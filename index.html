@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0a0f1d" />
+    <title>Controlador da Moto</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+
+  <body>
+    <main class="app-shell" id="appShell">
+      <header class="top-bar">
+        <button
+          class="menu-button"
+          id="menuButton"
+          type="button"
+          aria-label="Abrir menu"
+          aria-controls="menuPanel"
+          aria-expanded="false"
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+
+        <div class="brand" aria-label="Controlador da Moto">
+          <span class="brand-dot"></span>
+          <span>CDM</span>
+        </div>
+      </header>
+
+      <section class="hero" aria-label="Controle inteligente da moto">
+        <p class="eyebrow">IPSUN</p>
+
+        <div class="metrics-panel" aria-label="Resumo da moto">
+          <div class="metric">
+            <span class="metric-label">CONSUMO</span>
+            <strong class="metric-value" id="kmPerLiter" data-metric-key="kmPerLiter">12,5</strong>
+            <span class="metric-unit">km/l</span>
+          </div>
+
+          <span class="metric-divider" aria-hidden="true"></span>
+
+          <div class="metric">
+            <span class="metric-label">ODÔMETRO</span>
+            <strong class="metric-value" id="totalKm" data-metric-key="totalKm">8.420</strong>
+            <span class="metric-unit">total km</span>
+          </div>
+        </div>
+
+        <div class="motorcycle-stage" role="img" aria-label="Imagem da motocicleta">
+          <div class="stage-glow"></div>
+
+          <img
+            class="motorcycle-image"
+            id="homeMotorcycleImage"
+            src="honda-xre-300-2015-ganha-inedita-versao-rally.webp"
+            alt="Honda XRE 300 Rally"
+          />
+        </div>
+
+        <p class="hero-copy">
+          Monitore sua moto de um jeito simples, rápido e seguro.
+        </p>
+
+        <div class="status-pill">
+          <span class="status-dot"></span>
+          Sistema pronto
+        </div>
+
+        <div class="quick-actions bottom-actions" aria-label="Ações rápidas">
+          <button
+            class="quick-action"
+            id="openFuelingButton"
+            type="button"
+            aria-label="Abrir histórico de abastecimento"
+            aria-controls="fuelingSheet"
+            aria-expanded="false"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M7 20V5.5A1.5 1.5 0 0 1 8.5 4h6A1.5 1.5 0 0 1 16 5.5V20M5 20h13M9 8h5M18 8l2 2v6.5a1.5 1.5 0 0 1-3 0V13" />
+            </svg>
+            <span>Abastecer</span>
+          </button>
+
+          <button
+            class="quick-action"
+            id="openMaintenanceButton"
+            type="button"
+            aria-label="Abrir histórico de manutenção"
+            aria-controls="maintenanceSheet"
+            aria-expanded="false"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m14.5 6.5 3-3 3 3-3 3M4 20l8.5-8.5m-1-4.5a5 5 0 0 0 6.5 6.5L20 17l-3 3-3.5-3.5A5 5 0 0 1 11.5 7z" />
+            </svg>
+            <span>Manutenção</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+
+      <aside class="menu-panel" id="menuPanel" aria-hidden="true">
+        <div class="panel-header">
+          <span>Menu</span>
+          <button class="close-button" id="closeButton" type="button" aria-label="Fechar menu">
+            &times;
+          </button>
+        </div>
+
+        <nav aria-label="Navegação principal">
+          <a class="active" href="#inicio">Início <span>01</span></a>
+          <a href="image.html">Minha moto <span>02</span></a>
+          <a href="#configuracoes">Configurações <span>03</span></a>
+        </nav>
+
+        <p class="panel-footer">Controlador da Moto <span>v0.1</span></p>
+      </aside>
+
+      <aside
+        class="bottom-sheet fueling-sheet"
+        id="fuelingSheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="fuelingSheetTitle"
+        aria-hidden="true"
+      >
+        <div class="sheet-handle" aria-hidden="true"></div>
+
+        <header class="sheet-header">
+          <div>
+            <p class="sheet-eyebrow">HISTÓRICO DA MOTO</p>
+            <h2 id="fuelingSheetTitle">Abastecimentos</h2>
+          </div>
+          <button class="close-button sheet-close" id="closeFuelingButton" type="button" aria-label="Fechar histórico">
+            &times;
+          </button>
+        </header>
+
+        <div class="sheet-body">
+          <div class="history-loading" id="historyLoading" role="status" aria-live="polite">
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span>Carregando histórico...</span>
+          </div>
+
+          <div class="fueling-history" id="fuelingHistory" role="list" hidden></div>
+
+          <div class="empty-state" id="fuelingEmptyState" hidden>
+            <span class="empty-state-icon" aria-hidden="true">⌁</span>
+            <strong>Nenhum abastecimento ainda</strong>
+            <p>Registre o primeiro abastecimento da sua moto.</p>
+          </div>
+
+          <div class="history-error" id="historyError" role="alert" hidden>
+            Não foi possível carregar o histórico.
+            <button class="retry-button" id="retryFuelingButton" type="button">Tentar novamente</button>
+          </div>
+        </div>
+
+        <footer class="sheet-footer">
+          <button class="sheet-action" id="addFuelingButton" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span id="addFuelingLabel">Abastecer</span>
+          </button>
+          <p class="sheet-feedback" id="fuelingFeedback" aria-live="polite"></p>
+        </footer>
+      </aside>
+
+      <aside
+        class="bottom-sheet maintenance-sheet"
+        id="maintenanceSheet"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="maintenanceSheetTitle"
+        aria-hidden="true"
+      >
+        <div class="sheet-handle" aria-hidden="true"></div>
+
+        <header class="sheet-header">
+          <div>
+            <p class="sheet-eyebrow">HISTÓRICO DA MOTO</p>
+            <h2 id="maintenanceSheetTitle">Manutenções</h2>
+          </div>
+          <button class="close-button sheet-close" id="closeMaintenanceButton" type="button" aria-label="Fechar histórico">
+            &times;
+          </button>
+        </header>
+
+        <div class="sheet-body">
+          <div class="history-loading" id="maintenanceLoading" role="status" aria-live="polite">
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <span>Carregando histórico...</span>
+          </div>
+
+          <div class="maintenance-history" id="maintenanceHistory" role="list" hidden></div>
+
+          <div class="empty-state" id="maintenanceEmptyState" hidden>
+            <span class="empty-state-icon" aria-hidden="true">⌁</span>
+            <strong>Nenhuma manutenção ainda</strong>
+            <p>Registre a primeira manutenção da sua moto.</p>
+          </div>
+
+          <div class="history-error" id="maintenanceError" role="alert" hidden>
+            Não foi possível carregar o histórico.
+            <button class="retry-button" id="retryMaintenanceButton" type="button">Tentar novamente</button>
+          </div>
+        </div>
+
+        <footer class="sheet-footer">
+          <button class="sheet-action" id="addMaintenanceButton" type="button" disabled>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            <span id="addMaintenanceLabel">Manutenção</span>
+          </button>
+          <p class="sheet-feedback" id="maintenanceFeedback" aria-live="polite"></p>
+        </footer>
+      </aside>
+    </main>
+  </body>
+</html>

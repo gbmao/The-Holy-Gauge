@@ -1,0 +1,63 @@
+# .NET / ASP.NET build output
+bin/
+obj/
+out/
+artifacts/
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+TestResults/
+
+# Visual Studio / JetBrains
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.csproj.user
+
+# NuGet packages and generated archives
+packages/
+*.nupkg
+*.snupkg
+
+# Node.js / frontend dependencies and generated output
+node_modules/
+dist/
+coverage/
+.npm/
+.parcel-cache/
+.vite/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+appsettings.*.local.json
+*.pfx
+*.p12
+
+# Local databases and runtime logs
+*.db
+*.sqlite
+*.sqlite3
+*.db-shm
+*.db-wal
+*.log
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*.tmp
+*.temp
