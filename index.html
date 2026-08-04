@@ -103,6 +103,18 @@
 
       <div class="backdrop" id="backdrop" aria-hidden="true"></div>
 
+      <button
+        class="components-handle"
+        id="componentsHandle"
+        type="button"
+        aria-label="Abrir componentes"
+        aria-controls="componentsPanel"
+        aria-expanded="false"
+      >
+        <span class="handle-grip" aria-hidden="true"></span>
+        <span class="handle-chevron" aria-hidden="true">‹</span>
+      </button>
+
       <aside class="menu-panel" id="menuPanel" aria-hidden="true">
         <div class="panel-header">
           <span>Menu</span>
@@ -118,6 +130,55 @@
         </nav>
 
         <p class="panel-footer">Controlador da Moto <span>v0.1</span></p>
+      </aside>
+
+      <aside
+        class="components-panel"
+        id="componentsPanel"
+        role="dialog"
+        aria-labelledby="componentsTitle"
+        aria-hidden="true"
+      >
+        <div class="components-header">
+          <div>
+            <p class="components-eyebrow">PAINEL AUXILIAR</p>
+            <h2 id="componentsTitle">Componentes</h2>
+          </div>
+          <button class="close-button" id="closeComponentsButton" type="button" aria-label="Fechar componentes">
+            &times;
+          </button>
+        </div>
+
+        <p class="components-hint">Deslize para a esquerda para fechar.</p>
+
+        <div class="components-list" role="list" aria-label="Componentes da moto">
+          <div class="component-item" role="listitem">
+            <span class="component-icon">M</span>
+            <span class="component-copy">
+              <strong>Motor</strong>
+              <small>Monitoramento ativo</small>
+            </span>
+            <span class="component-status">OK</span>
+          </div>
+
+          <div class="component-item" role="listitem">
+            <span class="component-icon">B</span>
+            <span class="component-copy">
+              <strong>Bateria</strong>
+              <small>Nível normal</small>
+            </span>
+            <span class="component-status">OK</span>
+          </div>
+
+          <div class="component-item" role="listitem">
+            <span class="component-icon">P</span>
+            <span class="component-copy">
+              <strong>Pneus</strong>
+              <small>Última leitura</small>
+            </span>
+            <span class="component-status">OK</span>
+          </div>
+        </div>
       </aside>
 
       <aside
