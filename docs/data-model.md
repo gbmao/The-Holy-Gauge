@@ -4,7 +4,7 @@
 ## Abastecimento
 
 | Campo | Tipo | Obrigatório | observação
-|:--:|:--:|:--:|
+|:--:|:--:|:--:| --:|
 |id_gas|int|sim| identificador
 |liters|DECIMAL|sim| litros abastecidos
 |bl_additive|boolean| nao| é aditivada?
