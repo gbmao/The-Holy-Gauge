@@ -1,6 +1,6 @@
 // Keep the API URL and endpoint names in one place for the future C# integration.
 export const API_CONFIG = {
-  baseUrl: 'https://localhost:7000/api',
+  baseUrl: 'http://localhost:5199',
   endpoints: {
     fuelingHistory: '/fuelings',
     maintenanceHistory: '/maintenance',
@@ -99,8 +99,9 @@ export async function requestApi(endpoint, options = {}) {
 export const fuelingApi = {
   async loadHistory() {
     // return requestApi(API_CONFIG.endpoints.fuelingHistory);
-    await wait(650);
-    return sortRecordsRecentFirst(MOCK_FUELING_HISTORY);
+    // await wait(650);
+    // return sortRecordsRecentFirst(MOCK_FUELING_HISTORY);
+    return requestApi('/api');
   },
 
   async addRecord(payload) {
