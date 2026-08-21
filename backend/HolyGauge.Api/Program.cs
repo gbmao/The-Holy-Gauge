@@ -1,7 +1,10 @@
 using backend.HolyGauge.Api.Models;
 using backend.HolyGauge.Api.Dto;    
+using Microsoft.Data.SqlClient;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString =
+    builder.Configuration.GetConnectionString("HolyGaugeDatabase");
 
 
 
@@ -48,6 +51,17 @@ app.MapGet("/api", () =>
     
     return getAllrefuelling;
 
+});
+
+
+//teste do DB
+app.MapGet("/db-check", async () =>
+{
+    await using var connection = new SqlConnection(connectionString);
+
+    await connection.OpenAsync();
+
+    return "Conectado ao banco!";
 });
 
 
