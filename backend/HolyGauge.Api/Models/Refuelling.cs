@@ -2,22 +2,15 @@ namespace  backend.HolyGauge.Api.Models;
 
     public class Refuelling
     {
-        public Refuelling(int id,int vehicleId, DateTime date, double amount, double pricePerUnit, int odometerReading)
-        {
-            Id = id;
-            VehicleId = vehicleId;
-            Date = date;
-            Amount = amount;
-            PricePerUnit = pricePerUnit;
-            OdometerReading = odometerReading;
-        }
 
-        public int Id { get; set; }
-        public int VehicleId { get; set; }
-        public DateTime Date { get; set; }
-        public double Amount { get; set; }
-        public double PricePerUnit { get; set; }
-        public int OdometerReading { get; set; }
+        private int Id { get; set; }
+        private decimal Liters { get; set; }
+        private bool Bl_additive { get; set; }
+        private int Mileage { get; set; }
+        private bool Bl_fullTank { get; set; }
+        private DateTime Dh_refuelling { get; set; }
+        private decimal gas_price { get; set; }
+
     }
 
 

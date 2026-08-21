@@ -25,7 +25,6 @@ var app = builder.Build();
 
 app.UseCors("Frontend");
 
-var refuelling = new Refuelling(1,1, DateTime.Now, 50.0, 1.5, 10000);
 
 var getAllrefuelling = getAllRefuelling();
 
