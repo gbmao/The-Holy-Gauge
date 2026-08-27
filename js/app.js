@@ -42,6 +42,41 @@ function loadSavedMotorcycleImage() {
   }
 }
 
+function buildFuelingPayload() {
+  const litersInput = document.querySelector('#fuelingLitersInput');
+  const mileageInput = document.querySelector('#fuelingMileageInput');
+  const gasPriceInput = document.querySelector('#fuelingGasPriceInput');
+  const additiveInput = document.querySelector('#fuelingAdditiveInput');
+  const fullTankInput = document.querySelector('#fuelingFullTankInput');
+
+  const litersValue = litersInput.value.trim();
+  const mileageValue = mileageInput.value.trim();
+  const gasPriceValue = gasPriceInput.value.trim();
+  const liters = Number(litersValue);
+  const mileage = mileageValue ? Number(mileageValue) : null;
+  const gasPrice = gasPriceValue ? Number(gasPriceValue) : null;
+
+  if (!litersValue || !Number.isFinite(liters) || liters < 0) {
+    throw new Error('Informe uma quantidade válida de litros.');
+  }
+
+  if (mileageValue && !Number.isFinite(mileage)) {
+    throw new Error('Informe uma quilometragem válida.');
+  }
+
+  if (gasPriceValue && !Number.isFinite(gasPrice)) {
+    throw new Error('Informe um preço por litro válido.');
+  }
+
+  return {
+    liters,
+    mileage,
+    gasPrice,
+    blAdditive: additiveInput.checked,
+    blFullTank: fullTankInput.checked,
+  };
+}
+
 function updateOverlayState() {
   const isMenuOpen = appShell.classList.contains('menu-open');
   const isFuelingOpen = appShell.classList.contains('fueling-open');
@@ -96,10 +131,12 @@ bottomSheets = createBottomSheets({
     addLabel: document.querySelector('#addFuelingLabel'),
     feedback: document.querySelector('#fuelingFeedback'),
     api: fuelingApi,
+    form: document.querySelector('#fuelingForm'),
+    buildPayload: buildFuelingPayload,
     openClass: 'fueling-open',
     recordType: 'fueling',
     defaultAddLabel: 'Abastecer',
-    successMessage: 'Registro mock adicionado.',
+    successMessage: 'Abastecimento registrado.',
     errorMessage: 'Não foi possível registrar o abastecimento.',
     recordConfig: {
       cardClassName: 'fueling-card',

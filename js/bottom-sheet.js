@@ -61,6 +61,7 @@ export function createBottomSheet({
   addButton,
   addLabel,
   feedback,
+  form,
   api,
   openClass,
   recordType,
@@ -68,6 +69,7 @@ export function createBottomSheet({
   successMessage,
   errorMessage,
   recordConfig,
+  buildPayload = () => ({ motorcycleId: 'current-motorcycle' }),
   onOpen = () => {},
   onStateChange = () => {},
 }) {
@@ -105,8 +107,19 @@ export function createBottomSheet({
     }
   }
 
-  async function handleAdd() {
+  async function handleAdd(event) {
+    event?.preventDefault();
+
     if (isAdding || history === null) {
+      return;
+    }
+
+    let payload;
+
+    try {
+      payload = buildPayload();
+    } catch (error) {
+      feedback.textContent = error.message;
       return;
     }
 
@@ -116,8 +129,13 @@ export function createBottomSheet({
     feedback.textContent = '';
 
     try {
-      const newRecord = await api.addRecord({ motorcycleId: 'current-motorcycle' });
-      history = [newRecord, ...history];
+      const newRecord = await api.addRecord(payload);
+      const recordForHistory = newRecord || {
+        ...payload,
+        odometer: payload.mileage,
+      };
+
+      history = [recordForHistory, ...history];
       renderHistory(history);
       feedback.textContent = successMessage;
     } catch (error) {
@@ -161,7 +179,12 @@ export function createBottomSheet({
 
   closeButton.addEventListener('click', close);
   retryButton.addEventListener('click', loadHistory);
-  addButton.addEventListener('click', handleAdd);
+
+  if (form) {
+    form.addEventListener('submit', handleAdd);
+  } else {
+    addButton.addEventListener('click', handleAdd);
+  }
 
   return {
     close,

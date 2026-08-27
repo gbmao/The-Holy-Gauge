@@ -654,6 +654,63 @@ h1 span {
   flex: 0 0 auto;
 }
 
+.fueling-form {
+  display: grid;
+  gap: 9px;
+}
+
+.fueling-form-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.fueling-field {
+  display: grid;
+  gap: 4px;
+  color: #7f8da4;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.fueling-field input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 0 8px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: rgba(26, 36, 56, 0.72);
+  color: var(--text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.fueling-field input:focus {
+  border-color: rgba(255, 173, 107, 0.7);
+  outline: none;
+}
+
+.fueling-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.fueling-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #a9b5c8;
+  font-size: 10px;
+}
+
+.fueling-checkbox input {
+  accent-color: var(--accent);
+}
+
 .sheet-action {
   display: inline-flex;
   width: 100%;

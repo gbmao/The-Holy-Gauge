@@ -1,6 +1,7 @@
 using backend.HolyGauge.Api.Models;
 using backend.HolyGauge.Api.Dto;    
 using Microsoft.Data.SqlClient;
+using backend.HolyGauge.Api.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString =
@@ -20,6 +21,7 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
+builder.Services.AddScoped<RefuellingRepository>();
 
 var app = builder.Build();
 
@@ -43,6 +45,13 @@ app.UseHttpsRedirection();
 
 app.MapGet("/", () => "Hello World!");
 
+app.MapPost("/api/refuelling",
+    async (Refuelling refuelling, RefuellingRepository repository) =>
+{
+    await repository.CreateAsync(refuelling);
+
+    return Results.Ok();
+});
 
 
 app.MapGet("/api", () =>

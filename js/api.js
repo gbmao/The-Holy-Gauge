@@ -91,11 +91,11 @@ export async function requestApi(endpoint, options = {}) {
     throw new Error('API request failed with status ' + response.status);
   }
 
-  return response.json();
+  const responseBody = await response.text();
+  return responseBody.trim() ? JSON.parse(responseBody) : null;
 }
 
-// These methods currently return mock data. Replace only their bodies with requestApi()
-// calls when the C# backend is available.
+// Maintenance methods still return mock data until their backend endpoints are available.
 export const fuelingApi = {
   async loadHistory() {
     // return requestApi(API_CONFIG.endpoints.fuelingHistory);
@@ -105,21 +105,10 @@ export const fuelingApi = {
   },
 
   async addRecord(payload) {
-    // return requestApi(API_CONFIG.endpoints.fuelingHistory, {
-    //   method: 'POST',
-    //   body: JSON.stringify(payload),
-    // });
-    await wait(400);
-    return {
-      id: 'mock-fueling-' + Date.now(),
-      occurredAt: new Date().toISOString(),
-      date: 'AGORA',
-      station: 'Novo abastecimento',
-      liters: '—',
-      total: '—',
-      odometer: 'Pendente',
-      ...payload,
-    };
+    return requestApi('/api/refuelling', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   },
 };
 

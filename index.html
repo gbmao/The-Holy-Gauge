@@ -222,13 +222,65 @@
         </div>
 
         <footer class="sheet-footer">
-          <button class="sheet-action" id="addFuelingButton" type="button" disabled>
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M12 5v14M5 12h14" />
-            </svg>
-            <span id="addFuelingLabel">Abastecer</span>
-          </button>
-          <p class="sheet-feedback" id="fuelingFeedback" aria-live="polite"></p>
+          <form class="fueling-form" id="fuelingForm" novalidate>
+            <div class="fueling-form-fields">
+              <label class="fueling-field">
+                <span>Litros *</span>
+                <input
+                  id="fuelingLitersInput"
+                  name="liters"
+                  type="number"
+                  min="0"
+                  step="any"
+                  inputmode="decimal"
+                  required
+                />
+              </label>
+
+              <label class="fueling-field">
+                <span>Quilometragem</span>
+                <input
+                  id="fuelingMileageInput"
+                  name="mileage"
+                  type="number"
+                  step="1"
+                  inputmode="numeric"
+                />
+              </label>
+
+              <label class="fueling-field">
+                <span>Preço por litro</span>
+                <input
+                  id="fuelingGasPriceInput"
+                  name="gasPrice"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  inputmode="decimal"
+                />
+              </label>
+            </div>
+
+            <div class="fueling-checkboxes">
+              <label class="fueling-checkbox">
+                <input id="fuelingAdditiveInput" name="blAdditive" type="checkbox" />
+                <span>Gasolina aditivada</span>
+              </label>
+
+              <label class="fueling-checkbox">
+                <input id="fuelingFullTankInput" name="blFullTank" type="checkbox" />
+                <span>Tanque cheio</span>
+              </label>
+            </div>
+
+            <button class="sheet-action" id="addFuelingButton" type="submit" disabled>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              <span id="addFuelingLabel">Abastecer</span>
+            </button>
+            <p class="sheet-feedback" id="fuelingFeedback" aria-live="polite"></p>
+          </form>
         </footer>
       </aside>
 

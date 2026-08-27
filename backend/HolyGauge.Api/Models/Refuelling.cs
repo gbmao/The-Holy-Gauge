@@ -3,13 +3,13 @@ namespace  backend.HolyGauge.Api.Models;
     public class Refuelling
     {
 
-        private int Id { get; set; }
-        private decimal Liters { get; set; }
-        private bool Bl_additive { get; set; }
-        private int Mileage { get; set; }
-        private bool Bl_fullTank { get; set; }
-        private DateTime Dh_refuelling { get; set; }
-        private decimal gas_price { get; set; }
+        public int Id { get; set; }
+        public decimal Liters { get; set; }
+        public bool? BlAdditive { get; set; }
+        public int? Mileage { get; set; }
+        public bool? BlFullTank { get; set; }
+        public DateTime Dh_refuelling { get; set; }
+        public decimal? GasPrice { get; set; }
 
     }
 
