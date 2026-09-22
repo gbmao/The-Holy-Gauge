@@ -114,6 +114,10 @@ export const fuelingApi = {
   async getMonthlyExpense(month, year) {
     return requestApi(`/api/monthly-expense?month=${month}&year=${year}`);
   },
+
+  async getAverageConsumption() {
+    return requestApi('/api/average-consumption');
+  },
 };
 
 export const maintenanceApi = {

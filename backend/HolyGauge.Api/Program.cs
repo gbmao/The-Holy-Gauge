@@ -60,6 +60,12 @@ app.MapGet("/api/monthly-expense", async (int month, int year, RefuellingReposit
     return Results.Ok(monthlyExpense);
 });
 
+app.MapGet("/api/average-consumption", async (RefuellingRepository repository) =>
+{
+    var averageConsumption = await repository.GetAverageConsumptionAsync();
+
+    return Results.Ok(averageConsumption);
+});
 
 app.MapGet("/api", () =>
 {

@@ -56,4 +56,22 @@ public class RefuellingRepository
 
         return result != null ? Convert.ToDecimal(result) : 0;
     }
+
+    public async Task<decimal> GetAverageConsumptionAsync()
+    {
+        using var connection = new SqlConnection(_connectionString);
+
+        using var command = new SqlCommand(
+            "SP_CONSUMO_MEDIO",
+            connection
+        );
+
+        command.CommandType = CommandType.StoredProcedure;
+
+        connection.Open();
+
+        var result = command.ExecuteScalar();
+
+        return result != null ? Convert.ToDecimal(result) : 0;
+    }
 }

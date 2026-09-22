@@ -14,6 +14,6 @@ E que possa calcular média de gastos e de consumo de gasolina.
 ## 2. MVP
 
 - ~~registrar um abastecimento~~
-- ver o consumo médio
+- ~~ver o consumo médio~~
 - ~~ver o gasto mensal~~
 
