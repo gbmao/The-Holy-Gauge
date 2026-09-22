@@ -47,8 +47,8 @@ public class RefuellingRepository
 
         command.CommandType = CommandType.StoredProcedure;
 
-        command.Parameters.AddWithValue("@Month", month);
-        command.Parameters.AddWithValue("@Year", year);
+        command.Parameters.AddWithValue("@MES", month);
+        command.Parameters.AddWithValue("@ANO", year);
 
         connection.Open();
 

@@ -14,7 +14,7 @@ function createMonthlyExpenseMonitor(componentsPanel) {
   const copy = document.createElement('span');
   const title = document.createElement('strong');
   const period = document.createElement('small');
-  const valueElement = document.createElement('span');
+  const valueElement = document.createElement('strong');
   const componentsList = componentsPanel.querySelector('.components-list');
 
   monitor.className = 'component-item monthly-expense';
