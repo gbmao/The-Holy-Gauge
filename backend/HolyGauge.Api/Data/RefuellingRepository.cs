@@ -35,4 +35,25 @@ public class RefuellingRepository
 
         await command.ExecuteNonQueryAsync();
     }
+
+    public decimal GetMonthlyExpense(int month, int year)
+    {
+        using var connection = new SqlConnection(_connectionString);
+
+        using var command = new SqlCommand(
+            "SP_GASTO_MENSAL",
+            connection
+        );
+
+        command.CommandType = CommandType.StoredProcedure;
+
+        command.Parameters.AddWithValue("@Month", month);
+        command.Parameters.AddWithValue("@Year", year);
+
+        connection.Open();
+
+        var result = command.ExecuteScalar();
+
+        return result != null ? Convert.ToDecimal(result) : 0;
+    }
 }

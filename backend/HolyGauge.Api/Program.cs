@@ -53,6 +53,13 @@ app.MapPost("/api/refuelling",
     return Results.Ok();
 });
 
+app.MapGet("/api/monthly-expense", (int month, int year, RefuellingRepository repository) =>
+{
+    var monthlyExpense = repository.GetMonthlyExpense(month, year);
+
+    return Results.Ok(monthlyExpense);
+});
+
 
 app.MapGet("/api", () =>
 {
