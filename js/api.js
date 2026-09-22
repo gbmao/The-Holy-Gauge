@@ -110,6 +110,10 @@ export const fuelingApi = {
       body: JSON.stringify(payload),
     });
   },
+
+  async getMonthlyExpense(month, year) {
+    return requestApi(`/api/monthly-expense?month=${month}&year=${year}`);
+  },
 };
 
 export const maintenanceApi = {

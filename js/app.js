@@ -78,11 +78,10 @@ function buildFuelingPayload() {
 }
 
 function updateOverlayState() {
-  const isMenuOpen = appShell.classList.contains('menu-open');
   const isFuelingOpen = appShell.classList.contains('fueling-open');
   const isMaintenanceOpen = appShell.classList.contains('maintenance-open');
   const isComponentsOpen = appShell.classList.contains('components-open');
-  const hasOverlayOpen = isMenuOpen || isFuelingOpen || isMaintenanceOpen || isComponentsOpen;
+  const hasOverlayOpen = isFuelingOpen || isMaintenanceOpen || isComponentsOpen;
 
   backdrop.setAttribute('aria-hidden', String(!hasOverlayOpen));
   document.body.style.overflow = hasOverlayOpen ? 'hidden' : '';
@@ -101,15 +100,10 @@ loadSavedMotorcycleImage();
 
 sidebar = createSidebar({
   appShell,
-  menuButton: document.querySelector('#menuButton'),
-  closeButton: document.querySelector('#closeButton'),
   backdrop,
-  menuLinks: document.querySelectorAll('.menu-panel a'),
-  menuPanel: document.querySelector('#menuPanel'),
   componentsPanel: document.querySelector('#componentsPanel'),
   closeComponentsButton: document.querySelector('#closeComponentsButton'),
   componentsHandle: document.querySelector('#componentsHandle'),
-  closeBottomSheets: () => bottomSheets?.closeAll(),
   onBackdrop: closeAllOverlays,
   onStateChange: updateOverlayState,
 });

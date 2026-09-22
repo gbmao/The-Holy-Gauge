@@ -1,3 +1,55 @@
+import { fuelingApi } from './api.js';
+
+function formatMonthlyExpense(expense) {
+  const value = Number(expense);
+
+  return Number.isFinite(value)
+    ? value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\u00a0/g, ' ')
+    : 'R$ 0,00';
+}
+
+function createMonthlyExpenseMonitor(componentsPanel) {
+  const monitor = document.createElement('div');
+  const icon = document.createElement('span');
+  const copy = document.createElement('span');
+  const title = document.createElement('strong');
+  const period = document.createElement('small');
+  const valueElement = document.createElement('span');
+  const componentsList = componentsPanel.querySelector('.components-list');
+
+  monitor.className = 'component-item monthly-expense';
+  monitor.setAttribute('role', 'listitem');
+  icon.className = 'component-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = '$';
+  copy.className = 'component-copy';
+  title.textContent = 'Gasto mensal';
+  period.textContent = 'Mês atual';
+  valueElement.className = 'component-status';
+  valueElement.setAttribute('aria-live', 'polite');
+  valueElement.textContent = 'R$ 0,00';
+  copy.append(title, period);
+  monitor.append(icon, copy, valueElement);
+  componentsList.append(monitor);
+
+  return valueElement;
+}
+
+async function loadMonthlyExpense(valueElement) {
+  const currentDate = new Date();
+
+  try {
+    const expense = await fuelingApi.getMonthlyExpense(
+      currentDate.getMonth() + 1,
+      currentDate.getFullYear(),
+    );
+
+    valueElement.textContent = formatMonthlyExpense(expense);
+  } catch {
+    valueElement.textContent = 'R$ 0,00';
+  }
+}
+
 function startHorizontalGesture(event, target) {
   if (event.pointerType === 'mouse' && event.button !== 0) {
     return null;
@@ -26,35 +78,22 @@ function isHorizontalSwipe(start, event) {
 
 export function createSidebar({
   appShell,
-  menuButton,
-  closeButton,
   backdrop,
-  menuLinks,
-  menuPanel,
   componentsPanel,
   closeComponentsButton,
   componentsHandle,
-  closeBottomSheets = () => {},
   onBackdrop = () => {},
   onStateChange = () => {},
 }) {
-  let menuGestureStart = null;
   let componentsGestureStart = null;
   let componentsHandleGesture = null;
   let suppressHandleClick = false;
+  const monthlyExpenseValue = createMonthlyExpenseMonitor(componentsPanel);
+
+  loadMonthlyExpense(monthlyExpenseValue);
 
   function notifyStateChange() {
     onStateChange();
-  }
-
-  function setMenuState(isOpen) {
-    const shouldOpen = Boolean(isOpen);
-    appShell.classList.toggle('menu-open', shouldOpen);
-    menuButton.setAttribute('aria-expanded', String(shouldOpen));
-    menuButton.setAttribute('aria-label', shouldOpen ? 'Fechar menu' : 'Abrir menu');
-    menuPanel.setAttribute('aria-hidden', String(!shouldOpen));
-
-    notifyStateChange();
   }
 
   function setComponentsState(isOpen) {
@@ -75,7 +114,6 @@ export function createSidebar({
   }
 
   function closeAll() {
-    setMenuState(false);
     setComponentsState(false);
   }
 
@@ -92,24 +130,8 @@ export function createSidebar({
     componentsPanel.style.transform = 'translateX(' + (basePosition + boundedDelta) + 'px)';
   }
 
-  menuButton.addEventListener('click', () => {
-    const shouldOpen = !appShell.classList.contains('menu-open');
-
-    if (shouldOpen) {
-      setComponentsState(false);
-      closeBottomSheets();
-    }
-
-    setMenuState(shouldOpen);
-  });
-
-  closeButton.addEventListener('click', closeAll);
   backdrop.addEventListener('click', onBackdrop);
   closeComponentsButton.addEventListener('click', () => setComponentsState(false));
-
-  menuLinks.forEach((link) => {
-    link.addEventListener('click', closeAll);
-  });
 
   componentsHandle.addEventListener('click', () => {
     if (suppressHandleClick) {
@@ -180,23 +202,6 @@ export function createSidebar({
     componentsHandleGesture = null;
   });
 
-  menuPanel.addEventListener('pointerdown', (event) => {
-    menuGestureStart = startHorizontalGesture(event, menuPanel);
-  });
-
-  menuPanel.addEventListener('pointerup', (event) => {
-    const deltaX = isHorizontalSwipe(menuGestureStart, event);
-    menuGestureStart = null;
-
-    if (deltaX > 0) {
-      setComponentsState(true);
-    }
-  });
-
-  menuPanel.addEventListener('pointercancel', () => {
-    menuGestureStart = null;
-  });
-
   componentsPanel.addEventListener('pointerdown', (event) => {
     componentsGestureStart = startHorizontalGesture(event, componentsPanel);
   });
@@ -216,7 +221,6 @@ export function createSidebar({
 
   return {
     closeAll,
-    setMenuState,
     setComponentsState,
   };
 }
