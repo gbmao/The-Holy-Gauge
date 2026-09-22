@@ -53,9 +53,9 @@ app.MapPost("/api/refuelling",
     return Results.Ok();
 });
 
-app.MapGet("/api/monthly-expense", (int month, int year, RefuellingRepository repository) =>
+app.MapGet("/api/monthly-expense", async (int month, int year, RefuellingRepository repository) =>
 {
-    var monthlyExpense = repository.GetMonthlyExpense(month, year);
+    var monthlyExpense = await repository.GetMonthlyExpenseAsync(month, year);
 
     return Results.Ok(monthlyExpense);
 });

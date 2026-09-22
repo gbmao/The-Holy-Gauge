@@ -36,7 +36,7 @@ public class RefuellingRepository
         await command.ExecuteNonQueryAsync();
     }
 
-    public decimal GetMonthlyExpense(int month, int year)
+    public async Task<decimal> GetMonthlyExpenseAsync(int month, int year)
     {
         using var connection = new SqlConnection(_connectionString);
 

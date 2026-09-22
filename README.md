@@ -15,5 +15,5 @@ E que possa calcular média de gastos e de consumo de gasolina.
 
 - ~~registrar um abastecimento~~
 - ver o consumo médio
-- ver o gasto mensal
+- ~~ver o gasto mensal~~
 
