@@ -19,7 +19,7 @@ E que possa calcular média de gastos e de consumo de gasolina.
 
 ## 3. Próximas funcionalidades
 
-- retirar o mock do historico de abastecimento e preencher com dados do banco
+- ~~retirar o mock do historico de abastecimento e preencher com dados do banco~~
 
 - entender migração para mobile
 
