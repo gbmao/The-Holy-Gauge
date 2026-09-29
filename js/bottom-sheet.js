@@ -24,7 +24,7 @@ function renderHistoryCard(record, config) {
 
   const date = document.createElement('span');
   date.className = 'fueling-card-date';
-  date.textContent = record.date || 'SEM DATA';
+  date.textContent = record.occurredAt ? new Date(record.occurredAt).toLocaleDateString('pt-BR'): 'SEM DATA';
 
   const title = document.createElement('strong');
   title.className = 'fueling-card-location';

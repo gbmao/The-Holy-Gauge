@@ -28,10 +28,6 @@ var app = builder.Build();
 app.UseCors("Frontend");
 
 
-var getAllrefuelling = getAllRefuelling();
-
-
-
 
 
 // Configure the HTTP request pipeline.
@@ -67,10 +63,11 @@ app.MapGet("/api/average-consumption", async (RefuellingRepository repository) =
     return Results.Ok(averageConsumption);
 });
 
-app.MapGet("/api", () =>
+app.MapGet("/api", async (RefuellingRepository repository) =>
 {
+    var getAllrefuelling = await repository.GetAllRefuellingsAsync();
     
-    return getAllrefuelling;
+    return Results.Ok(getAllrefuelling);
 
 });
 
@@ -87,26 +84,3 @@ app.MapGet("/db-check", async () =>
 
 
 app.Run();
-
-    // just for mocking purposes, this will be replaced with a database call in the future
-    Array getAllRefuelling()
-    {
-        List<RefuellingHistoryDto> refuellings = new List<RefuellingHistoryDto>();
-        
-
-
-        for (int i = 0; i < 10; i++)
-        {
-            refuellings.Add(new RefuellingHistoryDto
-            {
-                Id = i,
-                OccurredAt = DateTime.Now.AddDays(-i),
-                Liters = i * 10,
-                Total = (decimal)(i * 10 * 1.5),
-                Odometer = 10000 + (i * 100)
-            }); 
-
-        }
-
-        return refuellings.ToArray();
-    }

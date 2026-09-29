@@ -74,4 +74,36 @@ public class RefuellingRepository
 
         return result != null ? Convert.ToDecimal(result) : 0;
     }
+
+    public async Task<List<RefuellingHistoryDto>> GetAllRefuellingsAsync()
+    {
+        var refuellings = new List<RefuellingHistoryDto>();
+
+        using var connection = new SqlConnection(_connectionString);
+
+        using var command = new SqlCommand(
+            "SP_GET_ALL_REFUELLINGS",
+            connection
+        );
+
+        command.CommandType = CommandType.StoredProcedure;
+
+        await connection.OpenAsync();
+
+        using var reader = await command.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
+        {
+            refuellings.Add(new RefuellingHistoryDto
+            {
+                Id = reader.GetInt32(reader.GetOrdinal("Id")),
+                OccurredAt = reader.GetDateTime(reader.GetOrdinal("OccurredAt")),
+                Liters = reader.GetDecimal(reader.GetOrdinal("Liters")),
+                Total = reader.GetDecimal(reader.GetOrdinal("Total")),
+                Odometer = reader.GetInt32(reader.GetOrdinal("Mileage"))
+            });
+        }
+
+        return refuellings;
+    }
 }
