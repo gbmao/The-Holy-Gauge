@@ -1,0 +1,78 @@
+CREATE PROCEDURE SP_CONSUMO_MEDIO
+AS
+BEGIN
+		;WITH ULTIMO_ABAST AS 
+			(	
+				SELECT	TOP 1 *
+				FROM	REFUELLING R
+				WHERE BL_FULL_TANK = 1
+				ORDER BY DH_REFUELLING DESC, REFUELLING_ID DESC
+			),
+				PENULTIMO_ABAST AS 
+			 (
+				SELECT	*
+				FROM	REFUELLING R
+				WHERE BL_FULL_TANK = 1
+				ORDER BY DH_REFUELLING DESC, REFUELLING_ID DESC
+				OFFSET 1 ROWS
+				FETCH NEXT 1 ROWS ONLY
+			)
+			
+		SELECT 
+		CAST(U.MILEAGE - P.MILEAGE AS DECIMAL (10,2))/ NULLIF(U.LITERS,0) AS CONSUMO_MEDIO
+		FROM ULTIMO_ABAST U
+			CROSS JOIN PENULTIMO_ABAST P
+
+END;
+
+CREATE PROCEDURE SP_CREATE_REFUELLING
+    @Liters DECIMAL(5,2),
+    @Bl_Additive BIT = NULL,
+    @Mileage INT = NULL,
+    @Bl_Full_Tank BIT = NULL,
+    @Gas_Price DECIMAL(6,3) = NULL
+AS
+BEGIN
+    INSERT INTO REFUELLING (
+        Liters,
+        Bl_Additive,
+        Mileage,
+        Bl_Full_Tank,
+        Dh_Refuelling,
+        Cd_Status,
+        Gas_Price
+    )
+    VALUES (
+        @Liters,
+        @Bl_Additive,
+        @Mileage,
+        @Bl_Full_Tank,
+        GETDATE(),
+        1,
+        @Gas_Price
+    );
+END;
+
+CREATE  PROCEDURE SP_GASTO_MENSAL
+	@MES int,
+	@ANO int
+AS
+BEGIN
+	SELECT	SUM(GAS_PRICE * liters)
+	FROM	REFUELLING
+	WHERE	MONTH(DH_REFUELLING) 	= 	@MES
+	AND		YEAR(DH_REFUELLING) 	= 	@ANO
+	
+END;
+
+CREATE  PROCEDURE SP_GET_ALL_REFUELLINGS
+AS BEGIN
+	SELECT	r.Refuelling_id 					AS Id,
+			r.DH_REFUELLING              		AS OccurredAt,
+			r.LITERS 							AS Liters,
+			r.LITERS * r.Gas_price 				AS Total,
+			r.Mileage 							AS	Mileage
+	FROM	REFUELLING r
+	LEFT JOIN GAS_STATION g ON g.GAS_STATION_ID = r.GAS_STATION_ID
+	ORDER BY DH_REFUELLING DESC
+END;
