@@ -50,9 +50,9 @@ public class RefuellingRepository
         command.Parameters.AddWithValue("@MES", month);
         command.Parameters.AddWithValue("@ANO", year);
 
-        connection.Open();
+        await connection.OpenAsync();
 
-        var result = command.ExecuteScalar();
+        var result = await command.ExecuteScalarAsync();
 
         return result != null ? Convert.ToDecimal(result) : 0;
     }
@@ -68,9 +68,9 @@ public class RefuellingRepository
 
         command.CommandType = CommandType.StoredProcedure;
 
-        connection.Open();
+        await connection.OpenAsync();
 
-        var result = command.ExecuteScalar();
+        var result = await command.ExecuteScalarAsync();
 
         return result != null ? Convert.ToDecimal(result) : 0;
     }
