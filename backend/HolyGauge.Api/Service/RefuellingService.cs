@@ -30,7 +30,6 @@ namespace backend.HolyGauge.Api.Service
         {
             return await _refuellingRepository.GetAverageConsumptionAsync();
         }
-
         public async Task<List<RefuellingHistoryDto>> GetAllRefuellingsAsync()
         {
             return await _refuellingRepository.GetAllRefuellingsAsync();
@@ -39,20 +38,36 @@ namespace backend.HolyGauge.Api.Service
         //Validation methods
         public bool ValidatePositiveLitersAndZero(decimal liters)
         {
+            if(liters <= 0)
+            {
+                throw new ArgumentException("Liters must be greater than zero.");
+            }
             return liters > 0;
         }
 
         public bool ValidatePositiveGasPriceAndZero(decimal? gasPrice)
         {
+            if(gasPrice <= 0 || gasPrice == null)
+            {
+                throw new ArgumentException("Gas price must be greater than zero.");
+            }
             return gasPrice > 0;
         }
         public bool ValidatePositiveMileage(decimal? mileage)
         {
+            if(mileage <= 0 || mileage == null)
+            {
+                throw new ArgumentException("Mileage must be greater than zero.");
+            }
             return mileage > 0;
         }
 
         public bool ValidateMileageHigherThanPrevious(decimal mileage, decimal previousMileage)
         {
+            if(mileage < previousMileage)
+            {
+                throw new ArgumentException("Mileage must be higher than the previous mileage.");
+            }
             return mileage >= previousMileage;
         }
     }
