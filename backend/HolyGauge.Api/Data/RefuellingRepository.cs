@@ -2,9 +2,10 @@ using backend.HolyGauge.Api.Models;
 using backend.HolyGauge.Api.Dto;
 using Microsoft.Data.SqlClient;
 using System.Data;
+using backend.HolyGauge.Api.Data;
 
 namespace backend.HolyGauge.Api.Data;
-public class RefuellingRepository
+public class RefuellingRepository : IRefuellingRepository
 {
     private readonly string _connectionString;
 

@@ -2,6 +2,7 @@ using backend.HolyGauge.Api.Models;
 using backend.HolyGauge.Api.Dto;    
 using Microsoft.Data.SqlClient;
 using backend.HolyGauge.Api.Data;
+using backend.HolyGauge.Api.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString =
@@ -21,7 +22,9 @@ builder.Services.AddCors(options =>
             .AllowAnyMethod();
     });
 });
-builder.Services.AddScoped<RefuellingRepository>();
+// builder.Services.AddScoped<RefuellingRepository>();
+builder.Services.AddScoped<IRefuellingRepository, RefuellingRepository>();
+builder.Services.AddScoped<RefuellingService>();
 
 var app = builder.Build();
 
@@ -42,30 +45,30 @@ app.UseHttpsRedirection();
 app.MapGet("/", () => "Hello World!");
 
 app.MapPost("/api/refuelling",
-    async (Refuelling refuelling, RefuellingRepository repository) =>
+    async (Refuelling refuelling, RefuellingService service) =>
 {
-    await repository.CreateAsync(refuelling);
+    await service.CreateAsync(refuelling);
 
     return Results.Ok();
 });
 
-app.MapGet("/api/monthly-expense", async (int month, int year, RefuellingRepository repository) =>
+app.MapGet("/api/monthly-expense", async (int month, int year, RefuellingService service) =>
 {
-    var monthlyExpense = await repository.GetMonthlyExpenseAsync(month, year);
+    var monthlyExpense = await service.GetMonthlyExpenseAsync(month, year);
 
     return Results.Ok(monthlyExpense);
 });
 
-app.MapGet("/api/average-consumption", async (RefuellingRepository repository) =>
+app.MapGet("/api/average-consumption", async (RefuellingService service) =>
 {
-    var averageConsumption = await repository.GetAverageConsumptionAsync();
+    var averageConsumption = await service.GetAverageConsumptionAsync();
 
     return Results.Ok(averageConsumption);
 });
 
-app.MapGet("/api", async (RefuellingRepository repository) =>
+app.MapGet("/api", async (RefuellingService service) =>
 {
-    var getAllrefuelling = await repository.GetAllRefuellingsAsync();
+    var getAllrefuelling = await service.GetAllRefuellingsAsync();
     
     return Results.Ok(getAllrefuelling);
 
