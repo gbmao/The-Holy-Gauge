@@ -1,36 +1,40 @@
--- DROP SCHEMA dbo;
+USE [HolyGauge];
+GO
 
-CREATE SCHEMA dbo;
--- HolyGauge.dbo.GAS_STATION definition
+IF OBJECT_ID(N'dbo.GAS_STATION', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.GAS_STATION
+    (
+        GAS_STATION_ID INT NOT NULL,
+        NAME VARCHAR(255) NULL,
+        ADRESS VARCHAR(255) NULL,
+        CITY VARCHAR(255) NULL,
+        CONSTRAINT PK_GAS_STATION PRIMARY KEY (GAS_STATION_ID)
+    );
+END;
+GO
 
--- Drop table
-
--- DROP TABLE HolyGauge.dbo.GAS_STATION;
-
-CREATE TABLE HolyGauge.dbo.GAS_STATION (
-	GAS_STATION_ID int NOT NULL,
-	NAME varchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-	ADRESS varchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-	CITY varchar(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL,
-	CONSTRAINT PK__GAS_STAT__06CE9EB7CAEE45F2 PRIMARY KEY (GAS_STATION_ID)
-);
-
-
--- HolyGauge.dbo.REFUELLING definition
-
--- Drop table
-
--- DROP TABLE HolyGauge.dbo.REFUELLING;
-
-CREATE TABLE HolyGauge.dbo.REFUELLING (
-	Refuelling_id int IDENTITY(1,1) NOT NULL,
-	Liters decimal(5,2) NOT NULL,
-	Bl_additive bit NULL,
-	Mileage int NULL,
-	Bl_full_tank bit NULL,
-	Dh_refuelling datetime NULL,
-	Cd_status bit DEFAULT 1 NOT NULL,
-	Gas_price decimal(6,3) NULL,
-	GAS_STATION_ID int NULL,
-	CONSTRAINT PK__REFUELLI__FF232878ECDE93F4 PRIMARY KEY (Refuelling_id)
-);
+IF OBJECT_ID(N'dbo.REFUELLING', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.REFUELLING
+    (
+        Refuelling_id INT IDENTITY(1,1) NOT NULL,
+        Liters DECIMAL(5,2) NOT NULL,
+        Bl_additive BIT NULL,
+        Mileage INT NULL,
+        Bl_full_tank BIT NULL,
+        Dh_refuelling DATETIME NOT NULL
+            CONSTRAINT DF_REFUELLING_Dh_refuelling DEFAULT (GETDATE()),
+        Cd_status BIT NOT NULL
+            CONSTRAINT DF_REFUELLING_Cd_status DEFAULT (1),
+        Gas_price DECIMAL(6,3) NULL,
+        GAS_STATION_ID INT NULL,
+        CONSTRAINT PK_REFUELLING PRIMARY KEY (Refuelling_id),
+        CONSTRAINT CK_REFUELLING_Liters_NonNegative CHECK (Liters >= 0),
+        CONSTRAINT CK_REFUELLING_Mileage_NonNegative CHECK (Mileage IS NULL OR Mileage >= 0),
+        CONSTRAINT CK_REFUELLING_Gas_price_NonNegative CHECK (Gas_price IS NULL OR Gas_price >= 0),
+        CONSTRAINT FK_REFUELLING_GAS_STATION FOREIGN KEY (GAS_STATION_ID)
+            REFERENCES dbo.GAS_STATION (GAS_STATION_ID)
+    );
+END;
+GO

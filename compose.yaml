@@ -1,21 +1,40 @@
 services:
   database:
     image: mcr.microsoft.com/mssql/server:2025-latest
-
     container_name: holy-gauge-sql
-
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD}"
-
+      MSSQL_PID: Developer
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-HolyGaugeDev_2026!}"
     ports:
-      - "1434:1433"
-
+      - "127.0.0.1:1434:1433"
     volumes:
       - holy-gauge-sql-data:/var/opt/mssql
-
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - >-
+          /opt/mssql-tools18/bin/sqlcmd -C -S localhost -U sa
+          -P "$$MSSQL_SA_PASSWORD" -Q "SELECT 1" -b -o /dev/null
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
     restart: unless-stopped
+
+  database-init:
+    image: mcr.microsoft.com/mssql/server:2025-latest
+    entrypoint: ["/bin/bash", "/scripts/init.sh"]
+    working_dir: /scripts
+    environment:
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-HolyGaugeDev_2026!}"
+    volumes:
+      - ./database:/scripts:ro
+    depends_on:
+      database:
+        condition: service_healthy
+    restart: "no"
 
 volumes:
   holy-gauge-sql-data:
-    external: true
+    name: holy-gauge-sql-data

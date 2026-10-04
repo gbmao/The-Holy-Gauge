@@ -38,25 +38,11 @@ Antes de iniciar, tenha instalado:
 
 ---
 
-### 2. Configurar variáveis de ambiente
+### 2. Configurar a senha do banco (opcional)
 
-Crie o arquivo `.env` a partir do exemplo:
+Para iniciar rapidamente em ambiente local, não é necessário criar um `.env`: o Compose usa a senha pública de desenvolvimento `HolyGaugeDev_2026!`. Ela serve exclusivamente para desenvolvimento local e não deve ser reutilizada em produção nem em ambientes acessíveis pela rede. Para trocar a senha local, copie `.env.example` para `.env` e defina `MSSQL_SA_PASSWORD`.
 
-```bash
-cp .env.example .env
-```
-
-Preencha as variáveis necessárias:
-
-```env
-MSSQL_SA_PASSWORD=
-MSSQL_SA_USER=
-
-DB_HOST=
-DB_NAME=
-```
-
-> O arquivo `.env` não deve ser versionado.
+> O arquivo `.env` não deve ser versionado. A senha padrão acima é pública e exclusiva para desenvolvimento local.
 
 ---
 
@@ -67,6 +53,8 @@ Na raiz do projeto, execute:
 ```bash
 docker compose up -d
 ```
+
+O Compose aguarda o SQL Server ficar pronto e então cria o banco `HolyGauge`, as tabelas e as procedures.
 
 Para verificar se o container está rodando:
 
@@ -99,8 +87,10 @@ dotnet user-secrets init
 Adicione a connection string:
 
 ```bash
-dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;Database=HolyGauge;User Id=sa;Password=SUA_SENHA;TrustServerCertificate=True"
+dotnet user-secrets set "ConnectionStrings:HolyGaugeDatabase" "Server=localhost,1434;Database=HolyGauge;User Id=sa;Password=SUA_SENHA;TrustServerCertificate=True"
 ```
+
+Use a senha definida em `.env` ou, se estiver usando o padrão local, `HolyGaugeDev_2026!`.
 
 Para conferir os secrets configurados:
 
@@ -108,7 +98,7 @@ Para conferir os secrets configurados:
 dotnet user-secrets list
 ```
 
-> Não coloque senhas ou connection strings reais no repositório.
+> Não coloque no repositório senhas privadas nem connection strings com credenciais próprias. A senha pública de desenvolvimento documentada acima é exclusiva para uso local.
 
 ---
 
@@ -146,14 +136,20 @@ http://127.0.0.1:5500/index.html
 
 Com o frontend e a API em execução, o Holy Gauge estará pronto para uso.
 
+### Executar os testes
+
+O projeto xUnit fica em `backend/HolyGauge.Api.Tests`. Para executar os testes, use na raiz do repositório:
+
+```bash
+dotnet test backend/HolyGauge.Api.Tests/HolyGauge.Api.Tests.csproj
+```
+
 ---
 
 ## Resumo
 
 ```text
 git clone
-   ↓
-cp .env.example .env
    ↓
 docker compose up -d
    ↓
@@ -165,3 +161,5 @@ dotnet run
    ↓
 abrir frontend
 ```
+
+Copiar `.env.example` para `.env` é opcional e serve para trocar a senha local do banco.
