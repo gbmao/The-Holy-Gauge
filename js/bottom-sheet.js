@@ -130,13 +130,20 @@ export function createBottomSheet({
 
     try {
       const newRecord = await api.addRecord(payload);
-      const recordForHistory = newRecord || {
-        ...payload,
-        odometer: payload.mileage,
-      };
 
-      history = [recordForHistory, ...history];
-      renderHistory(history);
+      if (recordType === 'fueling') {
+        await loadHistory();
+        window.dispatchEvent(new Event('fueling-record-added'));
+      } else {
+        const recordForHistory = newRecord || {
+          ...payload,
+          odometer: payload.mileage,
+        };
+
+        history = [recordForHistory, ...history];
+        renderHistory(history);
+      }
+
       feedback.textContent = successMessage;
     } catch (error) {
       console.error('Unable to add ' + recordType + ' record', error);

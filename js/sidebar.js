@@ -91,6 +91,7 @@ export function createSidebar({
   const monthlyExpenseValue = createMonthlyExpenseMonitor(componentsPanel);
 
   loadMonthlyExpense(monthlyExpenseValue);
+  window.addEventListener('fueling-record-added', () => loadMonthlyExpense(monthlyExpenseValue));
 
   function notifyStateChange() {
     onStateChange();

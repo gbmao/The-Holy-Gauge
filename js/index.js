@@ -30,3 +30,4 @@ async function loadAverageConsumption() {
 }
 
 loadAverageConsumption();
+window.addEventListener('fueling-record-added', loadAverageConsumption);
