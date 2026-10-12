@@ -189,6 +189,6 @@ npm run android:install
 
 Também é possível copiar o APK para o celular e abri-lo para instalar. O Android pode solicitar autorização para instalar apps dessa origem.
 
-Antes de gerar um APK para um celular físico, configure `VITE_API_BASE_URL` no arquivo `.env` com o endereço acessível da API. `localhost` aponta para o próprio celular; para desenvolvimento na mesma rede, use o IP da máquina que executa a API. O APK de depuração permite HTTP para esse cenário; para distribuição, use uma API com HTTPS. O projeto nativo Android fica em `android/` e pode ser aberto com `npm run cap:open`.
+No app Capacitor, o histórico, os novos abastecimentos, as despesas mensais e o consumo médio usam o SQLite local do aparelho; essas operações não dependem da API nem de `VITE_API_BASE_URL`. No navegador, elas continuam usando a API HTTP, configurada por `VITE_API_BASE_URL` no `.env`. Os registros de manutenção continuam simulados. O projeto nativo Android fica em `android/` e pode ser aberto com `npm run cap:open`.
 
 O projeto está configurado para Android. A geração de um app iOS exige macOS e Xcode.

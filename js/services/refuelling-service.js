@@ -45,12 +45,14 @@ function validateAndNormalizeInput(input, tankCapacityLiters) {
   if (liters <= 0) {
     throw new RangeError('A quantidade de litros precisa ser maior que zero.');
   }
-  if (liters > tankCapacityLiters) {
+  if (tankCapacityLiters !== null && liters > tankCapacityLiters) {
     throw new RangeError(`A quantidade de litros não pode exceder a capacidade do tanque (${tankCapacityLiters} L).`);
   }
 
-  const mileage = requireFiniteNumber(input.mileage, 'Quilometragem');
-  if (!Number.isInteger(mileage) || mileage < 0) {
+  const mileage = input.mileage === undefined || input.mileage === null || input.mileage === ''
+    ? null
+    : requireFiniteNumber(input.mileage, 'Quilometragem');
+  if (mileage !== null && (!Number.isInteger(mileage) || mileage < 0)) {
     throw new RangeError('A quilometragem precisa ser um número inteiro maior ou igual a zero.');
   }
 
@@ -79,8 +81,8 @@ function validateAndNormalizeInput(input, tankCapacityLiters) {
  * - getLatest(): returns the latest record or null
  * - create(record): persists the record and may return it or its id
  *
- * Tank capacity is injected so the service does not assume which motorcycle
- * is being managed and remains independent from SQLite.
+ * Tank capacity is optional and only validated when the motorcycle's capacity
+ * is configured. The service remains independent from SQLite.
  */
 export class RefuellingService {
   constructor(repository, { tankCapacityLiters } = {}) {
@@ -88,12 +90,14 @@ export class RefuellingService {
       throw new TypeError('O repositório precisa implementar getLatest() e create().');
     }
 
-    if (typeof tankCapacityLiters !== 'number' || !Number.isFinite(tankCapacityLiters) || tankCapacityLiters <= 0) {
+    if (tankCapacityLiters !== undefined
+      && tankCapacityLiters !== null
+      && (typeof tankCapacityLiters !== 'number' || !Number.isFinite(tankCapacityLiters) || tankCapacityLiters <= 0)) {
       throw new TypeError('Informe uma capacidade de tanque válida em litros.');
     }
 
     this.repository = repository;
-    this.tankCapacityLiters = tankCapacityLiters;
+    this.tankCapacityLiters = tankCapacityLiters ?? null;
   }
 
   async create(input) {
@@ -101,7 +105,7 @@ export class RefuellingService {
     const previous = await this.repository.getLatest();
     let previousMileage = null;
 
-    if (previous?.mileage !== undefined && previous?.mileage !== null) {
+    if (refuelling.mileage !== null && previous?.mileage !== undefined && previous?.mileage !== null) {
       previousMileage = requireFiniteNumber(previous.mileage, 'Quilometragem do abastecimento anterior');
 
       if (refuelling.mileage <= previousMileage) {
@@ -113,7 +117,10 @@ export class RefuellingService {
       ? null
       : roundTo(refuelling.liters * refuelling.gasPrice, 2);
 
-    const consumptionKmPerLiter = previous?.blFullTank === true && previousMileage !== null && refuelling.blFullTank
+    const consumptionKmPerLiter = previous?.blFullTank === true
+      && previousMileage !== null
+      && refuelling.mileage !== null
+      && refuelling.blFullTank
       ? roundTo((refuelling.mileage - previousMileage) / refuelling.liters, 2)
       : null;
 

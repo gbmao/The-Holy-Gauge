@@ -1,4 +1,6 @@
-// Keep the API URL and endpoint names in one place for the future C# integration.
+// Keep the fueling interface stable while selecting HTTP or local SQLite by platform.
+import { Capacitor } from '@capacitor/core';
+
 export const API_CONFIG = {
   baseUrl: (import.meta.env?.VITE_API_BASE_URL || 'http://localhost:5199').replace(/\/+$/, ''),
   endpoints: {
@@ -8,6 +10,58 @@ export const API_CONFIG = {
     averageConsumption: '/api/average-consumption',
   },
 };
+
+let nativeFuelingComponentsPromise = null;
+
+async function getNativeFuelingComponents() {
+  if (!nativeFuelingComponentsPromise) {
+    nativeFuelingComponentsPromise = Promise.all([
+      import('./repositories/sqlite-refuelling-repository.js'),
+      import('./services/refuelling-service.js'),
+    ])
+      .then(([repositoryModule, serviceModule]) => {
+        const repository = new repositoryModule.SqliteRefuellingRepository();
+        const service = new serviceModule.RefuellingService(repository);
+        return { repository, service };
+      })
+      .catch((error) => {
+        nativeFuelingComponentsPromise = null;
+        throw error;
+      });
+  }
+
+  return nativeFuelingComponentsPromise;
+}
+
+function isNativeApp() {
+  return Capacitor.isNativePlatform();
+}
+
+function formatLiters(value) {
+  return `${Number(value).toLocaleString('pt-BR', { maximumFractionDigits: 2 })} L`;
+}
+
+function formatOdometer(value) {
+  return value === null || value === undefined
+    ? '—'
+    : `${Number(value).toLocaleString('pt-BR')} km`;
+}
+
+function formatCurrency(value) {
+  return value === null || value === undefined
+    ? '—'
+    : Number(value).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\u00a0/g, ' ');
+}
+
+function mapNativeFuelingRecord(record) {
+  return {
+    ...record,
+    station: 'Abastecimento',
+    liters: formatLiters(record.liters),
+    total: formatCurrency(record.total),
+    odometer: formatOdometer(record.mileage),
+  };
+}
 
 const MOCK_MAINTENANCE_HISTORY = [
   {
@@ -69,10 +123,22 @@ export async function requestApi(endpoint, options = {}) {
 
 export const fuelingApi = {
   async loadHistory() {
+    if (isNativeApp()) {
+      const { repository } = await getNativeFuelingComponents();
+      const records = await repository.getAll();
+      return records.map(mapNativeFuelingRecord);
+    }
+
     return requestApi(API_CONFIG.endpoints.fuelingHistory);
   },
 
   async addRecord(payload) {
+    if (isNativeApp()) {
+      const { service } = await getNativeFuelingComponents();
+      const record = await service.create(payload);
+      return mapNativeFuelingRecord(record);
+    }
+
     return requestApi(API_CONFIG.endpoints.fuelingRecord, {
       method: 'POST',
       body: JSON.stringify(payload),
@@ -80,11 +146,21 @@ export const fuelingApi = {
   },
 
   async getMonthlyExpense(month, year) {
+    if (isNativeApp()) {
+      const { repository } = await getNativeFuelingComponents();
+      return repository.getMonthlyExpense(month, year);
+    }
+
     const query = new URLSearchParams({ month: String(month), year: String(year) });
     return requestApi(API_CONFIG.endpoints.monthlyExpense + '?' + query);
   },
 
   async getAverageConsumption() {
+    if (isNativeApp()) {
+      const { repository } = await getNativeFuelingComponents();
+      return repository.getAverageConsumption();
+    }
+
     return requestApi(API_CONFIG.endpoints.averageConsumption);
   },
 };

@@ -10,7 +10,10 @@ const SELECT_REFUELLING_COLUMNS = `
   Cd_status AS status,
   Gas_price AS gasPrice,
   GAS_STATION_ID AS gasStationId,
-  ROUND(Liters * COALESCE(Gas_price, 0), 2) AS total
+  CASE
+    WHEN Gas_price IS NULL THEN NULL
+    ELSE ROUND(Liters * Gas_price, 2)
+  END AS total
 `;
 
 function toSqliteBoolean(value, fieldName) {
@@ -40,7 +43,7 @@ function mapRefuellingRow(row) {
     status: Boolean(row.status),
     gasPrice: row.gasPrice === null ? null : Number(row.gasPrice),
     gasStationId: row.gasStationId === null ? null : Number(row.gasStationId),
-    total: Number(row.total),
+    total: row.total === null ? null : Number(row.total),
   };
 }
 
