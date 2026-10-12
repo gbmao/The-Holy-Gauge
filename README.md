@@ -19,11 +19,12 @@ E que possa calcular média de gastos e de consumo de gasolina.
 
 ## 3. Próximas funcionalidades
 
-- ~~retirar o mock do historico de abastecimento e preencher com dados do banco~~
+A base mobile está pronta: o app Android usa SQLite local para abastecimentos, enquanto o navegador continua usando a API HTTP. As próximas entregas são:
 
-- entender migração para mobile
-
-- decidir por qual tipo de banco no mobile
+- substituir os dados simulados de manutenção por registros persistidos;
+- permitir cadastrar e configurar a moto, incluindo a capacidade do tanque;
+- adicionar edição e exclusão de abastecimentos e manutenções pela interface;
+- definir uma estratégia de backup e sincronização dos dados locais com a API, caso seja necessário acessá-los em mais de um aparelho.
 
 
 ## Como rodar o projeto
