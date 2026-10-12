@@ -163,8 +163,15 @@ export const fuelingApi = {
 
     return requestApi(API_CONFIG.endpoints.averageConsumption);
   },
-};
 
+  async getTotalKm() {
+    if (isNativeApp()) {
+      const {repository} = await getNativeFuelingComponents();
+      return repository.getTotalKm();
+    }
+    return requestApi(API_CONFIG.endpoints.totalKm);
+  },
+};
 // Maintenance methods still return mock data until their backend endpoints are available.
 export const maintenanceApi = {
   async loadHistory() {

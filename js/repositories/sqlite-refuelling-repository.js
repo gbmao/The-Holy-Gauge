@@ -230,6 +230,19 @@ export class SqliteRefuellingRepository {
     return Math.round(((distance / Number(latest.liters)) + Number.EPSILON) * 100) / 100;
   }
 
+  async getTotalKm() {
+    const [row] = await this.queryRows(`
+        SELECT Mileage AS TotalKm
+        FROM REFUELLING
+        WHERE Cd_status = 1
+          AND Mileage IS NOT NULL
+        ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+        LIMIT 1
+      `);
+
+    return row?.TotalKm !== undefined && row?.TotalKm !== null ? Number(row.TotalKm) : 0;
+  }
+
   async softDelete(id) {
     const connection = await this.databaseProvider();
     const result = await connection.run(`
