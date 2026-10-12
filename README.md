@@ -163,3 +163,32 @@ abrir frontend
 ```
 
 Copiar `.env.example` para `.env` é opcional e serve para trocar a senha local do banco.
+
+## Gerar o app Android com Capacitor
+
+O projeto gera um APK de depuração instalável em dispositivos Android. São necessários Node.js 18 ou superior, JDK 17 e Android SDK com a plataforma Android 34 e Build Tools 34.0.0. Configure `ANDROID_HOME` para a pasta do SDK e adicione `platform-tools` ao `PATH` para usar os comandos abaixo.
+
+Instale as dependências e gere o APK:
+
+```bash
+npm install
+npm run android:build
+```
+
+O arquivo será criado em:
+
+```text
+android/app/build/outputs/apk/debug/app-debug.apk
+```
+
+Para instalar com um celular conectado por USB e depuração USB habilitada:
+
+```bash
+npm run android:install
+```
+
+Também é possível copiar o APK para o celular e abri-lo para instalar. O Android pode solicitar autorização para instalar apps dessa origem.
+
+Antes de gerar um APK para um celular físico, configure `VITE_API_BASE_URL` no arquivo `.env` com o endereço acessível da API. `localhost` aponta para o próprio celular; para desenvolvimento na mesma rede, use o IP da máquina que executa a API. O APK de depuração permite HTTP para esse cenário; para distribuição, use uma API com HTTPS. O projeto nativo Android fica em `android/` e pode ser aberto com `npm run cap:open`.
+
+O projeto está configurado para Android. A geração de um app iOS exige macOS e Xcode.

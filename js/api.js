@@ -1,8 +1,9 @@
 // Keep the API URL and endpoint names in one place for the future C# integration.
 export const API_CONFIG = {
-  baseUrl: 'http://localhost:5199',
+  baseUrl: (import.meta.env?.VITE_API_BASE_URL || 'http://localhost:5199').replace(/\/+$/, ''),
   endpoints: {
-    fuelingHistory: '/api/refuelling',
+    fuelingHistory: '/api',
+    fuelingRecord: '/api/refuelling',
     monthlyExpense: '/api/monthly-expense',
     averageConsumption: '/api/average-consumption',
   },
@@ -72,7 +73,7 @@ export const fuelingApi = {
   },
 
   async addRecord(payload) {
-    return requestApi(API_CONFIG.endpoints.fuelingHistory, {
+    return requestApi(API_CONFIG.endpoints.fuelingRecord, {
       method: 'POST',
       body: JSON.stringify(payload),
     });

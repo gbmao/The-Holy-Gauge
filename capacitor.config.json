@@ -1,0 +1,8 @@
+{
+  "appId": "com.controladordamoto.app",
+  "appName": "Controlador da Moto",
+  "webDir": "www",
+  "server": {
+    "androidScheme": "https"
+  }
+}

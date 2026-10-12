@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Controlador da Moto</string>
+    <string name="title_activity_main">Controlador da Moto</string>
+    <string name="package_name">com.controladordamoto.app</string>
+    <string name="custom_url_scheme">com.controladordamoto.app</string>
+</resources>

@@ -27,6 +27,8 @@ packages/
 # Node.js / frontend dependencies and generated output
 node_modules/
 dist/
+www/
+public/assets/sql-wasm.wasm
 coverage/
 .npm/
 .parcel-cache/
@@ -61,3 +63,9 @@ desktop.ini
 *.swo
 *.tmp
 *.temp
+
+# Capacitor / Android generated state
+android/.gradle/
+android/local.properties
+android/app/build/
+android/captures/
