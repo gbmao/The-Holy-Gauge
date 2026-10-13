@@ -122,3 +122,32 @@ BEGIN
     ORDER BY r.Dh_refuelling DESC, r.Refuelling_id DESC;
 END;
 GO
+
+
+    CREATE OR ALTER PROCEDURE dbo.SP_CREATE_MAINTENANCE
+    @Description NVARCHAR(255),
+    @DATE DATETIME = NULL,
+    @KILOMETERS INT = NULL,
+    @COST DECIMAL(10, 2) = NULL,
+    @NEXTKILOMETERS INT = NULL,
+    @NEXTDATE DATETIME = NULL,
+    @NOTES NVARCHAR(MAX) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF @DATE IS NULL
+        SET @DATE = GETDATE();
+    IF @KILOMETERS IS NULL
+        SET @KILOMETERS = (SELECT TOP 1 Mileage FROM dbo.REFUELLING WHERE Cd_status = 1 AND Mileage IS NOT NULL ORDER BY Dh_refuelling DESC, Refuelling_id DESC);
+    IF @KILOMETERS < (SELECT TOP 1 Mileage FROM dbo.REFUELLING WHERE Cd_status = 1 AND Mileage IS NOT NULL ORDER BY Dh_refuelling DESC, Refuelling_id DESC)
+        THROW 50006, 'Kilometers cannot be less than the last recorded kilometers.', 1;
+    IF @NEXTKILOMETERS IS NOT NULL AND @NEXTKILOMETERS < @KILOMETERS
+        THROW 50007, 'Next kilometers cannot be less than current kilometers.', 1;
+    IF @COST < 0
+        THROW 50008, 'Cost cannot be negative.', 1;
+    IF @NEXTDATE IS NOT NULL AND @NEXTDATE < @DATE
+        THROW 50009, 'Next date cannot be earlier than current date.', 1;
+    IF @Description IS NULL OR LTRIM(RTRIM(@Description)) = ''
+        THROW 50010, 'Description cannot be empty.', 1;
+    
+    
