@@ -14,8 +14,22 @@ namespace HolyGauge.Api.Service
 
         public async Task CreateMaintenanceAsync(Maintenance maintenance)
         {
-            //ValidateMaintenance(maintenance);
+            ValidateMaintenance(maintenance);
             await _maintenanceRepository.CreateMaintenanceAsync(maintenance);
+        }
+
+        public async Task<List<Maintenance>> GetAllMaintenancesAsync()
+        {
+            return await _maintenanceRepository.GetAllMaintenancesAsync();
+        }
+
+        private void ValidateMaintenance(Maintenance maintenance)
+        {
+            if (maintenance == null)
+                throw new ArgumentNullException(nameof(maintenance));
+
+            if (string.IsNullOrWhiteSpace(maintenance.Description))
+                throw new ArgumentException("Description is required", nameof(maintenance.Description));
         }
     }
 }
