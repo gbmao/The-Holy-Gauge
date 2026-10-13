@@ -3,6 +3,9 @@ using backend.HolyGauge.Api.Dto;
 using Microsoft.Data.SqlClient;
 using backend.HolyGauge.Api.Data;
 using backend.HolyGauge.Api.Service;
+using HolyGauge.Api.Data;
+using HolyGauge.Api.Service;
+using HolyGauge.Api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString =
@@ -25,6 +28,8 @@ builder.Services.AddCors(options =>
 // builder.Services.AddScoped<RefuellingRepository>();
 builder.Services.AddScoped<IRefuellingRepository, RefuellingRepository>();
 builder.Services.AddScoped<RefuellingService>();
+builder.Services.AddScoped<IMaintenanceRepository, MaintenanceRepository>();
+builder.Services.AddScoped<MaintenanceService>();
 
 var app = builder.Build();
 
@@ -71,6 +76,22 @@ app.MapGet("/api", async (RefuellingService service) =>
     var getAllrefuelling = await service.GetAllRefuellingsAsync();
     
     return Results.Ok(getAllrefuelling);
+
+});
+
+app.MapPost("/api/maintenance",
+    async (Maintenance maintenance, MaintenanceService service) =>
+{
+    await service.CreateMaintenanceAsync(maintenance);
+
+    return Results.Ok();
+});
+
+app.MapGet("/api/maintenance", async (MaintenanceService service) =>
+{
+    var getAllMaintenance = await service.GetAllMaintenancesAsync();
+    
+    return Results.Ok(getAllMaintenance);
 
 });
 
