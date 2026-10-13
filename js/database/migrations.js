@@ -47,6 +47,76 @@ BEGIN
   SELECT RAISE(ABORT, 'Mileage must be greater than the previous refuelling.');
 END;`;
 
+const CREATE_MAINTENANCE_TABLE = `CREATE TABLE IF NOT EXISTS MAINTENANCE (
+  Maintenance_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+  Description TEXT NOT NULL
+    CHECK (length(Description) <= 225 AND trim(Description) <> ''),
+  MAINTENANCEDATE TEXT NULL DEFAULT (datetime('now')),
+  COST NUMERIC NULL
+    CHECK (COST IS NULL OR COST >= 0),
+  KILOMETERS INTEGER NULL
+    CHECK (KILOMETERS IS NULL OR KILOMETERS >= 0),
+  NEXTKILOMETERS INTEGER NULL
+    CHECK (NEXTKILOMETERS IS NULL OR NEXTKILOMETERS >= 0),
+  NEXTDATE TEXT NULL,
+  NOTES TEXT NULL
+);`;
+
+const CREATE_MAINTENANCE_VALIDATION_TRIGGER = `CREATE TRIGGER IF NOT EXISTS TR_MAINTENANCE_VALIDATE
+BEFORE INSERT ON MAINTENANCE
+BEGIN
+  SELECT RAISE(ABORT, 'Description cannot be empty.')
+  WHERE NEW.Description IS NULL OR trim(NEW.Description) = '';
+
+  SELECT RAISE(ABORT, 'Kilometers cannot be less than the last recorded kilometers.')
+  WHERE NEW.KILOMETERS IS NOT NULL
+    AND NEW.KILOMETERS < (
+      SELECT Mileage
+      FROM REFUELLING
+      WHERE Cd_status = 1 AND Mileage IS NOT NULL
+      ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+      LIMIT 1
+    );
+
+  SELECT RAISE(ABORT, 'Next kilometers cannot be less than current kilometers.')
+  WHERE NEW.NEXTKILOMETERS IS NOT NULL
+    AND NEW.NEXTKILOMETERS < COALESCE(
+      NEW.KILOMETERS,
+      (
+        SELECT Mileage
+        FROM REFUELLING
+        WHERE Cd_status = 1 AND Mileage IS NOT NULL
+        ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+        LIMIT 1
+      )
+    );
+
+  SELECT RAISE(ABORT, 'Cost cannot be negative.')
+  WHERE NEW.COST < 0;
+
+  SELECT RAISE(ABORT, 'Next date cannot be earlier than current date.')
+  WHERE NEW.NEXTDATE IS NOT NULL
+    AND julianday(NEW.NEXTDATE) < julianday(COALESCE(NEW.MAINTENANCEDATE, datetime('now')));
+END;`;
+
+const CREATE_MAINTENANCE_DEFAULTS_TRIGGER = `CREATE TRIGGER IF NOT EXISTS TR_MAINTENANCE_DEFAULTS
+AFTER INSERT ON MAINTENANCE
+BEGIN
+  UPDATE MAINTENANCE
+  SET MAINTENANCEDATE = COALESCE(NEW.MAINTENANCEDATE, datetime('now')),
+      KILOMETERS = COALESCE(
+        NEW.KILOMETERS,
+        (
+          SELECT Mileage
+          FROM REFUELLING
+          WHERE Cd_status = 1 AND Mileage IS NOT NULL
+          ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+          LIMIT 1
+        )
+      )
+  WHERE Maintenance_ID = NEW.Maintenance_ID;
+END;`;
+
 /**
  * Each entry describes the statements needed to move a database from the
  * previous version to `toVersion`. Add future ALTER/CREATE statements in a
@@ -59,6 +129,14 @@ export const DATABASE_MIGRATIONS = [
       CREATE_GAS_STATION_TABLE,
       CREATE_REFUELLING_TABLE,
       CREATE_REFUELLING_MILEAGE_TRIGGER,
+    ],
+  },
+  {
+    toVersion: 2,
+    statements: [
+      CREATE_MAINTENANCE_TABLE,
+      CREATE_MAINTENANCE_VALIDATION_TRIGGER,
+      CREATE_MAINTENANCE_DEFAULTS_TRIGGER,
     ],
   },
 ];
