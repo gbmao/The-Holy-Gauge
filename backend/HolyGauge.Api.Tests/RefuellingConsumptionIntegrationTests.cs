@@ -1,22 +1,20 @@
 using Microsoft.Data.SqlClient;
 using System.Data;
 using Xunit;
-using Xunit.Sdk;
 
 namespace backend.HolyGauge.Api.Tests;
 
 public class RefuellingConsumptionIntegrationTests
 {
-    private const string ConnectionStringEnvironmentVariable = "HOLYGAUGE_TEST_CONNECTION_STRING";
-
-    [Fact]
+    [SqlServerFact]
     public async Task SpConsumoMedio_UsesDistanceBetweenLatestEligibleFullTankRefuellings()
     {
-        var connectionString = Environment.GetEnvironmentVariable(ConnectionStringEnvironmentVariable);
+        var connectionString = Environment.GetEnvironmentVariable(
+            SqlServerFactAttribute.ConnectionStringEnvironmentVariable);
         if (string.IsNullOrWhiteSpace(connectionString))
         {
-            throw SkipException.ForSkip(
-                $"Set {ConnectionStringEnvironmentVariable} to an isolated SQL Server test database to run this integration test.");
+            throw new InvalidOperationException(
+                $"Set {SqlServerFactAttribute.ConnectionStringEnvironmentVariable} to an isolated SQL Server test database to run this integration test.");
         }
 
         var connectionStringBuilder = new SqlConnectionStringBuilder(connectionString);
@@ -24,7 +22,7 @@ public class RefuellingConsumptionIntegrationTests
             || !connectionStringBuilder.InitialCatalog.Contains("test", StringComparison.OrdinalIgnoreCase))
         {
             throw new InvalidOperationException(
-                $"The database in {ConnectionStringEnvironmentVariable} must have 'test' in its name. The test inserts temporary rows and rolls them back.");
+                $"The database in {SqlServerFactAttribute.ConnectionStringEnvironmentVariable} must have 'test' in its name. The test inserts temporary rows and rolls them back.");
         }
 
         using var connection = new SqlConnection(connectionStringBuilder.ConnectionString);
@@ -88,5 +86,18 @@ public class RefuellingConsumptionIntegrationTests
         command.Parameters.Add("@Active", SqlDbType.Bit).Value = active;
 
         await command.ExecuteNonQueryAsync();
+    }
+}
+
+public sealed class SqlServerFactAttribute : FactAttribute
+{
+    public const string ConnectionStringEnvironmentVariable = "HOLYGAUGE_TEST_CONNECTION_STRING";
+
+    public SqlServerFactAttribute()
+    {
+        if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(ConnectionStringEnvironmentVariable)))
+        {
+            Skip = $"Set {ConnectionStringEnvironmentVariable} to an isolated SQL Server test database to run this integration test.";
+        }
     }
 }

@@ -2,6 +2,7 @@ using backend.HolyGauge.Api.Models;
 using backend.HolyGauge.Api.Dto;
 using Microsoft.Data.SqlClient;
 using backend.HolyGauge.Api.Data;
+using backend.HolyGauge.Api.ExceptionHandling;
 using backend.HolyGauge.Api.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -12,6 +13,8 @@ var allowedOrigins = builder.Configuration
     .Get<string[]>() ?? [];
 
 builder.Services.AddOpenApi();
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -33,6 +36,7 @@ builder.Services.AddScoped<MaintenanceService>();
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
 app.UseCors("Frontend");
 
 if (app.Environment.IsDevelopment())
