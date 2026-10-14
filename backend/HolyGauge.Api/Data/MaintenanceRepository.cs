@@ -10,7 +10,7 @@ namespace backend.HolyGauge.Api.Data
 
         public MaintenanceRepository(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            _connectionString = configuration.GetConnectionString("HolyGaugeDatabase")!;
         }
 
         public async Task CreateMaintenanceAsync(Maintenance maintenance)

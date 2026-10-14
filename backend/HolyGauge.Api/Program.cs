@@ -54,50 +54,68 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapPost("/api/refuelling",
-    async (Refuelling refuelling, RefuellingService service) =>
-{
-    await service.CreateAsync(refuelling);
+var api = app.MapGroup("/api");
 
-    return Results.Ok();
+var refuellingApi = api.MapGroup("/refuelling").WithTags("Refuelling");
+refuellingApi.MapPost("/",
+    async (CreateRefuellingRequest request, RefuellingService service) =>
+    {
+        var refuelling = new Refuelling
+        {
+            Liters = request.Liters,
+            BlAdditive = request.BlAdditive,
+            Mileage = request.Mileage,
+            BlFullTank = request.BlFullTank,
+            GasPrice = request.GasPrice
+        };
+
+        await service.CreateAsync(refuelling);
+
+        return Results.StatusCode(StatusCodes.Status201Created);
+    });
+
+refuellingApi.MapGet("/", async (RefuellingService service) =>
+{
+    var refuellings = await service.GetAllRefuellingsAsync();
+    return Results.Ok(refuellings);
 });
 
-app.MapGet("/api/monthly-expense", async (int month, int year, RefuellingService service) =>
+api.MapGet("/monthly-expense", async (int month, int year, RefuellingService service) =>
 {
     var monthlyExpense = await service.GetMonthlyExpenseAsync(month, year);
-
     return Results.Ok(monthlyExpense);
 });
 
-app.MapGet("/api/average-consumption", async (RefuellingService service) =>
+api.MapGet("/average-consumption", async (RefuellingService service) =>
 {
     var averageConsumption = await service.GetAverageConsumptionAsync();
-
     return Results.Ok(averageConsumption);
 });
 
-app.MapGet("/api", async (RefuellingService service) =>
+var maintenanceApi = api.MapGroup("/maintenance").WithTags("Maintenance");
+maintenanceApi.MapPost("/",
+    async (CreateMaintenanceRequest request, MaintenanceService service) =>
+    {
+        var maintenance = new Maintenance
+        {
+            Description = request.Description,
+            Date = request.Date,
+            Kilometers = request.Kilometers,
+            Cost = request.Cost,
+            NextKilometers = request.NextKilometers,
+            NextDate = request.NextDate,
+            Notes = request.Notes
+        };
+
+        await service.CreateMaintenanceAsync(maintenance);
+
+        return Results.StatusCode(StatusCodes.Status201Created);
+    });
+
+maintenanceApi.MapGet("/", async (MaintenanceService service) =>
 {
-    var getAllrefuelling = await service.GetAllRefuellingsAsync();
-    
-    return Results.Ok(getAllrefuelling);
-
-});
-
-app.MapPost("/api/maintenance",
-    async (Maintenance maintenance, MaintenanceService service) =>
-{
-    await service.CreateMaintenanceAsync(maintenance);
-
-    return Results.Ok();
-});
-
-app.MapGet("/api/maintenance", async (MaintenanceService service) =>
-{
-    var getAllMaintenance = await service.GetAllMaintenancesAsync();
-    
-    return Results.Ok(getAllMaintenance);
-
+    var maintenances = await service.GetAllMaintenancesAsync();
+    return Results.Ok(maintenances);
 });
 
 app.Run();
