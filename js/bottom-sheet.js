@@ -59,6 +59,8 @@ export function createBottomSheet({
   errorState,
   retryButton,
   addButton,
+  formOpenButton,
+  formCancelButton,
   addLabel,
   feedback,
   form,
@@ -82,6 +84,45 @@ export function createBottomSheet({
     emptyState.hidden = state !== 'empty';
     errorState.hidden = state !== 'error';
     addButton.disabled = state === 'loading' || state === 'error';
+    if (formOpenButton) {
+      formOpenButton.disabled = state === 'loading' || state === 'error';
+    }
+  }
+
+  function showEntryForm() {
+    if (!form || !formOpenButton || isAdding) {
+      return;
+    }
+
+    form.hidden = false;
+    formOpenButton.hidden = true;
+    loading.hidden = true;
+    historyElement.hidden = true;
+    emptyState.hidden = true;
+    errorState.hidden = true;
+    feedback.textContent = '';
+    feedback.classList.remove('error');
+    form.querySelector('input, textarea')?.focus({ preventScroll: true });
+  }
+
+  function hideEntryForm({ clear = true } = {}) {
+    if (!form || !formOpenButton) {
+      return;
+    }
+
+    form.hidden = true;
+    formOpenButton.hidden = false;
+    if (clear) {
+      form.reset();
+      feedback.textContent = '';
+      feedback.classList.remove('error');
+    }
+
+    if (history !== null) {
+      renderHistory(history);
+    } else {
+      setState('loading');
+    }
   }
 
   function renderHistory(records) {
@@ -120,6 +161,7 @@ export function createBottomSheet({
       payload = buildPayload();
     } catch (error) {
       feedback.textContent = error.message;
+      feedback.classList.add('error');
       return;
     }
 
@@ -127,6 +169,7 @@ export function createBottomSheet({
     addButton.disabled = true;
     addLabel.textContent = 'Salvando...';
     feedback.textContent = '';
+    feedback.classList.remove('error');
 
     try {
       const newRecord = await api.addRecord(payload);
@@ -141,13 +184,22 @@ export function createBottomSheet({
         };
 
         history = [recordForHistory, ...history];
+        if (formOpenButton) {
+          form.hidden = true;
+          formOpenButton.hidden = false;
+          form.reset();
+        }
         renderHistory(history);
       }
 
       feedback.textContent = successMessage;
+      feedback.classList.remove('error');
     } catch (error) {
       console.error('Unable to add ' + recordType + ' record', error);
-      feedback.textContent = errorMessage;
+      const isMaintenanceValidationError = recordType === 'maintenance'
+        && (error instanceof TypeError || error instanceof RangeError);
+      feedback.textContent = isMaintenanceValidationError ? error.message : errorMessage;
+      feedback.classList.add('error');
     } finally {
       isAdding = false;
       addLabel.textContent = defaultAddLabel;
@@ -189,7 +241,17 @@ export function createBottomSheet({
 
   if (form) {
     form.addEventListener('submit', handleAdd);
-  } else {
+  }
+
+  if (formOpenButton) {
+    formOpenButton.addEventListener('click', showEntryForm);
+  }
+
+  if (formCancelButton) {
+    formCancelButton.addEventListener('click', () => hideEntryForm());
+  }
+
+  if (!form) {
     addButton.addEventListener('click', handleAdd);
   }
 

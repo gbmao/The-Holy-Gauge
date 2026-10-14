@@ -77,6 +77,52 @@ function buildFuelingPayload() {
   };
 }
 
+function toLocalDateInputValue(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function readOptionalMaintenanceNumber(selector, label, { integer = false } = {}) {
+  const value = document.querySelector(selector).value.trim();
+  if (!value) {
+    return null;
+  }
+
+  const number = Number(value);
+  if (!Number.isFinite(number) || number < 0) {
+    throw new RangeError(`${label} precisa ser um número maior ou igual a zero.`);
+  }
+
+  if (integer && !Number.isInteger(number)) {
+    throw new RangeError(`${label} precisa ser um número inteiro.`);
+  }
+
+  return number;
+}
+
+function buildMaintenancePayload() {
+  const description = document.querySelector('#maintenanceDescriptionInput').value.trim();
+  if (!description) {
+    throw new TypeError('Informe a descrição da manutenção.');
+  }
+
+  return {
+    description,
+    date: document.querySelector('#maintenanceDateInput').value || toLocalDateInputValue(),
+    kilometers: readOptionalMaintenanceNumber('#maintenanceKilometersInput', 'A quilometragem', { integer: true }),
+    cost: readOptionalMaintenanceNumber('#maintenanceCostInput', 'O custo'),
+    nextKilometers: readOptionalMaintenanceNumber(
+      '#maintenanceNextKilometersInput',
+      'A próxima quilometragem',
+      { integer: true },
+    ),
+    nextDate: document.querySelector('#maintenanceNextDateInput').value || null,
+    notes: document.querySelector('#maintenanceNotesInput').value.trim() || null,
+  };
+}
+
 function updateOverlayState() {
   const isFuelingOpen = appShell.classList.contains('fueling-open');
   const isMaintenanceOpen = appShell.classList.contains('maintenance-open');
@@ -153,20 +199,24 @@ bottomSheets = createBottomSheets({
     errorState: document.querySelector('#maintenanceError'),
     retryButton: document.querySelector('#retryMaintenanceButton'),
     addButton: document.querySelector('#addMaintenanceButton'),
+    formOpenButton: document.querySelector('#openMaintenanceFormButton'),
+    formCancelButton: document.querySelector('#cancelMaintenanceFormButton'),
     addLabel: document.querySelector('#addMaintenanceLabel'),
     feedback: document.querySelector('#maintenanceFeedback'),
     api: maintenanceApi,
+    form: document.querySelector('#maintenanceForm'),
+    buildPayload: buildMaintenancePayload,
     openClass: 'maintenance-open',
     recordType: 'maintenance',
-    defaultAddLabel: 'Manutenção',
-    successMessage: 'Registro mock adicionado.',
+    defaultAddLabel: 'Salvar manutenção',
+    successMessage: 'Manutenção registrada.',
     errorMessage: 'Não foi possível registrar a manutenção.',
     recordConfig: {
       cardClassName: 'fueling-card maintenance-card',
       titleField: 'service',
       titleFallback: 'Manutenção',
-      subtitleField: 'workshop',
-      subtitleFallback: 'Oficina não informada',
+      subtitleField: 'notes',
+      subtitleFallback: 'Sem observações',
       stats: [
         ['Custo', 'cost'],
         ['Km', 'odometer'],

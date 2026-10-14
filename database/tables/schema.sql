@@ -38,3 +38,24 @@ BEGIN
     );
 END;
 GO
+
+IF OBJECT_ID(N'dbo.MAINTENANCE', N'U') IS NULL
+BEGIN
+        CREATE TABLE dbo.MAINTENANCE
+        (       
+                Maintenance_ID INT IDENTITY(1,1) NOT NULL,
+                Description NVARCHAR(225) NOT NULL,
+                MAINTENANCEDATE DATETIME NULL,
+                COST DECIMAL(10,2) NULL,
+                KILOMETERS INT NULL,
+                NEXTKILOMETERS INT NULL,
+                NEXTDATE DATETIME NULL,
+                NOTES NVARCHAR(255) NULL,
+                CONSTRAINT PK_MAINTENANCE PRIMARY KEY (Maintenance_ID),
+                CONSTRAINT CK_MAINTENANCE_Cost_NonNegative CHECK (COST IS NULL OR COST >= 0),
+                CONSTRAINT CK_MAINTENANCE_Kilometers_NonNegative CHECK (KILOMETERS IS NULL OR KILOMETERS >= 0),
+                CONSTRAINT CK_MAINTENANCE_NextKilometers_NonNegative CHECK (NEXTKILOMETERS IS NULL OR NEXTKILOMETERS >= 0)
+        );
+END;
+GO
+

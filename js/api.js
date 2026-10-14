@@ -12,6 +12,7 @@ export const API_CONFIG = {
 };
 
 let nativeFuelingComponentsPromise = null;
+let nativeMaintenanceComponentsPromise = null;
 
 async function getNativeFuelingComponents() {
   if (!nativeFuelingComponentsPromise) {
@@ -31,6 +32,26 @@ async function getNativeFuelingComponents() {
   }
 
   return nativeFuelingComponentsPromise;
+}
+
+async function getNativeMaintenanceComponents() {
+  if (!nativeMaintenanceComponentsPromise) {
+    nativeMaintenanceComponentsPromise = Promise.all([
+      import('./repositories/sqlite-maintenance-repository.js'),
+      import('./services/maintenance-service.js'),
+    ])
+      .then(([repositoryModule, serviceModule]) => {
+        const repository = new repositoryModule.SqliteMaintenanceRepository();
+        const service = new serviceModule.MaintenanceService(repository);
+        return { repository, service };
+      })
+      .catch((error) => {
+        nativeMaintenanceComponentsPromise = null;
+        throw error;
+      });
+  }
+
+  return nativeMaintenanceComponentsPromise;
 }
 
 function isNativeApp() {
@@ -63,38 +84,28 @@ function mapNativeFuelingRecord(record) {
   };
 }
 
-const MOCK_MAINTENANCE_HISTORY = [
-  {
-    id: 'mock-maintenance-001',
-    occurredAt: '2026-07-25T09:30:00-03:00',
-    date: '25 JUL 2026',
-    service: 'Troca de óleo',
-    workshop: 'Moto Center',
-    cost: 'R$ 120,00',
-    odometer: '8.350 km',
-    status: 'Concluída',
-  },
-  {
-    id: 'mock-maintenance-002',
-    occurredAt: '2026-06-18T15:00:00-03:00',
-    date: '18 JUN 2026',
-    service: 'Revisão dos freios',
-    workshop: 'Oficina Avenida',
-    cost: 'R$ 85,00',
-    odometer: '7.950 km',
-    status: 'Concluída',
-  },
-  {
-    id: 'mock-maintenance-003',
-    occurredAt: '2026-04-09T11:20:00-03:00',
-    date: '09 ABR 2026',
-    service: 'Troca de relação',
-    workshop: 'Garagem XRE',
-    cost: 'R$ 480,00',
-    odometer: '7.100 km',
-    status: 'Concluída',
-  },
-];
+function mapMaintenanceRecord(record) {
+  const nextDetails = [];
+
+  if (record.nextKilometers !== null && record.nextKilometers !== undefined) {
+    nextDetails.push(formatOdometer(record.nextKilometers));
+  }
+
+  if (record.nextDate) {
+    nextDetails.push(new Date(record.nextDate).toLocaleDateString('pt-BR'));
+  }
+
+  return {
+    ...record,
+    occurredAt: record.date,
+    service: record.description,
+    workshop: record.workshop || 'Oficina não informada',
+    cost: formatCurrency(record.cost),
+    odometer: formatOdometer(record.kilometers),
+    status: nextDetails.length ? `Próxima: ${nextDetails.join(' / ')}` : 'Sem próxima revisão',
+  };
+}
+
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
@@ -163,27 +174,38 @@ export const fuelingApi = {
 
     return requestApi(API_CONFIG.endpoints.averageConsumption);
   },
+
+  async getTotalKm() {
+    if (isNativeApp()) {
+      const {repository} = await getNativeFuelingComponents();
+      return repository.getTotalKm();
+    }
+    return requestApi(API_CONFIG.endpoints.totalKm);
+  },
 };
 
-// Maintenance methods still return mock data until their backend endpoints are available.
 export const maintenanceApi = {
   async loadHistory() {
-    await wait(650);
-    return sortRecordsRecentFirst(MOCK_MAINTENANCE_HISTORY);
+    if (isNativeApp()) {
+      const { service } = await getNativeMaintenanceComponents();
+      const records = await service.getAllMaintenances();
+      return records.map(mapMaintenanceRecord);
+    }
+
+    const records = await requestApi('/api/maintenance');
+    return Array.isArray(records) ? records.map(mapMaintenanceRecord) : [];
   },
 
   async addRecord(payload) {
-    await wait(400);
-    return {
-      id: 'mock-maintenance-' + Date.now(),
-      occurredAt: new Date().toISOString(),
-      date: 'AGORA',
-      service: 'Nova manutenção',
-      workshop: 'Aguardando oficina',
-      cost: '—',
-      odometer: 'Pendente',
-      status: 'Pendente',
-      ...payload,
-    };
+    if (isNativeApp()) {
+      const { service } = await getNativeMaintenanceComponents();
+      return mapMaintenanceRecord(await service.create(payload));
+    }
+
+    const record = await requestApi('/api/maintenance', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+    return mapMaintenanceRecord(record || payload);
   },
 };
