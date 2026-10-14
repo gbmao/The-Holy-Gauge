@@ -26,11 +26,23 @@ public class RefuellingRepository : IRefuellingRepository
 
         command.CommandType = CommandType.StoredProcedure;
 
-        command.Parameters.AddWithValue("@Liters", refuelling.Liters);
-        command.Parameters.AddWithValue("@Bl_Additive", refuelling.BlAdditive ?? (object)DBNull.Value);
-        command.Parameters.AddWithValue("@Mileage", refuelling.Mileage ?? (object)DBNull.Value);
-        command.Parameters.AddWithValue("@Bl_Full_Tank", refuelling.BlFullTank ?? (object)DBNull.Value);
-        command.Parameters.AddWithValue("@Gas_Price", refuelling.GasPrice ?? (object)DBNull.Value);
+        // Explicit SQL metadata avoids type/precision inference from the current value.
+        var litersParameter = command.Parameters.Add("@Liters", SqlDbType.Decimal);
+        litersParameter.Precision = 5;
+        litersParameter.Scale = 2;
+        litersParameter.Value = refuelling.Liters;
+
+        command.Parameters.Add("@Bl_Additive", SqlDbType.Bit).Value =
+            (object?)refuelling.BlAdditive ?? DBNull.Value;
+        command.Parameters.Add("@Mileage", SqlDbType.Int).Value =
+            (object?)refuelling.Mileage ?? DBNull.Value;
+        command.Parameters.Add("@Bl_Full_Tank", SqlDbType.Bit).Value =
+            (object?)refuelling.BlFullTank ?? DBNull.Value;
+
+        var gasPriceParameter = command.Parameters.Add("@Gas_Price", SqlDbType.Decimal);
+        gasPriceParameter.Precision = 6;
+        gasPriceParameter.Scale = 3;
+        gasPriceParameter.Value = (object?)refuelling.GasPrice ?? DBNull.Value;
 
         await connection.OpenAsync();
 
@@ -48,8 +60,8 @@ public class RefuellingRepository : IRefuellingRepository
 
         command.CommandType = CommandType.StoredProcedure;
 
-        command.Parameters.AddWithValue("@MES", month);
-        command.Parameters.AddWithValue("@ANO", year);
+        command.Parameters.Add("@MES", SqlDbType.Int).Value = month;
+        command.Parameters.Add("@ANO", SqlDbType.Int).Value = year;
 
         await connection.OpenAsync();
 

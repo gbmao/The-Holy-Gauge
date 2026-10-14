@@ -24,13 +24,24 @@ namespace backend.HolyGauge.Api.Data
 
             command.CommandType = CommandType.StoredProcedure;
 
-            command.Parameters.AddWithValue("@Description", maintenance.Description);
-            command.Parameters.AddWithValue("@Date", maintenance.Date ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@Kilometers", maintenance.Kilometers ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@Cost", maintenance.Cost ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@NextKilometers", maintenance.NextKilometers ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@NextDate", maintenance.NextDate ?? (object)DBNull.Value);
-            command.Parameters.AddWithValue("@Notes", maintenance.Notes ?? (object)DBNull.Value);
+            // Explicit SQL metadata avoids type/precision inference from the current value.
+            command.Parameters.Add("@Description", SqlDbType.NVarChar, 255).Value = maintenance.Description;
+            command.Parameters.Add("@Date", SqlDbType.DateTime).Value =
+                (object?)maintenance.Date ?? DBNull.Value;
+            command.Parameters.Add("@Kilometers", SqlDbType.Int).Value =
+                (object?)maintenance.Kilometers ?? DBNull.Value;
+
+            var costParameter = command.Parameters.Add("@Cost", SqlDbType.Decimal);
+            costParameter.Precision = 10;
+            costParameter.Scale = 2;
+            costParameter.Value = (object?)maintenance.Cost ?? DBNull.Value;
+
+            command.Parameters.Add("@NextKilometers", SqlDbType.Int).Value =
+                (object?)maintenance.NextKilometers ?? DBNull.Value;
+            command.Parameters.Add("@NextDate", SqlDbType.DateTime).Value =
+                (object?)maintenance.NextDate ?? DBNull.Value;
+            command.Parameters.Add("@Notes", SqlDbType.NVarChar, -1).Value =
+                (object?)maintenance.Notes ?? DBNull.Value;
 
             await connection.OpenAsync();
 

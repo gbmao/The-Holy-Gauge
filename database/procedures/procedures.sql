@@ -111,7 +111,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    SELECT
+    SELECT TOP (5)
         r.Refuelling_id AS Id,
         r.Dh_refuelling AS OccurredAt,
         r.Liters AS Liters,

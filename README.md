@@ -123,6 +123,86 @@ A API será iniciada no endereço exibido pelo terminal, por exemplo:
 http://localhost:5199
 ```
 
+### Endpoints da API
+
+Os exemplos usam `http://localhost:5199` como endereço base. As respostas JSON usam nomes de propriedades em camelCase.
+
+| Método | Endpoint | Descrição | Resposta de sucesso |
+| --- | --- | --- | --- |
+| `GET` | `/api/refuelling` | Lista os cinco abastecimentos ativos mais recentes, ordenados por data e identificador. | `200 OK` com uma lista |
+| `POST` | `/api/refuelling` | Registra um abastecimento. | `201 Created` sem corpo |
+| `GET` | `/api/monthly-expense?month=10&year=2026` | Retorna o gasto total do mês informado. | `200 OK` com um número decimal |
+| `GET` | `/api/average-consumption` | Retorna o consumo médio calculado pelo último par elegível de abastecimentos de tanque cheio. | `200 OK` com um número decimal |
+| `GET` | `/api/maintenance` | Lista as manutenções registradas. | `200 OK` com uma lista |
+| `POST` | `/api/maintenance` | Registra uma manutenção. | `201 Created` sem corpo |
+
+Exemplo de criação de abastecimento:
+
+```http
+POST /api/refuelling HTTP/1.1
+Content-Type: application/json
+
+{
+  "liters": 12.5,
+  "blAdditive": false,
+  "mileage": 15400,
+  "blFullTank": true,
+  "gasPrice": 5.89
+}
+```
+
+Exemplo de resposta de `GET /api/refuelling` (a lista contém no máximo cinco itens):
+
+```json
+[
+  {
+    "id": 42,
+    "occurredAt": "2026-10-14T12:30:00",
+    "liters": 12.5,
+    "total": 73.63,
+    "odometer": 15400
+  }
+]
+```
+
+`GET /api/monthly-expense?month=10&year=2026` e `GET /api/average-consumption` retornam um número JSON, por exemplo `184.50` e `12.4`, respectivamente.
+
+Exemplo de criação de manutenção:
+
+```http
+POST /api/maintenance HTTP/1.1
+Content-Type: application/json
+
+{
+  "description": "Troca de óleo",
+  "date": "2026-10-14T00:00:00",
+  "kilometers": 15400,
+  "cost": 120.00,
+  "nextKilometers": 18400,
+  "nextDate": "2027-04-14T00:00:00",
+  "notes": "Óleo 10W-30"
+}
+```
+
+`GET /api/maintenance` retorna uma lista com as propriedades `id`, `description`, `date`, `kilometers`, `cost`, `nextKilometers`, `nextDate` e `notes`; valores opcionais podem ser `null`. Erros de validação e de servidor são retornados como `Problem Details`.
+
+Exemplo de resposta de `GET /api/maintenance`:
+
+```json
+[
+  {
+    "id": 7,
+    "description": "Troca de óleo",
+    "date": "2026-10-14T00:00:00",
+    "kilometers": 15400,
+    "cost": 120.0,
+    "nextKilometers": 18400,
+    "nextDate": "2027-04-14T00:00:00",
+    "notes": "Óleo 10W-30"
+  }
+]
+```
+
 ---
 
 ### 7. Rodar o frontend
@@ -201,6 +281,6 @@ npm run android:install
 
 Também é possível copiar o APK para o celular e abri-lo para instalar. O Android pode solicitar autorização para instalar apps dessa origem.
 
-No app Capacitor, o histórico, os novos abastecimentos, as despesas mensais e o consumo médio usam o SQLite local do aparelho; essas operações não dependem da API nem de `VITE_API_BASE_URL`. No navegador, elas continuam usando a API HTTP, configurada por `VITE_API_BASE_URL` no `.env`. Os registros de manutenção continuam simulados. O projeto nativo Android fica em `android/` e pode ser aberto com `npm run cap:open`.
+No app Capacitor, os históricos de abastecimentos e manutenções, os novos registros, as despesas mensais e o consumo médio usam o SQLite local do aparelho; essas operações não dependem da API nem de `VITE_API_BASE_URL`. No navegador, abastecimentos e manutenções usam a API HTTP, configurada por `VITE_API_BASE_URL` no `.env`. O projeto nativo Android fica em `android/` e pode ser aberto com `npm run cap:open`.
 
 O projeto está configurado para Android. A geração de um app iOS exige macOS e Xcode.
