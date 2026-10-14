@@ -84,6 +84,28 @@ function mapNativeFuelingRecord(record) {
   };
 }
 
+function mapNativeMaintenanceRecord(record) {
+  const nextDetails = [];
+
+  if (record.nextKilometers !== null && record.nextKilometers !== undefined) {
+    nextDetails.push(formatOdometer(record.nextKilometers));
+  }
+
+  if (record.nextDate) {
+    nextDetails.push(new Date(record.nextDate).toLocaleDateString('pt-BR'));
+  }
+
+  return {
+    ...record,
+    occurredAt: record.date,
+    service: record.description,
+    workshop: record.workshop || 'Oficina não informada',
+    cost: formatCurrency(record.cost),
+    odometer: formatOdometer(record.kilometers),
+    status: nextDetails.length ? `Próxima: ${nextDetails.join(' / ')}` : 'Sem próxima revisão',
+  };
+}
+
 
 const wait = (milliseconds) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
@@ -165,8 +187,8 @@ export const fuelingApi = {
 export const maintenanceApi = {
   async loadHistory() {
     if (isNativeApp()) {
-      const { repository } = await getNativeMaintenanceComponents();
-      const records = await repository.getAllMaintenances();
+      const { service } = await getNativeMaintenanceComponents();
+      const records = await service.getAllMaintenances();
       return records.map(mapNativeMaintenanceRecord);
     }
 
@@ -174,6 +196,11 @@ export const maintenanceApi = {
   },
 
   async addRecord(payload) {
+    if (isNativeApp()) {
+      const { service } = await getNativeMaintenanceComponents();
+      return mapNativeMaintenanceRecord(await service.create(payload));
+    }
+
     return requestApi('/api/maintenance', {
       method: 'POST',
       body: JSON.stringify(payload),
