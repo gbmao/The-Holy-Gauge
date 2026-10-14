@@ -14,7 +14,7 @@ var allowedOrigins = builder.Configuration
 
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
-builder.Services.AddExceptionHandler<ValidationExceptionHandler>();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
