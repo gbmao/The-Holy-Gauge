@@ -1,7 +1,7 @@
-using HolyGauge.Api.Data;
-using HolyGauge.Api.Models;
+using backend.HolyGauge.Api.Data;
+using backend.HolyGauge.Api.Models;
 
-namespace HolyGauge.Api.Tests
+namespace backend.HolyGauge.Api.Tests
 {
     public class FakeMaintenanceRepository : IMaintenanceRepository
     {

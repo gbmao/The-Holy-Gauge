@@ -1,6 +1,6 @@
-using HolyGauge.Api.Models;
+using backend.HolyGauge.Api.Models;
 
-namespace HolyGauge.Api.Data
+namespace backend.HolyGauge.Api.Data
 {
     public interface IMaintenanceRepository
     {

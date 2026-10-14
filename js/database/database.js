@@ -1,6 +1,7 @@
 import { Capacitor } from '@capacitor/core';
 import { CapacitorSQLite, SQLiteConnection } from '@capacitor-community/sqlite';
 import { DATABASE_VERSION, registerDatabaseMigrations } from './migrations.js';
+import { assertSqliteSucceeded } from './sqlite-utils.js';
 
 const DATABASE_NAME = 'controlador-da-moto';
 const DATABASE_MODE = 'no-encryption';
@@ -27,15 +28,6 @@ async function initializeWebSqlite() {
   webSqliteElement.setAttribute('autoSave', 'true');
   await customElements.whenDefined('jeep-sqlite');
   await sqlite.initWebStore();
-}
-
-function assertSqliteSucceeded(result, operation) {
-  const changes = result?.changes?.changes;
-  const message = result?.message ?? result?.error;
-
-  if (message || changes === -1 || !Number.isFinite(changes)) {
-    throw new Error(message || `O SQLite não conseguiu ${operation}.`);
-  }
 }
 
 async function createOrRetrieveConnection() {

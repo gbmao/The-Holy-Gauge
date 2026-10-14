@@ -1,4 +1,5 @@
 import './app.js';
+import './keyboard-viewport.js';
 import { fuelingApi } from './api.js';
 
 const averageConsumptionElement = document.querySelector('#kmPerLiter');

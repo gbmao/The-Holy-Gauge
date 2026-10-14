@@ -11,7 +11,7 @@
     "build": "node scripts/copy-sqlite-wasm.mjs && vite build",
     "cap:sync": "npm run build && cap sync android",
     "cap:open": "cap open android",
-    "android:build": "npm run cap:sync && cd android && ./gradlew assembleDebug",
+    "android:build": "cd android && ./gradlew assembleDebug",
     "android:install": "npm run android:build && adb install -r android/app/build/outputs/apk/debug/app-debug.apk"
   },
   "dependencies": {

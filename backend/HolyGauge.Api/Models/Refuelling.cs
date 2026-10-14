@@ -1,4 +1,4 @@
-namespace  backend.HolyGauge.Api.Models;
+namespace backend.HolyGauge.Api.Models;
 
     public class Refuelling
     {
