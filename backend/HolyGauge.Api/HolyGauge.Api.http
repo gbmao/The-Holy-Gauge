@@ -1,6 +1,43 @@
 @HolyGauge.Api_HostAddress = http://localhost:5199
 
-GET {{HolyGauge.Api_HostAddress}}/weatherforecast/
+### Listar abastecimentos
+GET {{HolyGauge.Api_HostAddress}}/api/refuelling
 Accept: application/json
 
-###
+### Criar abastecimento
+POST {{HolyGauge.Api_HostAddress}}/api/refuelling
+Content-Type: application/json
+
+{
+  "liters": 10.5,
+  "blAdditive": false,
+  "mileage": 12500,
+  "blFullTank": true,
+  "gasPrice": 5.79
+}
+
+### Consultar gasto mensal
+GET {{HolyGauge.Api_HostAddress}}/api/monthly-expense?month=1&year=2026
+Accept: application/json
+
+### Consultar consumo médio
+GET {{HolyGauge.Api_HostAddress}}/api/average-consumption
+Accept: application/json
+
+### Listar manutenções
+GET {{HolyGauge.Api_HostAddress}}/api/maintenance
+Accept: application/json
+
+### Criar manutenção
+POST {{HolyGauge.Api_HostAddress}}/api/maintenance
+Content-Type: application/json
+
+{
+  "description": "Troca de óleo",
+  "date": "2026-01-15T10:00:00",
+  "kilometers": 12500,
+  "cost": 120.00,
+  "nextKilometers": 15500,
+  "nextDate": "2026-04-15T10:00:00",
+  "notes": "Óleo 10W-30"
+}

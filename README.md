@@ -127,6 +127,8 @@ http://localhost:5199
 
 ### 7. Rodar o frontend
 
+Os arquivos do frontend ficam em `frontend/`. Os comandos abaixo podem ser executados na raiz do repositório.
+
 Instale as dependências e inicie o Vite:
 
 ```bash

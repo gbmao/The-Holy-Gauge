@@ -28,7 +28,7 @@ packages/
 node_modules/
 dist/
 www/
-public/assets/sql-wasm.wasm
+**/public/assets/sql-wasm.wasm
 coverage/
 .npm/
 .parcel-cache/

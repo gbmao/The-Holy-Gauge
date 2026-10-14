@@ -1,0 +1,24 @@
+{
+  "name": "holy-gauge-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "node scripts/copy-sqlite-wasm.mjs && vite build"
+  },
+  "dependencies": {
+    "@capacitor-community/sqlite": "6.0.2",
+    "@capacitor/android": "6.2.2",
+    "@capacitor/core": "6.2.1",
+    "jeep-sqlite": "2.7.2",
+    "sql.js": "1.14.2"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.2.2",
+    "vite": "6.4.3"
+  }
+}

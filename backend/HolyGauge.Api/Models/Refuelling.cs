@@ -8,7 +8,7 @@ namespace backend.HolyGauge.Api.Models;
         public bool? BlAdditive { get; set; }
         public int? Mileage { get; set; }
         public bool? BlFullTank { get; set; }
-        public DateTime Dh_refuelling { get; set; }
+        public DateTime OccurredAt { get; set; }
         public decimal? GasPrice { get; set; }
 
     }
