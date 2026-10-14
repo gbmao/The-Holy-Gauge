@@ -84,7 +84,7 @@ function mapNativeFuelingRecord(record) {
   };
 }
 
-function mapNativeMaintenanceRecord(record) {
+function mapMaintenanceRecord(record) {
   const nextDetails = [];
 
   if (record.nextKilometers !== null && record.nextKilometers !== undefined) {
@@ -189,21 +189,23 @@ export const maintenanceApi = {
     if (isNativeApp()) {
       const { service } = await getNativeMaintenanceComponents();
       const records = await service.getAllMaintenances();
-      return records.map(mapNativeMaintenanceRecord);
+      return records.map(mapMaintenanceRecord);
     }
 
-    return requestApi('/api/maintenance');
+    const records = await requestApi('/api/maintenance');
+    return Array.isArray(records) ? records.map(mapMaintenanceRecord) : [];
   },
 
   async addRecord(payload) {
     if (isNativeApp()) {
       const { service } = await getNativeMaintenanceComponents();
-      return mapNativeMaintenanceRecord(await service.create(payload));
+      return mapMaintenanceRecord(await service.create(payload));
     }
 
-    return requestApi('/api/maintenance', {
+    const record = await requestApi('/api/maintenance', {
       method: 'POST',
       body: JSON.stringify(payload),
     });
+    return mapMaintenanceRecord(record || payload);
   },
 };

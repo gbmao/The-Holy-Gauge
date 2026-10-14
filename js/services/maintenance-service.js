@@ -35,7 +35,19 @@ function normalizeDate(value, fieldName, defaultValue = null) {
     return null;
   }
 
-  const date = value instanceof Date ? value : new Date(value);
+  let date;
+  if (value instanceof Date) {
+    date = value;
+  } else if (typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const [year, month, day] = value.split('-').map(Number);
+    date = new Date(`${value}T12:00:00`);
+    if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+      throw new TypeError(`${fieldName} é inválida.`);
+    }
+  } else {
+    date = new Date(value);
+  }
+
   if (Number.isNaN(date.getTime())) {
     throw new TypeError(`${fieldName} é inválida.`);
   }
