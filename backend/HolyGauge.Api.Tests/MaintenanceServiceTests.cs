@@ -1,8 +1,8 @@
-using HolyGauge.Api.Service;
+using backend.HolyGauge.Api.Service;
 using Xunit;
-using HolyGauge.Api.Models;
+using backend.HolyGauge.Api.Models;
 
-namespace HolyGauge.Api.Tests
+namespace backend.HolyGauge.Api.Tests
 {
     public class MaintenanceServiceTests
     {

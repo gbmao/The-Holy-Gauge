@@ -1,3 +1,4 @@
+// Migration 1 is kept as originally applied; migration 3 renames ADRESS safely.
 const CREATE_GAS_STATION_TABLE = `CREATE TABLE IF NOT EXISTS GAS_STATION (
   GAS_STATION_ID INTEGER NOT NULL PRIMARY KEY,
   NAME VARCHAR(255) NULL,
@@ -137,6 +138,12 @@ export const DATABASE_MIGRATIONS = [
       CREATE_MAINTENANCE_TABLE,
       CREATE_MAINTENANCE_VALIDATION_TRIGGER,
       CREATE_MAINTENANCE_DEFAULTS_TRIGGER,
+    ],
+  },
+  {
+    toVersion: 3,
+    statements: [
+      'ALTER TABLE GAS_STATION RENAME COLUMN ADRESS TO ADDRESS;',
     ],
   },
 ];

@@ -1,8 +1,8 @@
 using System.Data;
-using HolyGauge.Api.Models;
+using backend.HolyGauge.Api.Models;
 using Microsoft.Data.SqlClient;
 
-namespace HolyGauge.Api.Data
+namespace backend.HolyGauge.Api.Data
 {
     public class MaintenanceRepository : IMaintenanceRepository
     {
@@ -61,9 +61,9 @@ namespace HolyGauge.Api.Data
                     Id = reader.GetInt32(reader.GetOrdinal("Id")),
                     Description = reader.GetString(reader.GetOrdinal("Description")),
                     Date = reader.IsDBNull(reader.GetOrdinal("Date")) ? null : reader.GetDateTime(reader.GetOrdinal("Date")),
-                    Kilometers = reader.IsDBNull(reader.GetOrdinal("Kilometers")) ? null : reader.GetDecimal(reader.GetOrdinal("Kilometers")),
+                    Kilometers = reader.IsDBNull(reader.GetOrdinal("Kilometers")) ? null : reader.GetInt32(reader.GetOrdinal("Kilometers")),
                     Cost = reader.IsDBNull(reader.GetOrdinal("Cost")) ? null : reader.GetDecimal(reader.GetOrdinal("Cost")),
-                    NextKilometers = reader.IsDBNull(reader.GetOrdinal("NextKilometers")) ? null : reader.GetDecimal(reader.GetOrdinal("NextKilometers")),
+                    NextKilometers = reader.IsDBNull(reader.GetOrdinal("NextKilometers")) ? null : reader.GetInt32(reader.GetOrdinal("NextKilometers")),
                     NextDate = reader.IsDBNull(reader.GetOrdinal("NextDate")) ? null : reader.GetDateTime(reader.GetOrdinal("NextDate")),
                     Notes = reader.IsDBNull(reader.GetOrdinal("Notes")) ? null : reader.GetString(reader.GetOrdinal("Notes"))
                 };

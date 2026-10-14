@@ -149,5 +149,26 @@ BEGIN
         THROW 50009, 'Next date cannot be earlier than current date.', 1;
     IF @Description IS NULL OR LTRIM(RTRIM(@Description)) = ''
         THROW 50010, 'Description cannot be empty.', 1;
-    
-    
+
+    INSERT INTO dbo.MAINTENANCE
+    (
+        Description,
+        MAINTENANCEDATE,
+        COST,
+        KILOMETERS,
+        NEXTKILOMETERS,
+        NEXTDATE,
+        NOTES
+    )
+    VALUES
+    (
+        @Description,
+        @DATE,
+        @COST,
+        @KILOMETERS,
+        @NEXTKILOMETERS,
+        @NEXTDATE,
+        @NOTES
+    );
+END;
+GO

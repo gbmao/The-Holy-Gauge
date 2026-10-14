@@ -5,12 +5,63 @@ IF OBJECT_ID(N'dbo.GAS_STATION', N'U') IS NULL
 BEGIN
     CREATE TABLE dbo.GAS_STATION
     (
-        GAS_STATION_ID INT NOT NULL,
+        GAS_STATION_ID INT IDENTITY(1,1) NOT NULL,
         NAME VARCHAR(255) NULL,
-        ADRESS VARCHAR(255) NULL,
+        ADDRESS VARCHAR(255) NULL,
         CITY VARCHAR(255) NULL,
         CONSTRAINT PK_GAS_STATION PRIMARY KEY (GAS_STATION_ID)
     );
+END;
+ELSE
+BEGIN
+    IF COL_LENGTH(N'dbo.GAS_STATION', N'ADRESS') IS NOT NULL
+       AND COL_LENGTH(N'dbo.GAS_STATION', N'ADDRESS') IS NULL
+    BEGIN
+        EXEC sys.sp_rename N'dbo.GAS_STATION.ADRESS', N'ADDRESS', N'COLUMN';
+    END
+    ELSE IF COL_LENGTH(N'dbo.GAS_STATION', N'ADRESS') IS NOT NULL
+        AND COL_LENGTH(N'dbo.GAS_STATION', N'ADDRESS') IS NOT NULL
+    BEGIN
+        EXEC sys.sp_executesql N'
+            UPDATE dbo.GAS_STATION
+            SET ADDRESS = COALESCE(ADDRESS, ADRESS);
+            ALTER TABLE dbo.GAS_STATION DROP COLUMN ADRESS;';
+    END;
+
+    IF COLUMNPROPERTY(OBJECT_ID(N'dbo.GAS_STATION'), N'GAS_STATION_ID', N'IsIdentity') = 0
+    BEGIN
+        -- Preserve existing primary and foreign keys while generating future IDs.
+        IF OBJECT_ID(N'dbo.SEQ_GAS_STATION_ID', N'SO') IS NULL
+        BEGIN
+            DECLARE @NextGasStationId INT = ISNULL(
+                (SELECT MAX(GAS_STATION_ID) FROM dbo.GAS_STATION),
+                0
+            ) + 1;
+            DECLARE @CreateSequenceSql NVARCHAR(256) =
+                N'CREATE SEQUENCE dbo.SEQ_GAS_STATION_ID AS INT START WITH '
+                + CONVERT(NVARCHAR(20), @NextGasStationId)
+                + N' INCREMENT BY 1;';
+
+            EXEC sys.sp_executesql @CreateSequenceSql;
+        END;
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM sys.default_constraints AS dc
+            INNER JOIN sys.columns AS c
+                ON c.object_id = dc.parent_object_id
+               AND c.column_id = dc.parent_column_id
+            WHERE dc.parent_object_id = OBJECT_ID(N'dbo.GAS_STATION')
+              AND c.name = N'GAS_STATION_ID'
+        )
+        BEGIN
+            ALTER TABLE dbo.GAS_STATION
+                ADD CONSTRAINT DF_GAS_STATION_ID
+                DEFAULT (NEXT VALUE FOR dbo.SEQ_GAS_STATION_ID)
+                FOR GAS_STATION_ID;
+        END;
+    END;
 END;
 GO
 

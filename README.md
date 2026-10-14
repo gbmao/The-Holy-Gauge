@@ -127,15 +127,24 @@ http://localhost:5199
 
 ### 7. Rodar o frontend
 
-Abra a pasta do frontend com um servidor local, como o Live Server.
+Instale as dependências e inicie o Vite:
 
-Exemplo:
-
-```text
-http://127.0.0.1:5500/index.html
+```bash
+npm install
+npm run dev
 ```
 
+Abra a URL mostrada pelo Vite, normalmente `http://localhost:5173`.
+
 Com o frontend e a API em execução, o Holy Gauge estará pronto para uso.
+
+Em desenvolvimento, o CORS permite `http://localhost:5173` e `http://127.0.0.1:5173`, configurados em `appsettings.Development.json`. Em outros ambientes, defina as origens permitidas por `Cors:AllowedOrigins`, por exemplo com `Cors__AllowedOrigins__0=https://seu-frontend.example.com`.
+
+Para aplicar as atualizações idempotentes do schema SQL Server a um banco local já existente, execute:
+
+```bash
+docker compose run --rm database-init
+```
 
 ### Executar os testes
 

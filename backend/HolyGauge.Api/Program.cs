@@ -1,31 +1,31 @@
 using backend.HolyGauge.Api.Models;
-using backend.HolyGauge.Api.Dto;    
+using backend.HolyGauge.Api.Dto;
 using Microsoft.Data.SqlClient;
 using backend.HolyGauge.Api.Data;
 using backend.HolyGauge.Api.Service;
-using HolyGauge.Api.Data;
-using HolyGauge.Api.Service;
-using HolyGauge.Api.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString =
     builder.Configuration.GetConnectionString("HolyGaugeDatabase");
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? [];
 
-
-
-//move this to a service layer in the future
 builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
+        if (allowedOrigins.Length > 0)
+        {
+            policy.WithOrigins(allowedOrigins);
+        }
+
         policy
-            .WithOrigins("http://127.0.0.1:5500")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
 });
-// builder.Services.AddScoped<RefuellingRepository>();
 builder.Services.AddScoped<IRefuellingRepository, RefuellingRepository>();
 builder.Services.AddScoped<RefuellingService>();
 builder.Services.AddScoped<IMaintenanceRepository, MaintenanceRepository>();
@@ -35,19 +35,20 @@ var app = builder.Build();
 
 app.UseCors("Frontend");
 
-
-
-
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    app.MapGet("/db-check", async () =>
+    {
+        await using var connection = new SqlConnection(connectionString);
+        await connection.OpenAsync();
+
+        return Results.Ok("Conectado ao banco!");
+    });
 }
 
 app.UseHttpsRedirection();
-
-
-app.MapGet("/", () => "Hello World!");
 
 app.MapPost("/api/refuelling",
     async (Refuelling refuelling, RefuellingService service) =>
@@ -94,17 +95,5 @@ app.MapGet("/api/maintenance", async (MaintenanceService service) =>
     return Results.Ok(getAllMaintenance);
 
 });
-
-
-//teste do DB
-app.MapGet("/db-check", async () =>
-{
-    await using var connection = new SqlConnection(connectionString);
-
-    await connection.OpenAsync();
-
-    return "Conectado ao banco!";
-});
-
 
 app.Run();

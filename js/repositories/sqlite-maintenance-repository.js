@@ -1,4 +1,5 @@
 import { openDatabase } from '../database/database.js';
+import { assertSqliteSucceeded, sqliteErrorMessage } from '../database/sqlite-utils.js';
 
 const SELECT_MAINTENANCE_COLUMNS = `
   Maintenance_ID AS id,
@@ -10,29 +11,6 @@ const SELECT_MAINTENANCE_COLUMNS = `
   NEXTDATE AS nextDate,
   NOTES AS notes
 `;
-
-function sqliteErrorMessage(result) {
-  if (typeof result?.message === 'string' && result.message.trim()) {
-    return result.message;
-  }
-
-  if (typeof result?.error === 'string' && result.error.trim()) {
-    return result.error;
-  }
-
-  return null;
-}
-
-function assertSqliteSucceeded(result, operation) {
-  const changes = result?.changes?.changes;
-  const message = sqliteErrorMessage(result);
-
-  if (message || changes === -1 || !Number.isFinite(changes)) {
-    throw new Error(message || `O SQLite não conseguiu ${operation}.`);
-  }
-
-  return result.changes;
-}
 
 function mapMaintenanceRow(row) {
   if (!row) {
