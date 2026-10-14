@@ -1,161 +1,106 @@
-using Xunit;
-using backend.HolyGauge.Api.Data;
 using backend.HolyGauge.Api.Models;
 using backend.HolyGauge.Api.Service;
+using Xunit;
 
+namespace backend.HolyGauge.Api.Tests;
 
-namespace backend.HolyGauge.Api.Tests
+public class RefuellingServiceTests
 {
-    public class RefuellingServiceTests
+    [Fact]
+    public async Task CreateAsync_WhenRefuellingIsValid_PassesItToRepository()
     {
-
-
-        [Fact]
-        public void ValidatePositiveGasPriceAndZero_When_GasPriceIsPositive_ReturnsTrue()
+        var repository = new FakeRefuellingRepository();
+        var service = new RefuellingService(repository);
+        var refuelling = new Refuelling
         {
-            // Arrange
-            var service = new RefuellingService(new FakeRefuellingRepository());
-            decimal gasPrice = 5.75m;
+            Liters = 10.5m,
+            Mileage = 100,
+            GasPrice = 5m,
+            BlAdditive = true,
+            BlFullTank = true
+        };
 
-            // Act
-            bool result = service.ValidatePositiveGasPriceAndZero(gasPrice);
-            System.Console.WriteLine($"Gas Price: {gasPrice}, Result: {result}"); // Debugging line
-            // Assert
-            Assert.True(result);
-        }
-        [Fact]
-        public void ValidatePositiveMileage_When_MileageIsPositive_ReturnsTrue()
-        {
-            // Arrange
-            var service = new RefuellingService(new FakeRefuellingRepository());
-            decimal mileage = 1000m;
+        await service.CreateAsync(refuelling);
 
-            // Act
-            bool result = service.ValidatePositiveMileage(mileage);
+        Assert.Equal(1, repository.CreateAsyncCallCount);
+        Assert.Same(refuelling, repository.CreatedRefuelling);
+    }
 
-            // Assert
-            Assert.True(result);
-        }
-        [Fact]
-        public void ValidateMileageHigherThanPrevious_When_MileageIsHigherThanPrevious_ReturnsTrue()
-        {
-            // Arrange
-            var service = new RefuellingService(new FakeRefuellingRepository());
-            decimal mileage = 15000m; // Assuming last mileage was 10000m
-            decimal previousMileage = 10000m;
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0)]
+    public async Task CreateAsync_WhenLitersAreNotPositive_DoesNotCallRepository(decimal liters)
+    {
+        var repository = new FakeRefuellingRepository();
+        var service = new RefuellingService(repository);
+        var refuelling = new Refuelling { Liters = liters, Mileage = 100, GasPrice = 5m };
 
-            // Act
-            bool result = service.ValidateMileageHigherThanPrevious(mileage, previousMileage);
+        await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(refuelling));
 
-            // Assert
-            Assert.True(result);
-        }
-        [Fact]
-        public void ValidatePositiveLitersAndZero_When_LitersAreNegative_ReturnsException()
-        {
-            // Arrange
-            var service = new RefuellingService(new FakeRefuellingRepository());
-            decimal liters = -10.5m;
+        Assert.Equal(0, repository.CreateAsyncCallCount);
+    }
 
-            // Act & Assert
-            Assert.Throws<ArgumentException>(() => service.ValidatePositiveLitersAndZero(liters));
-        }
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0)]
+    public async Task CreateAsync_WhenGasPriceIsNotPositive_DoesNotCallRepository(decimal gasPrice)
+    {
+        var repository = new FakeRefuellingRepository();
+        var service = new RefuellingService(repository);
+        var refuelling = new Refuelling { Liters = 10m, Mileage = 100, GasPrice = gasPrice };
 
-        [Fact]
-        public async Task CreateAsync_When_LitersAreNegative_ThrowsArgumentException()
-        {
-            var repository = new FakeRefuellingRepository();
-            var service = new RefuellingService(repository);
-            var refuelling = new Refuelling
-            {
-                Liters = -10.5m,
-                Mileage = 100,
-                GasPrice = 5m
-            };
+        await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(refuelling));
 
-            await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(refuelling));
-        }
+        Assert.Equal(0, repository.CreateAsyncCallCount);
+    }
 
-        [Fact]
-        public async Task CreateAsync_When_LitersAreNegative_DoesNotCallRepository()
-        {
-            var repository = new FakeRefuellingRepository();
-            var service = new RefuellingService(repository);
-            var refuelling = new Refuelling
-            {
-                Liters = -10.5m,
-                Mileage = 100,
-                GasPrice = 5m
-            };
+    [Fact]
+    public async Task CreateAsync_WhenGasPriceIsNull_DoesNotCallRepository()
+    {
+        var repository = new FakeRefuellingRepository();
+        var service = new RefuellingService(repository);
+        var refuelling = new Refuelling { Liters = 10m, Mileage = 100, GasPrice = null };
 
-            await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(refuelling));
+        await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(refuelling));
 
-            Assert.Equal(0, repository.CreateAsyncCallCount);
-        }
+        Assert.Equal(0, repository.CreateAsyncCallCount);
+    }
 
-        [Fact]
-        public async Task CreateAsync_When_LitersArePositive_CallsRepository()
-        {
-            var repository = new FakeRefuellingRepository();
-            var service = new RefuellingService(repository);
-            var refuelling = new Refuelling
-            {
-                Liters = 10.5m,
-                Mileage = 100,
-                GasPrice = 5m
-            };
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(0)]
+    public async Task CreateAsync_WhenMileageIsNotPositive_DoesNotCallRepository(int mileage)
+    {
+        var repository = new FakeRefuellingRepository();
+        var service = new RefuellingService(repository);
+        var refuelling = new Refuelling { Liters = 10m, Mileage = mileage, GasPrice = 5m };
 
-            await service.CreateAsync(refuelling);
+        await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(refuelling));
 
-            Assert.Equal(1, repository.CreateAsyncCallCount);
-        }
+        Assert.Equal(0, repository.CreateAsyncCallCount);
+    }
 
-        [Fact]
-        public void ValidatePositiveGasPriceAndZero_When_GasPriceIsNegative_ThrowsArgumentException()
-        {
-            var service = new RefuellingService(new FakeRefuellingRepository());
+    [Fact]
+    public async Task CreateAsync_WhenMileageIsNull_DoesNotCallRepository()
+    {
+        var repository = new FakeRefuellingRepository();
+        var service = new RefuellingService(repository);
+        var refuelling = new Refuelling { Liters = 10m, Mileage = null, GasPrice = 5m };
 
-            Assert.Throws<ArgumentException>(() => service.ValidatePositiveGasPriceAndZero(-1m));
-        }
+        await Assert.ThrowsAsync<ArgumentException>(() => service.CreateAsync(refuelling));
 
-        [Fact]
-        public void ValidatePositiveGasPriceAndZero_When_GasPriceIsZero_ThrowsArgumentException()
-        {
-            var service = new RefuellingService(new FakeRefuellingRepository());
+        Assert.Equal(0, repository.CreateAsyncCallCount);
+    }
 
-            Assert.Throws<ArgumentException>(() => service.ValidatePositiveGasPriceAndZero(0m));
-        }
+    [Fact]
+    public async Task GetAverageConsumptionAsync_ReturnsRepositoryValue()
+    {
+        var repository = new FakeRefuellingRepository { AverageConsumptionToReturn = 36.1m };
+        var service = new RefuellingService(repository);
 
-        [Fact]
-        public void ValidatePositiveGasPriceAndZero_When_GasPriceIsNull_ThrowsArgumentException()
-        {
-            var service = new RefuellingService(new FakeRefuellingRepository());
+        var result = await service.GetAverageConsumptionAsync();
 
-            Assert.Throws<ArgumentException>(() => service.ValidatePositiveGasPriceAndZero(null));
-        }
-
-        [Fact]
-        public void ValidatePositiveMileage_When_MileageIsNegative_ThrowsArgumentException()
-        {
-            var service = new RefuellingService(new FakeRefuellingRepository());
-
-            Assert.Throws<ArgumentException>(() => service.ValidatePositiveMileage(-1m));
-        }
-
-        [Fact]
-        public void ValidatePositiveMileage_When_MileageIsZero_ThrowsArgumentException()
-        {
-            var service = new RefuellingService(new FakeRefuellingRepository());
-
-            Assert.Throws<ArgumentException>(() => service.ValidatePositiveMileage(0m));
-        }
-
-        [Fact]
-        public void ValidatePositiveMileage_When_MileageIsNull_ThrowsArgumentException()
-        {
-            var service = new RefuellingService(new FakeRefuellingRepository());
-
-            Assert.Throws<ArgumentException>(() => service.ValidatePositiveMileage(null));
-        }
+        Assert.Equal(36.1m, result);
+        Assert.Equal(1, repository.GetAverageConsumptionCallCount);
     }
 }
