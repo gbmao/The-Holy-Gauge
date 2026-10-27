@@ -2,6 +2,7 @@
   "appId": "com.controladordamoto.app",
   "appName": "Controlador da Moto",
   "webDir": "www",
+  "includePlugins": ["@capacitor-community/sqlite"],
   "server": {
     "androidScheme": "https"
   }

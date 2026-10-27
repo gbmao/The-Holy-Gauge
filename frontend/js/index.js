@@ -47,7 +47,7 @@ async function loadTotalKm() {
   totalKmElement.textContent = '0';
 
   try {
-    const totalKm = await fuelingApi.getTotalMileage();
+    const totalKm = await fuelingApi.getTotalKm();
     totalKmElement.textContent = formatTotalKm(totalKm);
   } catch {
     totalKmElement.textContent = '0';
@@ -55,6 +55,7 @@ async function loadTotalKm() {
 }
 
 loadTotalKm();
+window.addEventListener('fueling-record-added', loadTotalKm);
 
 loadAverageConsumption();
 window.addEventListener('fueling-record-added', loadAverageConsumption);
