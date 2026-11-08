@@ -29,9 +29,19 @@ function normalizeOptionalInteger(value, fieldName, minimum = 1) {
 }
 
 export class Vehicle {
-  constructor({ id = null, name, brand = null, model = null, year = null } = {}) {
+  constructor({
+    id = null,
+    name,
+    brand = null,
+    model = null,
+    year = null,
+    isSelected = false,
+  } = {}) {
     if (typeof name !== 'string' || name.trim() === '') {
       throw new TypeError('O nome do veículo é obrigatório.');
+    }
+    if (typeof isSelected !== 'boolean') {
+      throw new TypeError('A seleção do veículo precisa ser verdadeira ou falsa.');
     }
 
     this.id = normalizeOptionalInteger(id, 'O ID do veículo');
@@ -39,5 +49,6 @@ export class Vehicle {
     this.brand = normalizeOptionalText(brand, 'A marca');
     this.model = normalizeOptionalText(model, 'O modelo');
     this.year = normalizeOptionalInteger(year, 'O ano do veículo');
+    this.isSelected = isSelected;
   }
 }

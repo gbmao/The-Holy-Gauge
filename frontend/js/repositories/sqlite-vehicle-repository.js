@@ -7,11 +7,12 @@ const SELECT_VEHICLE_COLUMNS = `
   NAME AS name,
   BRAND AS brand,
   MODEL AS model,
-  YEAR AS year
+  YEAR AS year,
+  IS_SELECTED AS isSelected
 `;
 
 function mapVehicleRow(row) {
-  return row ? new Vehicle(row) : null;
+  return row ? new Vehicle({ ...row, isSelected: Boolean(row.isSelected) }) : null;
 }
 
 /**
@@ -59,13 +60,14 @@ export class SqliteVehicleRepository {
     const vehicle = input instanceof Vehicle ? input : new Vehicle(input);
     const connection = await this.databaseProvider();
     const result = await connection.run(`
-      INSERT INTO VEHICLE (NAME, BRAND, MODEL, YEAR)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO VEHICLE (NAME, BRAND, MODEL, YEAR, IS_SELECTED)
+      VALUES (?, ?, ?, ?, ?)
     `, [
       vehicle.name,
       vehicle.brand,
       vehicle.model,
       vehicle.year,
+      vehicle.isSelected ? 1 : 0,
     ]);
     const changes = assertSqliteSucceeded(result, 'registrar o veículo');
     const insertedId = Number(changes.lastId);
