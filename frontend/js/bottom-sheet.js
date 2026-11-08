@@ -48,6 +48,16 @@ function renderHistoryCard(record, config) {
   return card;
 }
 
+function sortHistoryRecentFirst(records) {
+  return [...records].sort((first, second) => {
+    const firstDate = new Date(first.occurredAt || first.date || 0).getTime();
+    const secondDate = new Date(second.occurredAt || second.date || 0).getTime();
+    const dateDifference = secondDate - firstDate;
+
+    return dateDifference || Number(second.id || 0) - Number(first.id || 0);
+  });
+}
+
 export function createBottomSheet({
   appShell,
   sheet,
@@ -71,6 +81,7 @@ export function createBottomSheet({
   successMessage,
   errorMessage,
   recordConfig,
+  historyLimit = Infinity,
   buildPayload = () => ({ motorcycleId: 'current-motorcycle' }),
   onOpen = () => {},
   onStateChange = () => {},
@@ -183,7 +194,7 @@ export function createBottomSheet({
           odometer: payload.mileage,
         };
 
-        history = [recordForHistory, ...history];
+        history = sortHistoryRecentFirst([recordForHistory, ...history]).slice(0, historyLimit);
         if (formOpenButton) {
           form.hidden = true;
           formOpenButton.hidden = false;

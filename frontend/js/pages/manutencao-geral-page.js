@@ -157,7 +157,7 @@ export class ManutencaoGeralPage {
     this.setState('loading');
 
     try {
-      const records = await this.api.loadHistory();
+      const records = await this.api.loadAllHistory();
       if (currentRequest === this.requestId) {
         this.render(records);
       }
