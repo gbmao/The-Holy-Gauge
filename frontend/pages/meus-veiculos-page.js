@@ -1,7 +1,9 @@
 import { vehicleApi } from '../js/api.js';
+import { loadSelectedVehicleId, veiculoselecionado } from '../js/vehicle-selection.js';
 
-function createVehicleCard(vehicle, onDelete) {
+function createVehicleCard(vehicle, isSelected, onDelete, onSelect) {
   const card = document.createElement('article');
+  const selectButton = document.createElement('div');
   const header = document.createElement('header');
   const titleGroup = document.createElement('div');
   const recordId = document.createElement('span');
@@ -11,6 +13,21 @@ function createVehicleCard(vehicle, onDelete) {
 
   card.className = 'meus-veiculos-card';
   card.setAttribute('role', 'listitem');
+  card.dataset.selected = String(isSelected);
+  selectButton.className = 'meus-veiculos-card-select';
+  selectButton.setAttribute('role', 'button');
+  selectButton.tabIndex = 0;
+  selectButton.dataset.selectVehicle = '';
+  selectButton.dataset.vehicleId = String(vehicle.id);
+  selectButton.setAttribute('aria-pressed', String(isSelected));
+  selectButton.setAttribute('aria-label', `Selecionar veículo ${vehicle.name}, marca ${vehicle.brand || 'não informada'}, modelo ${vehicle.model || 'não informado'}, ano ${vehicle.year ?? 'não informado'}`);
+  selectButton.addEventListener('click', () => onSelect(vehicle, selectButton));
+  selectButton.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onSelect(vehicle, selectButton);
+    }
+  });
   header.className = 'meus-veiculos-card-header';
   titleGroup.className = 'meus-veiculos-card-title-group';
   recordId.className = 'meus-veiculos-card-id';
@@ -23,7 +40,7 @@ function createVehicleCard(vehicle, onDelete) {
   deleteButton.setAttribute('aria-label', `Excluir veículo ${vehicle.name}`);
   deleteButton.addEventListener('click', () => onDelete(vehicle));
   titleGroup.append(recordId, title);
-  header.append(titleGroup, deleteButton);
+  header.append(titleGroup);
 
   fields.className = 'meus-veiculos-card-fields';
   [
@@ -41,7 +58,8 @@ function createVehicleCard(vehicle, onDelete) {
     fields.append(field);
   });
 
-  card.append(header, fields);
+  selectButton.append(header, fields);
+  card.append(selectButton, deleteButton);
   return card;
 }
 
@@ -66,6 +84,7 @@ export class MeusVeiculosPage {
     this.requestId = 0;
     this.pendingDelete = null;
     this.isDeleting = false;
+    this.isSelectingVehicle = false;
 
     this.refreshButton.addEventListener('click', () => this.load());
     this.retryButton.addEventListener('click', () => this.load());
@@ -95,10 +114,61 @@ export class MeusVeiculosPage {
 
   render(vehicles) {
     this.list.replaceChildren(...vehicles.map((vehicle) => (
-      createVehicleCard(vehicle, (selectedVehicle) => this.askDeleteVehicle(selectedVehicle))
+      createVehicleCard(
+        vehicle,
+        Number(vehicle.id) === veiculoselecionado,
+        (selectedVehicle) => this.askDeleteVehicle(selectedVehicle),
+        (selectedVehicle, button) => this.selectVehicle(selectedVehicle, button),
+      )
     )));
     this.count.textContent = `${vehicles.length} ${vehicles.length === 1 ? 'veículo' : 'veículos'}`;
     this.setState(vehicles.length ? 'loaded' : 'empty');
+  }
+
+  updateSelectionStyles() {
+    this.list.querySelectorAll('[data-select-vehicle]').forEach((button) => {
+      const isSelected = Number(button.dataset.vehicleId) === veiculoselecionado;
+      button.setAttribute('aria-pressed', String(isSelected));
+      button.closest('.meus-veiculos-card').dataset.selected = String(isSelected);
+    });
+  }
+
+  async selectVehicle(vehicle, button) {
+    if (this.isSelectingVehicle || Number(vehicle.id) === veiculoselecionado) {
+      return;
+    }
+
+    this.isSelectingVehicle = true;
+    this.list.querySelectorAll('[data-select-vehicle]').forEach((item) => {
+      item.setAttribute('aria-disabled', 'true');
+    });
+    this.feedback.hidden = true;
+
+    try {
+      const wasSelected = await this.api.select(Number(vehicle.id));
+      if (!wasSelected) {
+        throw new Error('O veículo não está mais ativo.');
+      }
+
+      const selectedId = await loadSelectedVehicleId();
+      if (selectedId !== Number(vehicle.id)) {
+        throw new Error('Não foi possível confirmar a seleção do veículo.');
+      }
+
+      this.updateSelectionStyles();
+      this.showFeedback(`${vehicle.name} selecionado.`, 'success');
+    } catch (error) {
+      console.error('Não foi possível selecionar o veículo.', error);
+      this.showFeedback('Não foi possível selecionar este veículo. Tente novamente.', 'error');
+    } finally {
+      this.isSelectingVehicle = false;
+      this.list.querySelectorAll('[data-select-vehicle]').forEach((item) => {
+        item.removeAttribute('aria-disabled');
+      });
+      if (button.isConnected) {
+        button.focus();
+      }
+    }
   }
 
   showFeedback(message, state) {
@@ -164,6 +234,7 @@ export class MeusVeiculosPage {
 
     try {
       const vehicles = await this.api.loadAll();
+      await loadSelectedVehicleId();
       if (currentRequest === this.requestId) {
         this.render(vehicles);
       }

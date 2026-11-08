@@ -56,6 +56,57 @@ export class SqliteVehicleRepository {
     return rows.map(mapVehicleRow);
   }
 
+  async getSelectedId() {
+    const [row] = await this.queryRows(`
+      SELECT VEHICLE_ID AS id
+      FROM VEHICLE
+      WHERE CD_STATUS = 1 AND IS_SELECTED = 1
+      ORDER BY VEHICLE_ID ASC
+      LIMIT 1
+    `);
+
+    return row?.id === null || row?.id === undefined ? null : Number(row.id);
+  }
+
+  async select(vehicleId) {
+    if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
+      throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
+    }
+
+    const [vehicle] = await this.queryRows(`
+      SELECT VEHICLE_ID AS id
+      FROM VEHICLE
+      WHERE VEHICLE_ID = ? AND CD_STATUS = 1
+    `, [vehicleId]);
+
+    if (!vehicle) {
+      return false;
+    }
+
+    const connection = await this.databaseProvider();
+    const result = await connection.executeTransaction([
+      {
+        statement: `
+          UPDATE VEHICLE
+          SET IS_SELECTED = 0
+          WHERE IS_SELECTED = 1 AND VEHICLE_ID <> ?
+        `,
+        values: [vehicleId],
+      },
+      {
+        statement: `
+          UPDATE VEHICLE
+          SET IS_SELECTED = 1
+          WHERE VEHICLE_ID = ? AND CD_STATUS = 1
+        `,
+        values: [vehicleId],
+      },
+    ]);
+    assertSqliteSucceeded(result, 'selecionar o veículo');
+
+    return true;
+  }
+
   async create(input) {
     const vehicle = input instanceof Vehicle ? input : new Vehicle(input);
     const connection = await this.databaseProvider();

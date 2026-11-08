@@ -118,6 +118,90 @@ BEGIN
   WHERE Maintenance_ID = NEW.Maintenance_ID;
 END;`;
 
+const CREATE_REFUELLING_MILEAGE_TRIGGER_BY_VEHICLE = `CREATE TRIGGER IF NOT EXISTS TR_REFUELLING_MILEAGE_INCREASES
+BEFORE INSERT ON REFUELLING
+WHEN NEW.Mileage IS NOT NULL
+  AND EXISTS (
+    SELECT 1
+    FROM REFUELLING
+    WHERE Cd_status = 1
+      AND Mileage IS NOT NULL
+      AND VEHICLE_ID IS NEW.VEHICLE_ID
+  )
+  AND NEW.Mileage <= (
+    SELECT Mileage
+    FROM REFUELLING
+    WHERE Cd_status = 1
+      AND Mileage IS NOT NULL
+      AND VEHICLE_ID IS NEW.VEHICLE_ID
+    ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+    LIMIT 1
+  )
+BEGIN
+  SELECT RAISE(ABORT, 'Mileage must be greater than the previous refuelling for this vehicle.');
+END;`;
+
+const CREATE_MAINTENANCE_VALIDATION_TRIGGER_BY_VEHICLE = `CREATE TRIGGER IF NOT EXISTS TR_MAINTENANCE_VALIDATE
+BEFORE INSERT ON MAINTENANCE
+BEGIN
+  SELECT RAISE(ABORT, 'Description cannot be empty.')
+  WHERE NEW.Description IS NULL OR trim(NEW.Description) = '';
+
+  SELECT RAISE(ABORT, 'Kilometers cannot be less than the last recorded kilometers for this vehicle.')
+  WHERE NEW.KILOMETERS IS NOT NULL
+    AND NEW.KILOMETERS < (
+      SELECT Mileage
+      FROM REFUELLING
+      WHERE Cd_status = 1
+        AND Mileage IS NOT NULL
+        AND VEHICLE_ID IS NEW.VEHICLE_ID
+      ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+      LIMIT 1
+    );
+
+  SELECT RAISE(ABORT, 'Next kilometers cannot be less than current kilometers.')
+  WHERE NEW.NEXTKILOMETERS IS NOT NULL
+    AND NEW.NEXTKILOMETERS < COALESCE(
+      NEW.KILOMETERS,
+      (
+        SELECT Mileage
+        FROM REFUELLING
+        WHERE Cd_status = 1
+          AND Mileage IS NOT NULL
+          AND VEHICLE_ID IS NEW.VEHICLE_ID
+        ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+        LIMIT 1
+      )
+    );
+
+  SELECT RAISE(ABORT, 'Cost cannot be negative.')
+  WHERE NEW.COST < 0;
+
+  SELECT RAISE(ABORT, 'Next date cannot be earlier than current date.')
+  WHERE NEW.NEXTDATE IS NOT NULL
+    AND julianday(NEW.NEXTDATE) < julianday(COALESCE(NEW.MAINTENANCEDATE, datetime('now')));
+END;`;
+
+const CREATE_MAINTENANCE_DEFAULTS_TRIGGER_BY_VEHICLE = `CREATE TRIGGER IF NOT EXISTS TR_MAINTENANCE_DEFAULTS
+AFTER INSERT ON MAINTENANCE
+BEGIN
+  UPDATE MAINTENANCE
+  SET MAINTENANCEDATE = COALESCE(NEW.MAINTENANCEDATE, datetime('now')),
+      KILOMETERS = COALESCE(
+        NEW.KILOMETERS,
+        (
+          SELECT Mileage
+          FROM REFUELLING
+          WHERE Cd_status = 1
+            AND Mileage IS NOT NULL
+            AND VEHICLE_ID IS NEW.VEHICLE_ID
+          ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+          LIMIT 1
+        )
+      )
+  WHERE Maintenance_ID = NEW.Maintenance_ID;
+END;`;
+
 const CREATE_VEHICLE_TABLE = `CREATE TABLE IF NOT EXISTS VEHICLE (
   VEHICLE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
   NAME TEXT NOT NULL,
@@ -175,6 +259,17 @@ export const DATABASE_MIGRATIONS = [
     toVersion: 6,
     statements: [
       'ALTER TABLE VEHICLE ADD COLUMN IS_SELECTED INTEGER NOT NULL DEFAULT 0 CHECK (IS_SELECTED IN (0, 1));',
+    ],
+  },
+  {
+    toVersion: 7,
+    statements: [
+      'DROP TRIGGER IF EXISTS TR_REFUELLING_MILEAGE_INCREASES;',
+      CREATE_REFUELLING_MILEAGE_TRIGGER_BY_VEHICLE,
+      'DROP TRIGGER IF EXISTS TR_MAINTENANCE_VALIDATE;',
+      CREATE_MAINTENANCE_VALIDATION_TRIGGER_BY_VEHICLE,
+      'DROP TRIGGER IF EXISTS TR_MAINTENANCE_DEFAULTS;',
+      CREATE_MAINTENANCE_DEFAULTS_TRIGGER_BY_VEHICLE,
     ],
   },
 ];

@@ -262,6 +262,24 @@ export const vehicleApi = {
     return service.getAll();
   },
 
+  async getSelectedId() {
+    if (!isNativeApp()) {
+      throw new Error('A seleção de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.getSelectedId();
+  },
+
+  async select(vehicleId) {
+    if (!isNativeApp()) {
+      throw new Error('A seleção de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.select(vehicleId);
+  },
+
   async delete(vehicleId) {
     if (!isNativeApp()) {
       throw new Error('A exclusão de veículos está disponível no app Android.');

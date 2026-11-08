@@ -150,13 +150,46 @@
 }
 
 .meus-veiculos-card {
-  display: grid;
-  gap: 14px;
-  padding: 15px;
+  position: relative;
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 17px;
   background: rgba(17, 24, 42, 0.82);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.meus-veiculos-card[data-selected="true"] {
+  border-color: #62d98b;
+  background: rgba(24, 54, 43, 0.84);
+  box-shadow: 0 0 0 1px rgba(98, 217, 139, 0.25), 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.meus-veiculos-card-select {
+  display: grid;
+  width: 100%;
+  gap: 14px;
+  padding: 15px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.meus-veiculos-card-select:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.meus-veiculos-card-select:focus-visible {
+  outline: 3px solid rgba(98, 217, 139, 0.72);
+  outline-offset: -4px;
+}
+
+.meus-veiculos-card-select[aria-disabled="true"] {
+  cursor: wait;
+  opacity: 0.75;
 }
 
 .meus-veiculos-card-title-group {
@@ -185,9 +218,14 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
+  padding-right: 105px;
 }
 
 .meus-veiculos-delete {
+  position: absolute;
+  z-index: 1;
+  top: 14px;
+  right: 14px;
   display: inline-flex;
   min-height: 34px;
   flex: 0 0 auto;
@@ -475,8 +513,12 @@
     margin-top: 48px;
   }
 
-  .meus-veiculos-card {
+  .meus-veiculos-card-select {
     grid-template-columns: minmax(145px, 0.65fr) minmax(0, 1fr);
     align-items: center;
+  }
+
+  .meus-veiculos-card-header {
+    padding-right: 0;
   }
 }

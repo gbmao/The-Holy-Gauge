@@ -43,6 +43,30 @@ export class VehicleService {
     ));
   }
 
+  async getSelectedId() {
+    if (typeof this.repository.getSelectedId !== 'function') {
+      throw new TypeError('O repositório de veículos precisa implementar getSelectedId().');
+    }
+
+    const selectedId = await this.repository.getSelectedId();
+    if (selectedId !== null && (!Number.isSafeInteger(selectedId) || selectedId <= 0)) {
+      throw new TypeError('O repositório retornou um ID de veículo selecionado inválido.');
+    }
+
+    return selectedId;
+  }
+
+  async select(vehicleId) {
+    if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
+      throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
+    }
+    if (typeof this.repository.select !== 'function') {
+      throw new TypeError('O repositório de veículos precisa implementar select().');
+    }
+
+    return this.repository.select(vehicleId);
+  }
+
   async delete(vehicleId) {
     if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
       throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
