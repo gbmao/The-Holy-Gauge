@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <meta name="theme-color" content="#0a0f1d" />
     <title>Controlador da Moto</title>
-    <link rel="stylesheet" href="styles.css" />
-    <script type="module" src="js/index.js" defer></script>
+    <link rel="stylesheet" href="../styles.css" />
+    <script type="module" src="../js/index.js" defer></script>
   </head>
 
   <body>
@@ -34,7 +34,7 @@
           <img
             class="motorcycle-image"
             id="homeMotorcycleImage"
-            src="honda-xre-300-2015-ganha-inedita-versao-rally.webp"
+            src="../honda-xre-300-2015-ganha-inedita-versao-rally.webp"
             alt="Honda XRE 300 Rally"
           />
         </div>
@@ -71,6 +71,53 @@
       </section>
 
       <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+
+      <button
+        class="navigation-handle"
+        id="navigationHandle"
+        type="button"
+        aria-label="Abrir menu"
+        aria-controls="navigationPanel"
+        aria-expanded="false"
+      >
+        <span class="navigation-handle-grip" aria-hidden="true"></span>
+        <span class="navigation-handle-chevron" aria-hidden="true">›</span>
+      </button>
+
+      <aside
+        class="navigation-panel"
+        id="navigationPanel"
+        role="dialog"
+        aria-labelledby="navigationTitle"
+        aria-hidden="true"
+      >
+        <div class="components-header">
+          <div>
+            <p class="components-eyebrow">MENU PRINCIPAL</p>
+            <h2 id="navigationTitle">Navegação</h2>
+          </div>
+          <button class="close-button" id="closeNavigationButton" type="button" aria-label="Fechar menu">
+            &times;
+          </button>
+        </div>
+
+        <p class="components-hint">Arraste o puxador para abrir ou fechar.</p>
+
+        <nav class="navigation-links" aria-label="Menu principal">
+          <a class="navigation-link" href="./index.html">
+            <span class="navigation-link-icon" aria-hidden="true">⌂</span>
+            <span>Início</span>
+          </a>
+          <a class="navigation-link" href="./abastecimentos.html">
+            <span class="navigation-link-icon" aria-hidden="true">A</span>
+            <span>Abastecimentos</span>
+          </a>
+          <a class="navigation-link" href="./manutencao.html">
+            <span class="navigation-link-icon" aria-hidden="true">M</span>
+            <span>Manutenção geral</span>
+          </a>
+        </nav>
+      </aside>
 
       <button
         class="components-handle"

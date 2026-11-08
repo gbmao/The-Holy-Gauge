@@ -1,4 +1,4 @@
-import { maintenanceApi } from '../api.js';
+import { maintenanceApi } from '../js/api.js';
 
 function formatDate(value) {
   if (!value) {
