@@ -67,6 +67,7 @@ export class SqliteMaintenanceRepository {
     const rows = await this.queryRows(`
       SELECT ${SELECT_MAINTENANCE_COLUMNS}
       FROM MAINTENANCE
+      WHERE CD_STATUS = 1
       ORDER BY MAINTENANCEDATE DESC, Maintenance_ID DESC
     `);
 
@@ -77,6 +78,7 @@ export class SqliteMaintenanceRepository {
     const rows = await this.queryRows(`
       SELECT ${SELECT_MAINTENANCE_COLUMNS}
       FROM MAINTENANCE
+      WHERE CD_STATUS = 1
       ORDER BY MAINTENANCEDATE DESC, Maintenance_ID DESC
       LIMIT 3
     `);

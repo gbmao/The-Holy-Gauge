@@ -23,6 +23,9 @@
 | BRAND | TEXT | não | marca |
 | MODEL | TEXT | não | modelo |
 | YEAR | INTEGER | não | ano |
+| CD_STATUS | INTEGER | sim | 1 ativo; 0 excluído logicamente |
 
 As tabelas `GAS_STATION`, `REFUELLING` e `MAINTENANCE` têm `VEHICLE_ID` como chave estrangeira para `VEHICLE`. A coluna permite `NULL` para preservar registros criados antes da migração.
+
+Ao excluir um veículo, `CD_STATUS` também passa a `0` nos registros associados. `REFUELLING` já possuía essa coluna; as migrations adicionam o mesmo campo a `VEHICLE`, `GAS_STATION` e `MAINTENANCE`. Os dados permanecem no SQLite, mas deixam de aparecer nas consultas ativas.
 

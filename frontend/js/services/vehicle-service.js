@@ -42,4 +42,15 @@ export class VehicleService {
       vehicle instanceof Vehicle ? vehicle : new Vehicle(vehicle)
     ));
   }
+
+  async delete(vehicleId) {
+    if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
+      throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
+    }
+    if (typeof this.repository.softDelete !== 'function') {
+      throw new TypeError('O repositório de veículos precisa implementar softDelete().');
+    }
+
+    return this.repository.softDelete(vehicleId);
+  }
 }

@@ -180,6 +180,43 @@
   overflow-wrap: anywhere;
 }
 
+.meus-veiculos-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.meus-veiculos-delete {
+  display: inline-flex;
+  min-height: 34px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 116, 116, 0.28);
+  border-radius: 11px;
+  background: rgba(148, 54, 54, 0.14);
+  color: #ffaaaa;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  transition: border-color 160ms ease, background 160ms ease, opacity 160ms ease;
+}
+
+.meus-veiculos-delete:hover,
+.meus-veiculos-delete:focus-visible {
+  border-color: rgba(255, 116, 116, 0.65);
+  background: rgba(148, 54, 54, 0.28);
+  outline: none;
+}
+
+.meus-veiculos-delete:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
 .meus-veiculos-card-fields {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -289,6 +326,143 @@
   cursor: pointer;
   font-size: 12px;
   font-weight: 700;
+}
+
+.meus-veiculos-feedback {
+  margin: 14px 0 0;
+  padding: 11px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.meus-veiculos-feedback[data-state="success"] {
+  border-color: rgba(104, 211, 145, 0.28);
+  background: rgba(46, 125, 80, 0.14);
+  color: #9ce2b4;
+}
+
+.meus-veiculos-feedback[data-state="error"] {
+  border-color: rgba(255, 116, 116, 0.28);
+  background: rgba(148, 54, 54, 0.16);
+  color: #ffaaaa;
+}
+
+.meus-veiculos-confirm-dialog {
+  width: min(440px, calc(100vw - 36px));
+  max-width: none;
+  max-height: calc(100dvh - 36px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  background: #151e32;
+  color: #f5f7fb;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+.meus-veiculos-confirm-dialog::backdrop {
+  background: rgba(4, 7, 15, 0.76);
+  backdrop-filter: blur(5px);
+}
+
+.meus-veiculos-confirm-card {
+  display: grid;
+  justify-items: center;
+  padding: 24px 20px 20px;
+  text-align: center;
+}
+
+.meus-veiculos-confirm-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  margin-bottom: 13px;
+  border: 1px solid rgba(255, 116, 116, 0.28);
+  border-radius: 14px;
+  background: rgba(148, 54, 54, 0.16);
+  color: #ffaaaa;
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.meus-veiculos-confirm-dialog h2 {
+  margin: 0;
+  color: #f5f7fb;
+  font-size: 20px;
+  letter-spacing: -0.04em;
+}
+
+.meus-veiculos-confirm-description {
+  margin: 9px 0 0;
+  color: #aab5c6;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.meus-veiculos-confirm-description strong {
+  color: #f5f7fb;
+}
+
+.meus-veiculos-confirm-error {
+  width: 100%;
+  margin: 13px 0 0;
+  color: #ffaaaa;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.meus-veiculos-confirm-actions {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.meus-veiculos-cancel-delete,
+.meus-veiculos-confirm-delete {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.meus-veiculos-cancel-delete {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(26, 36, 56, 0.78);
+  color: #dce3ee;
+}
+
+.meus-veiculos-confirm-delete {
+  border-color: rgba(255, 116, 116, 0.34);
+  background: #a94444;
+  color: #fff;
+}
+
+.meus-veiculos-cancel-delete:hover,
+.meus-veiculos-cancel-delete:focus-visible {
+  border-color: rgba(255, 255, 255, 0.3);
+  outline: none;
+}
+
+.meus-veiculos-confirm-delete:hover,
+.meus-veiculos-confirm-delete:focus-visible {
+  background: #bf5151;
+  outline: 3px solid rgba(255, 116, 116, 0.2);
+  outline-offset: 2px;
+}
+
+.meus-veiculos-confirm-actions button:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 @media (min-width: 600px) {

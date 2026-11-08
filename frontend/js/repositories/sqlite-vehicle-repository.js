@@ -48,6 +48,7 @@ export class SqliteVehicleRepository {
     const rows = await this.queryRows(`
       SELECT ${SELECT_VEHICLE_COLUMNS}
       FROM VEHICLE
+      WHERE CD_STATUS = 1
       ORDER BY NAME COLLATE NOCASE ASC, VEHICLE_ID ASC
     `);
 
@@ -85,5 +86,50 @@ export class SqliteVehicleRepository {
     }
 
     return savedVehicle;
+  }
+
+  async softDelete(vehicleId) {
+    if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
+      throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
+    }
+
+    const connection = await this.databaseProvider();
+    const result = await connection.executeTransaction([
+      {
+        statement: `
+          UPDATE GAS_STATION
+          SET CD_STATUS = 0
+          WHERE VEHICLE_ID = ? AND CD_STATUS = 1
+        `,
+        values: [vehicleId],
+      },
+      {
+        statement: `
+          UPDATE REFUELLING
+          SET CD_STATUS = 0
+          WHERE VEHICLE_ID = ? AND CD_STATUS = 1
+        `,
+        values: [vehicleId],
+      },
+      {
+        statement: `
+          UPDATE MAINTENANCE
+          SET CD_STATUS = 0
+          WHERE VEHICLE_ID = ? AND CD_STATUS = 1
+        `,
+        values: [vehicleId],
+      },
+      {
+        statement: `
+          UPDATE VEHICLE
+          SET CD_STATUS = 0
+          WHERE VEHICLE_ID = ? AND CD_STATUS = 1
+        `,
+        values: [vehicleId],
+      },
+    ]);
+    const changes = assertSqliteSucceeded(result, 'excluir o veículo');
+
+    return changes.changes > 0;
   }
 }

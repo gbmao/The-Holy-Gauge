@@ -262,6 +262,15 @@ export const vehicleApi = {
     return service.getAll();
   },
 
+  async delete(vehicleId) {
+    if (!isNativeApp()) {
+      throw new Error('A exclusão de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.delete(vehicleId);
+  },
+
   async create(input) {
     if (!isNativeApp()) {
       throw new Error('A criação de veículos está disponível no app Android.');
