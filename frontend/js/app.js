@@ -150,6 +150,8 @@ sidebar = createSidebar({
   componentsPanel: document.querySelector('#componentsPanel'),
   closeComponentsButton: document.querySelector('#closeComponentsButton'),
   componentsHandle: document.querySelector('#componentsHandle'),
+  openFuelingButton: document.querySelector('#openFuelingButton'),
+  openMaintenanceButton: document.querySelector('#openMaintenanceButton'),
   onBackdrop: closeAllOverlays,
   onStateChange: updateOverlayState,
 });
