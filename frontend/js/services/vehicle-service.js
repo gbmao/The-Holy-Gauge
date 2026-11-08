@@ -27,4 +27,19 @@ export class VehicleService {
 
     throw new Error('O repositório não retornou o veículo criado.');
   }
+
+  async getAll() {
+    if (typeof this.repository.getAll !== 'function') {
+      throw new TypeError('O repositório de veículos precisa implementar getAll().');
+    }
+
+    const vehicles = await this.repository.getAll();
+    if (!Array.isArray(vehicles)) {
+      throw new TypeError('O repositório não retornou uma lista de veículos.');
+    }
+
+    return vehicles.map((vehicle) => (
+      vehicle instanceof Vehicle ? vehicle : new Vehicle(vehicle)
+    ));
+  }
 }

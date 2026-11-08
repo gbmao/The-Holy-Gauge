@@ -253,6 +253,15 @@ export const maintenanceApi = {
 };
 
 export const vehicleApi = {
+  async loadAll() {
+    if (!isNativeApp()) {
+      throw new Error('A lista de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.getAll();
+  },
+
   async create(input) {
     if (!isNativeApp()) {
       throw new Error('A criação de veículos está disponível no app Android.');

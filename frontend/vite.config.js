@@ -19,6 +19,7 @@ export default defineConfig({
         abastecimentos: resolve(pagesDirectory, 'abastecimentos.html'),
         manutencao: resolve(pagesDirectory, 'manutencao.html'),
         adicionarVeiculo: resolve(pagesDirectory, 'adicionar-veiculo.html'),
+        meusVeiculos: resolve(pagesDirectory, 'meus-veiculos.html'),
         image: resolve(pagesDirectory, 'image.html'),
       },
     },

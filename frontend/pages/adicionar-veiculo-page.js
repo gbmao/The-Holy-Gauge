@@ -46,7 +46,7 @@ export class AdicionarVeiculoPage {
 
   closePage() {
     this.successDialog.close();
-    window.location.replace('./index.html');
+    window.location.replace('./meus-veiculos.html');
   }
 
   async handleSubmit(event) {

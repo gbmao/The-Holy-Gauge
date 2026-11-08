@@ -44,6 +44,16 @@ export class SqliteVehicleRepository {
     return result.values;
   }
 
+  async getAll() {
+    const rows = await this.queryRows(`
+      SELECT ${SELECT_VEHICLE_COLUMNS}
+      FROM VEHICLE
+      ORDER BY NAME COLLATE NOCASE ASC, VEHICLE_ID ASC
+    `);
+
+    return rows.map(mapVehicleRow);
+  }
+
   async create(input) {
     const vehicle = input instanceof Vehicle ? input : new Vehicle(input);
     const connection = await this.databaseProvider();
