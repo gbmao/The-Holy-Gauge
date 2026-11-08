@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#0a0f1d" />
+    <title>Manutenção geral | Controlador da Moto</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles/manutencao-geral.css" />
+    <script type="module" src="js/pages/manutencao-geral-page.js" defer></script>
+  </head>
+
+  <body>
+    <main class="manutencao-geral-page" data-manutencao-geral-page>
+      <div class="manutencao-geral-shell">
+        <header class="manutencao-geral-header">
+          <a class="manutencao-geral-back" href="./index.html" aria-label="Voltar para a página inicial">
+            <span aria-hidden="true">‹</span>
+            <span>Início</span>
+          </a>
+
+          <button class="manutencao-geral-refresh" type="button" data-refresh aria-label="Atualizar manutenções">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </header>
+
+        <section class="manutencao-geral-intro" aria-labelledby="manutencao-geral-title">
+          <p class="manutencao-geral-eyebrow">HISTÓRICO DA MOTO</p>
+          <h1 id="manutencao-geral-title">Manutenção geral</h1>
+          <p class="manutencao-geral-description">Todas as manutenções registradas, da mais recente à mais antiga.</p>
+        </section>
+
+        <section class="manutencao-geral-history" aria-label="Histórico completo de manutenções">
+          <div class="manutencao-geral-list-heading">
+            <h2>Todos os registros</h2>
+            <span data-record-count aria-live="polite"></span>
+          </div>
+
+          <div class="manutencao-geral-loading" data-loading role="status" aria-live="polite">
+            <span class="manutencao-geral-spinner" aria-hidden="true"></span>
+            <span>Carregando manutenções...</span>
+          </div>
+
+          <div class="manutencao-geral-record-list" data-record-list role="list" hidden></div>
+
+          <section class="manutencao-geral-empty" data-empty role="status" hidden>
+            <span class="manutencao-geral-empty-icon" aria-hidden="true">⌁</span>
+            <h2>Nenhuma manutenção registrada</h2>
+            <p>Quando você registrar uma manutenção, ela aparecerá aqui.</p>
+          </section>
+
+          <section class="manutencao-geral-error" data-error role="alert" hidden>
+            <h2>Não foi possível carregar as manutenções.</h2>
+            <p>Confira o armazenamento local do aparelho e tente novamente.</p>
+            <button class="manutencao-geral-retry" type="button" data-retry>Tentar novamente</button>
+          </section>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

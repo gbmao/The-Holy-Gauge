@@ -15,6 +15,7 @@ export default defineConfig({
       input: {
         index: resolve(frontendDirectory, 'index.html'),
         abastecimentos: resolve(frontendDirectory, 'abastecimentos.html'),
+        manutencao: resolve(frontendDirectory, 'manutencao.html'),
       },
     },
   },

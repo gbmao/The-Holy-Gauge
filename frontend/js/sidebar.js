@@ -138,9 +138,15 @@ export function createSidebar({
   });
   createComponentShortcut(componentsPanel, {
     titleText: 'Manutenção geral',
-    descriptionText: 'Ver histórico e registrar',
+    descriptionText: 'Ver todas as manutenções',
     iconText: 'M',
-    onClick: () => openMaintenanceButton?.click(),
+    onClick: () => {
+      if (isNativeApp()) {
+        window.location.assign('./manutencao.html');
+      } else {
+        openMaintenanceButton?.click();
+      }
+    },
   });
 
   loadMonthlyExpense(monthlyExpenseValue);
