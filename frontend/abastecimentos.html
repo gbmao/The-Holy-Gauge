@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#0a0f1d" />
+    <title>Abastecimentos | Controlador da Moto</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="styles/abastecimentos.css" />
+    <script type="module" src="js/pages/abastecimentos-page.js" defer></script>
+  </head>
+
+  <body>
+    <main class="abastecimentos-page" data-abastecimentos-page>
+      <div class="abastecimentos-shell">
+        <header class="abastecimentos-header">
+          <a class="abastecimentos-back" href="./index.html" aria-label="Voltar para a página inicial">
+            <span aria-hidden="true">‹</span>
+            <span>Início</span>
+          </a>
+
+          <button class="abastecimentos-refresh" type="button" data-refresh aria-label="Atualizar abastecimentos">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </header>
+
+        <section class="abastecimentos-intro" aria-labelledby="abastecimentos-title">
+          <p class="abastecimentos-eyebrow">HISTÓRICO DA MOTO</p>
+          <h1 id="abastecimentos-title">Abastecimentos</h1>
+          <p class="abastecimentos-description">Todos os abastecimentos registrados, do mais recente ao mais antigo.</p>
+        </section>
+
+        <section class="abastecimentos-history" aria-label="Histórico completo de abastecimentos">
+          <div class="abastecimentos-list-heading">
+            <h2>Todos os registros</h2>
+            <span data-record-count aria-live="polite"></span>
+          </div>
+
+          <div class="abastecimentos-loading" data-loading role="status" aria-live="polite">
+            <span class="abastecimentos-spinner" aria-hidden="true"></span>
+            <span>Carregando abastecimentos...</span>
+          </div>
+
+          <div class="abastecimentos-record-list" data-record-list role="list" hidden></div>
+
+          <section class="abastecimentos-empty" data-empty role="status" hidden>
+            <span class="abastecimentos-empty-icon" aria-hidden="true">⌁</span>
+            <h2>Nenhum abastecimento registrado</h2>
+            <p>Quando você registrar um abastecimento, ele aparecerá aqui.</p>
+          </section>
+
+          <section class="abastecimentos-error" data-error role="alert" hidden>
+            <h2>Não foi possível carregar os abastecimentos.</h2>
+            <p>Confira a conexão com o banco local e tente novamente.</p>
+            <button class="abastecimentos-retry" type="button" data-retry>Tentar novamente</button>
+          </section>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>

@@ -1,4 +1,4 @@
-import { fuelingApi } from './api.js';
+import { fuelingApi, isNativeApp } from './api.js';
 
 function formatMonthlyExpense(expense) {
   const value = Number(expense);
@@ -39,7 +39,7 @@ function createComponentShortcut(componentsPanel, {
   titleText,
   descriptionText,
   iconText,
-  openButton,
+  onClick,
 }) {
   const shortcut = document.createElement('button');
   const icon = document.createElement('span');
@@ -64,7 +64,7 @@ function createComponentShortcut(componentsPanel, {
   action.textContent = 'ABRIR';
   copy.append(title, description);
   shortcut.append(icon, copy, action);
-  shortcut.addEventListener('click', () => openButton?.click());
+  shortcut.addEventListener('click', onClick);
   componentsList.append(shortcut);
 }
 
@@ -126,15 +126,21 @@ export function createSidebar({
   const monthlyExpenseValue = createMonthlyExpenseMonitor(componentsPanel);
   createComponentShortcut(componentsPanel, {
     titleText: 'Abastecimento',
-    descriptionText: 'Ver histórico e registrar',
+    descriptionText: 'Ver todos os abastecimentos',
     iconText: 'A',
-    openButton: openFuelingButton,
+    onClick: () => {
+      if (isNativeApp()) {
+        window.location.assign('./abastecimentos.html');
+      } else {
+        openFuelingButton?.click();
+      }
+    },
   });
   createComponentShortcut(componentsPanel, {
     titleText: 'Manutenção geral',
     descriptionText: 'Ver histórico e registrar',
     iconText: 'M',
-    openButton: openMaintenanceButton,
+    onClick: () => openMaintenanceButton?.click(),
   });
 
   loadMonthlyExpense(monthlyExpenseValue);
