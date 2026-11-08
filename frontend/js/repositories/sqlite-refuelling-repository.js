@@ -1,5 +1,6 @@
 import { openDatabase } from '../database/database.js';
 import { assertSqliteSucceeded, sqliteErrorMessage } from '../database/sqlite-utils.js';
+import { getSelectedVehicleId } from '../vehicle-selection.js';
 
 const SELECT_REFUELLING_COLUMNS = `
   Refuelling_id AS id,
@@ -11,6 +12,7 @@ const SELECT_REFUELLING_COLUMNS = `
   Cd_status AS status,
   Gas_price AS gasPrice,
   GAS_STATION_ID AS gasStationId,
+  VEHICLE_ID AS vehicleId,
   CASE
     WHEN Gas_price IS NULL THEN NULL
     ELSE ROUND(Liters * Gas_price, 2)
@@ -44,6 +46,7 @@ function mapRefuellingRow(row) {
     status: Boolean(row.status),
     gasPrice: row.gasPrice === null ? null : Number(row.gasPrice),
     gasStationId: row.gasStationId === null ? null : Number(row.gasStationId),
+    vehicleId: row.vehicleId === null || row.vehicleId === undefined ? null : Number(row.vehicleId),
     total: row.total === null ? null : Number(row.total),
   };
 }
@@ -101,6 +104,7 @@ export class SqliteRefuellingRepository {
   }
 
   async create(record) {
+    const vehicleId = await getSelectedVehicleId();
     const connection = await this.databaseProvider();
     const result = await connection.run(`
       INSERT INTO REFUELLING (
@@ -111,8 +115,9 @@ export class SqliteRefuellingRepository {
         Dh_refuelling,
         Cd_status,
         Gas_price,
-        GAS_STATION_ID
-      ) VALUES (?, ?, ?, ?, ?, 1, ?, ?)
+        GAS_STATION_ID,
+        VEHICLE_ID
+      ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?)
     `, [
       record.liters,
       toSqliteBoolean(record.blAdditive, 'Bl_additive'),
@@ -121,6 +126,7 @@ export class SqliteRefuellingRepository {
       record.occurredAt ?? new Date().toISOString(),
       record.gasPrice ?? null,
       record.gasStationId ?? null,
+      vehicleId,
     ]);
     const changes = assertSqliteSucceeded(result, 'registrar o abastecimento');
     const insertedId = Number(changes.lastId);
@@ -132,8 +138,8 @@ export class SqliteRefuellingRepository {
     const [row] = await this.queryRows(`
       SELECT ${SELECT_REFUELLING_COLUMNS}
       FROM REFUELLING
-      WHERE Refuelling_id = ?
-    `, [insertedId], connection);
+      WHERE Refuelling_id = ? AND VEHICLE_ID IS ?
+    `, [insertedId, vehicleId], connection);
     const savedRecord = mapRefuellingRow(row);
 
     if (!savedRecord) {
@@ -147,65 +153,92 @@ export class SqliteRefuellingRepository {
   }
 
   async getLatest() {
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return null;
+    }
+
     const [row] = await this.queryRows(`
       SELECT ${SELECT_REFUELLING_COLUMNS}
       FROM REFUELLING
-      WHERE Cd_status = 1
+      WHERE Cd_status = 1 AND VEHICLE_ID = ?
       ORDER BY Dh_refuelling DESC, Refuelling_id DESC
       LIMIT 1
-    `);
+    `, [vehicleId]);
 
     return mapRefuellingRow(row);
   }
 
   async getRecent() {
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return [];
+    }
+
     const rows = await this.queryRows(`
       SELECT ${SELECT_REFUELLING_COLUMNS}
       FROM REFUELLING
-      WHERE Cd_status = 1
+      WHERE Cd_status = 1 AND VEHICLE_ID = ?
       ORDER BY Dh_refuelling DESC, Refuelling_id DESC
       LIMIT 3
-    `);
+    `, [vehicleId]);
 
     return rows.map(mapRefuellingRow);
   }
 
   async getAll() {
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return [];
+    }
+
     const rows = await this.queryRows(`
       SELECT ${SELECT_REFUELLING_COLUMNS}
       FROM REFUELLING
-      WHERE Cd_status = 1
+      WHERE Cd_status = 1 AND VEHICLE_ID = ?
       ORDER BY Dh_refuelling DESC, Refuelling_id DESC
-    `);
+    `, [vehicleId]);
 
     return rows.map(mapRefuellingRow);
   }
 
   async getMonthlyExpense(month, year) {
     validateMonthAndYear(month, year);
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return 0;
+    }
+
     const { start, end } = getMonthRange(month, year);
     const [row] = await this.queryRows(`
       SELECT COALESCE(SUM(Liters * Gas_price), 0) AS monthlyExpense
       FROM REFUELLING
       WHERE Cd_status = 1
+        AND VEHICLE_ID = ?
         AND Dh_refuelling >= ?
         AND Dh_refuelling < ?
-    `, [start, end]);
+    `, [vehicleId, start, end]);
 
     return Number(row?.monthlyExpense ?? 0);
   }
 
   async getAverageConsumption() {
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return 0;
+    }
+
     const rows = await this.queryRows(`
       SELECT Mileage AS mileage, Liters AS liters
       FROM REFUELLING
       WHERE Cd_status = 1
+        AND VEHICLE_ID = ?
         AND Bl_full_tank = 1
         AND Mileage IS NOT NULL
         AND Liters > 0
       ORDER BY Dh_refuelling DESC, Refuelling_id DESC
       LIMIT 2
-    `);
+    `, [vehicleId]);
 
     if (rows.length < 2) {
       return 0;
@@ -221,25 +254,36 @@ export class SqliteRefuellingRepository {
   }
 
   async getTotalKm() {
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return 0;
+    }
+
     const [row] = await this.queryRows(`
         SELECT Mileage AS TotalKm
         FROM REFUELLING
         WHERE Cd_status = 1
+          AND VEHICLE_ID = ?
           AND Mileage IS NOT NULL
         ORDER BY Dh_refuelling DESC, Refuelling_id DESC
         LIMIT 1
-      `);
+      `, [vehicleId]);
 
     return row?.TotalKm !== undefined && row?.TotalKm !== null ? Number(row.TotalKm) : 0;
   }
 
   async softDelete(id) {
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return false;
+    }
+
     const connection = await this.databaseProvider();
     const result = await connection.run(`
       UPDATE REFUELLING
       SET Cd_status = 0
-      WHERE Refuelling_id = ? AND Cd_status = 1
-    `, [id]);
+      WHERE Refuelling_id = ? AND VEHICLE_ID = ? AND Cd_status = 1
+    `, [id, vehicleId]);
     const changes = assertSqliteSucceeded(result, 'inativar o abastecimento');
 
     return changes.changes > 0;

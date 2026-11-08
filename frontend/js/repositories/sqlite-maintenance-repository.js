@@ -1,5 +1,6 @@
 import { openDatabase } from '../database/database.js';
 import { assertSqliteSucceeded, sqliteErrorMessage } from '../database/sqlite-utils.js';
+import { getSelectedVehicleId } from '../vehicle-selection.js';
 
 const SELECT_MAINTENANCE_COLUMNS = `
   Maintenance_ID AS id,
@@ -64,34 +65,51 @@ export class SqliteMaintenanceRepository {
   }
 
   async getAllMaintenances() {
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return [];
+    }
+
     const rows = await this.queryRows(`
       SELECT ${SELECT_MAINTENANCE_COLUMNS}
       FROM MAINTENANCE
+      WHERE CD_STATUS = 1 AND VEHICLE_ID = ?
       ORDER BY MAINTENANCEDATE DESC, Maintenance_ID DESC
-    `);
+    `, [vehicleId]);
 
     return rows.map(mapMaintenanceRow);
   }
 
   async getRecentMaintenances() {
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return [];
+    }
+
     const rows = await this.queryRows(`
       SELECT ${SELECT_MAINTENANCE_COLUMNS}
       FROM MAINTENANCE
+      WHERE CD_STATUS = 1 AND VEHICLE_ID = ?
       ORDER BY MAINTENANCEDATE DESC, Maintenance_ID DESC
       LIMIT 3
-    `);
+    `, [vehicleId]);
 
     return rows.map(mapMaintenanceRow);
   }
 
   async getLatestRefuellingMileage() {
+    const vehicleId = await getSelectedVehicleId();
+    if (vehicleId === null) {
+      return null;
+    }
+
     const [row] = await this.queryRows(`
       SELECT Mileage AS mileage
       FROM REFUELLING
-      WHERE Cd_status = 1 AND Mileage IS NOT NULL
+      WHERE Cd_status = 1 AND VEHICLE_ID = ? AND Mileage IS NOT NULL
       ORDER BY Dh_refuelling DESC, Refuelling_id DESC
       LIMIT 1
-    `);
+    `, [vehicleId]);
 
     return row?.mileage === null || row?.mileage === undefined
       ? null
@@ -99,6 +117,7 @@ export class SqliteMaintenanceRepository {
   }
 
   async create(record) {
+    const vehicleId = await getSelectedVehicleId();
     const connection = await this.databaseProvider();
     const result = await connection.run(`
       INSERT INTO MAINTENANCE (
@@ -108,8 +127,9 @@ export class SqliteMaintenanceRepository {
         KILOMETERS,
         NEXTKILOMETERS,
         NEXTDATE,
-        NOTES
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        NOTES,
+        VEHICLE_ID
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `, [
       record.description,
       record.date ?? null,
@@ -118,6 +138,7 @@ export class SqliteMaintenanceRepository {
       record.nextKilometers ?? null,
       record.nextDate ?? null,
       record.notes ?? null,
+      vehicleId,
     ]);
     const changes = assertSqliteSucceeded(result, 'registrar a manutenção');
     const insertedId = Number(changes.lastId);
@@ -129,8 +150,8 @@ export class SqliteMaintenanceRepository {
     const [row] = await this.queryRows(`
       SELECT ${SELECT_MAINTENANCE_COLUMNS}
       FROM MAINTENANCE
-      WHERE Maintenance_ID = ?
-    `, [insertedId], connection);
+      WHERE Maintenance_ID = ? AND VEHICLE_ID IS ?
+    `, [insertedId, vehicleId], connection);
     const savedRecord = mapMaintenanceRow(row);
 
     if (!savedRecord) {

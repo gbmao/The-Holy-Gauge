@@ -117,6 +117,7 @@ export function createSidebar({
   componentsHandle,
   openFuelingButton,
   openMaintenanceButton,
+  closeNavigation = () => {},
   onBackdrop = () => {},
   onStateChange = () => {},
 }) {
@@ -158,6 +159,11 @@ export function createSidebar({
 
   function setComponentsState(isOpen) {
     const shouldOpen = Boolean(isOpen);
+
+    if (shouldOpen) {
+      closeNavigation();
+    }
+
     appShell.classList.toggle('components-open', shouldOpen);
     componentsPanel.setAttribute('aria-hidden', String(!shouldOpen));
     componentsHandle.setAttribute('aria-expanded', String(shouldOpen));

@@ -306,6 +306,63 @@ h1 span {
   cursor: grabbing;
 }
 
+.navigation-handle {
+  position: absolute;
+  z-index: 8;
+  top: 50%;
+  left: 0;
+  display: grid;
+  width: 27px;
+  height: 82px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-left: 0;
+  border-radius: 0 15px 15px 0;
+  background: rgba(17, 24, 42, 0.94);
+  box-shadow: 8px 0 24px rgba(0, 0, 0, 0.2);
+  color: #9ba9be;
+  cursor: grab;
+  transform: translateY(-50%);
+  transition: background 180ms ease, color 180ms ease, width 180ms ease;
+  touch-action: none;
+  user-select: none;
+}
+
+.navigation-handle:hover,
+.navigation-handle:focus-visible {
+  width: 32px;
+  background: rgba(255, 154, 90, 0.16);
+  color: var(--accent-light);
+  outline: none;
+}
+
+.navigation-handle:active {
+  cursor: grabbing;
+}
+
+.navigation-handle-grip {
+  position: absolute;
+  width: 3px;
+  height: 28px;
+  border-radius: 999px;
+  background: currentColor;
+  opacity: 0.75;
+}
+
+.navigation-handle-chevron {
+  position: absolute;
+  left: 5px;
+  color: var(--accent-light);
+  font-size: 20px;
+  line-height: 1;
+  transition: transform 180ms ease;
+}
+
+.app-shell.navigation-open .navigation-handle-chevron {
+  transform: rotate(180deg);
+}
+
 .handle-grip {
   position: absolute;
   width: 3px;
@@ -799,6 +856,71 @@ h1 span {
   touch-action: pan-y;
 }
 
+.navigation-panel {
+  position: absolute;
+  z-index: 7;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  width: min(72%, 310px);
+  flex-direction: column;
+  padding: max(25px, env(safe-area-inset-top)) 19px max(24px, env(safe-area-inset-bottom));
+  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  background: #151e32;
+  box-shadow: 20px 0 55px rgba(0, 0, 0, 0.34);
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateX(-105%);
+  transition: transform 260ms cubic-bezier(0.22, 1, 0.36, 1), visibility 260ms ease;
+  touch-action: pan-y;
+}
+
+.navigation-links {
+  display: grid;
+  gap: 9px;
+}
+
+.navigation-link {
+  display: flex;
+  min-height: 53px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: rgba(26, 36, 56, 0.68);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 180ms ease, background 180ms ease, transform 180ms ease;
+}
+
+.navigation-link:hover,
+.navigation-link:focus-visible {
+  border-color: rgba(255, 173, 107, 0.7);
+  background: rgba(255, 154, 90, 0.12);
+  outline: none;
+}
+
+.navigation-link:active {
+  transform: scale(0.98);
+}
+
+.navigation-link-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(255, 154, 90, 0.12);
+  color: var(--accent-light);
+  font-size: 13px;
+  font-weight: 700;
+}
+
 .components-header {
   display: flex;
   align-items: flex-start;
@@ -931,6 +1053,18 @@ h1 span {
   visibility: visible;
   pointer-events: auto;
   transform: translateX(0);
+}
+
+.app-shell.navigation-open .navigation-panel {
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateX(0);
+}
+
+.app-shell.navigation-open .components-handle,
+.app-shell.components-open .navigation-handle {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .app-shell.fueling-open .fueling-sheet {

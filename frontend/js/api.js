@@ -13,6 +13,7 @@ export const API_CONFIG = {
 
 let nativeFuelingComponentsPromise = null;
 let nativeMaintenanceComponentsPromise = null;
+let nativeVehicleComponentsPromise = null;
 
 async function getNativeFuelingComponents() {
   if (!nativeFuelingComponentsPromise) {
@@ -52,6 +53,26 @@ async function getNativeMaintenanceComponents() {
   }
 
   return nativeMaintenanceComponentsPromise;
+}
+
+async function getNativeVehicleComponents() {
+  if (!nativeVehicleComponentsPromise) {
+    nativeVehicleComponentsPromise = Promise.all([
+      import('./repositories/sqlite-vehicle-repository.js'),
+      import('./services/vehicle-service.js'),
+    ])
+      .then(([repositoryModule, serviceModule]) => {
+        const repository = new repositoryModule.SqliteVehicleRepository();
+        const service = new serviceModule.VehicleService(repository);
+        return { repository, service };
+      })
+      .catch((error) => {
+        nativeVehicleComponentsPromise = null;
+        throw error;
+      });
+  }
+
+  return nativeVehicleComponentsPromise;
 }
 
 export function isNativeApp() {
@@ -228,5 +249,52 @@ export const maintenanceApi = {
       body: JSON.stringify(payload),
     });
     return mapMaintenanceRecord(record || payload);
+  },
+};
+
+export const vehicleApi = {
+  async loadAll() {
+    if (!isNativeApp()) {
+      throw new Error('A lista de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.getAll();
+  },
+
+  async getSelectedId() {
+    if (!isNativeApp()) {
+      throw new Error('A seleção de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.getSelectedId();
+  },
+
+  async select(vehicleId) {
+    if (!isNativeApp()) {
+      throw new Error('A seleção de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.select(vehicleId);
+  },
+
+  async delete(vehicleId) {
+    if (!isNativeApp()) {
+      throw new Error('A exclusão de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.delete(vehicleId);
+  },
+
+  async create(input) {
+    if (!isNativeApp()) {
+      throw new Error('A criação de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.create(input);
   },
 };

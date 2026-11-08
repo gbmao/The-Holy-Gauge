@@ -1,0 +1,524 @@
+.meus-veiculos-page {
+  min-height: 100vh;
+  padding: max(20px, env(safe-area-inset-top)) 18px max(28px, env(safe-area-inset-bottom));
+  background:
+    radial-gradient(circle at 90% 0%, rgba(255, 154, 90, 0.12), transparent 28rem),
+    #0a0f1d;
+}
+
+.meus-veiculos-shell {
+  width: min(100%, 720px);
+  margin: 0 auto;
+}
+
+.meus-veiculos-header {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.meus-veiculos-back,
+.meus-veiculos-refresh,
+.meus-veiculos-retry {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 13px;
+  background: rgba(17, 24, 42, 0.72);
+  color: #dce3ee;
+  text-decoration: none;
+}
+
+.meus-veiculos-back {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.meus-veiculos-back span:first-child {
+  color: #ffc56c;
+  font-size: 25px;
+  line-height: 0.7;
+}
+
+.meus-veiculos-refresh {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  color: #ffc56c;
+  cursor: pointer;
+  font-size: 23px;
+}
+
+.meus-veiculos-back:hover,
+.meus-veiculos-refresh:hover,
+.meus-veiculos-retry:hover,
+.meus-veiculos-add:hover {
+  border-color: rgba(255, 173, 107, 0.7);
+  background: rgba(255, 154, 90, 0.12);
+}
+
+.meus-veiculos-intro {
+  margin: 34px 0 30px;
+}
+
+.meus-veiculos-eyebrow {
+  margin: 0 0 9px;
+  color: #ffc56c;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.meus-veiculos-intro h1 {
+  margin: 0;
+  color: #f5f7fb;
+  font-size: clamp(29px, 8vw, 40px);
+  letter-spacing: -0.06em;
+  line-height: 1.05;
+}
+
+.meus-veiculos-description {
+  max-width: 420px;
+  margin: 10px 0 18px;
+  color: #8b97ab;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.meus-veiculos-add {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 1px solid rgba(255, 197, 108, 0.34);
+  border-radius: 13px;
+  background: linear-gradient(135deg, #ffb76e, #ff925d);
+  color: #24180f;
+  font-size: 12px;
+  font-weight: 800;
+  text-decoration: none;
+  transition: filter 160ms ease, transform 160ms ease;
+}
+
+.meus-veiculos-add:hover,
+.meus-veiculos-add:focus-visible {
+  filter: brightness(1.06);
+  outline: 3px solid rgba(255, 154, 90, 0.18);
+  outline-offset: 2px;
+}
+
+.meus-veiculos-add:active {
+  transform: scale(0.98);
+}
+
+.meus-veiculos-add span:first-child {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.meus-veiculos-list-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.meus-veiculos-list-heading h2 {
+  margin: 0;
+  color: #eef2f8;
+  font-size: 16px;
+  letter-spacing: -0.02em;
+}
+
+.meus-veiculos-list-heading span {
+  color: #73819a;
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.meus-veiculos-list {
+  display: grid;
+  gap: 10px;
+}
+
+.meus-veiculos-card {
+  position: relative;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 17px;
+  background: rgba(17, 24, 42, 0.82);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+}
+
+.meus-veiculos-card[data-selected="true"] {
+  border-color: #62d98b;
+  background: rgba(24, 54, 43, 0.84);
+  box-shadow: 0 0 0 1px rgba(98, 217, 139, 0.25), 0 12px 28px rgba(0, 0, 0, 0.16);
+}
+
+.meus-veiculos-card-select {
+  display: grid;
+  width: 100%;
+  gap: 14px;
+  padding: 15px;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.meus-veiculos-card-select:hover {
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.meus-veiculos-card-select:focus-visible {
+  outline: 3px solid rgba(98, 217, 139, 0.72);
+  outline-offset: -4px;
+}
+
+.meus-veiculos-card-select[aria-disabled="true"] {
+  cursor: wait;
+  opacity: 0.75;
+}
+
+.meus-veiculos-card-title-group {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.meus-veiculos-card-id {
+  color: #ffc56c;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+
+.meus-veiculos-card-title {
+  margin: 0;
+  color: #f5f7fb;
+  font-size: 15px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.meus-veiculos-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding-right: 105px;
+}
+
+.meus-veiculos-delete {
+  position: absolute;
+  z-index: 1;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  min-height: 34px;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 0 10px;
+  border: 1px solid rgba(255, 116, 116, 0.28);
+  border-radius: 11px;
+  background: rgba(148, 54, 54, 0.14);
+  color: #ffaaaa;
+  cursor: pointer;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  transition: border-color 160ms ease, background 160ms ease, opacity 160ms ease;
+}
+
+.meus-veiculos-delete:hover,
+.meus-veiculos-delete:focus-visible {
+  border-color: rgba(255, 116, 116, 0.65);
+  background: rgba(148, 54, 54, 0.28);
+  outline: none;
+}
+
+.meus-veiculos-delete:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.meus-veiculos-card-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.meus-veiculos-card-fields div {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: 5px;
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(26, 36, 56, 0.78);
+}
+
+.meus-veiculos-card-fields dt {
+  overflow: hidden;
+  color: #78869d;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.meus-veiculos-card-fields dd {
+  margin: 0;
+  color: #dce3ee;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.meus-veiculos-loading,
+.meus-veiculos-empty,
+.meus-veiculos-error {
+  display: flex;
+  min-height: 180px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 17px;
+  background: rgba(17, 24, 42, 0.7);
+  text-align: center;
+}
+
+.meus-veiculos-loading {
+  flex-direction: row;
+  gap: 10px;
+  color: #aab5c6;
+  font-size: 12px;
+}
+
+.meus-veiculos-spinner {
+  width: 17px;
+  height: 17px;
+  border: 2px solid rgba(255, 197, 108, 0.25);
+  border-top-color: #ffc56c;
+  border-radius: 50%;
+  animation: meus-veiculos-spin 750ms linear infinite;
+}
+
+@keyframes meus-veiculos-spin {
+  to { transform: rotate(360deg); }
+}
+
+.meus-veiculos-empty-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 154, 90, 0.25);
+  border-radius: 14px;
+  background: rgba(255, 154, 90, 0.1);
+  color: #ffc56c;
+  font-size: 25px;
+}
+
+.meus-veiculos-empty h2,
+.meus-veiculos-error h2 {
+  margin: 0;
+  color: #eef2f8;
+  font-size: 14px;
+}
+
+.meus-veiculos-empty p,
+.meus-veiculos-error p {
+  max-width: 300px;
+  margin: 7px 0 0;
+  color: #8b97ab;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.meus-veiculos-retry {
+  min-height: 38px;
+  margin-top: 16px;
+  padding: 0 14px;
+  color: #ffc56c;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.meus-veiculos-feedback {
+  margin: 14px 0 0;
+  padding: 11px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.meus-veiculos-feedback[data-state="success"] {
+  border-color: rgba(104, 211, 145, 0.28);
+  background: rgba(46, 125, 80, 0.14);
+  color: #9ce2b4;
+}
+
+.meus-veiculos-feedback[data-state="error"] {
+  border-color: rgba(255, 116, 116, 0.28);
+  background: rgba(148, 54, 54, 0.16);
+  color: #ffaaaa;
+}
+
+.meus-veiculos-confirm-dialog {
+  width: min(440px, calc(100vw - 36px));
+  max-width: none;
+  max-height: calc(100dvh - 36px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 22px;
+  background: #151e32;
+  color: #f5f7fb;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+.meus-veiculos-confirm-dialog::backdrop {
+  background: rgba(4, 7, 15, 0.76);
+  backdrop-filter: blur(5px);
+}
+
+.meus-veiculos-confirm-card {
+  display: grid;
+  justify-items: center;
+  padding: 24px 20px 20px;
+  text-align: center;
+}
+
+.meus-veiculos-confirm-icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  margin-bottom: 13px;
+  border: 1px solid rgba(255, 116, 116, 0.28);
+  border-radius: 14px;
+  background: rgba(148, 54, 54, 0.16);
+  color: #ffaaaa;
+  font-size: 23px;
+  font-weight: 800;
+}
+
+.meus-veiculos-confirm-dialog h2 {
+  margin: 0;
+  color: #f5f7fb;
+  font-size: 20px;
+  letter-spacing: -0.04em;
+}
+
+.meus-veiculos-confirm-description {
+  margin: 9px 0 0;
+  color: #aab5c6;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.meus-veiculos-confirm-description strong {
+  color: #f5f7fb;
+}
+
+.meus-veiculos-confirm-error {
+  width: 100%;
+  margin: 13px 0 0;
+  color: #ffaaaa;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.meus-veiculos-confirm-actions {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.meus-veiculos-cancel-delete,
+.meus-veiculos-confirm-delete {
+  min-height: 44px;
+  padding: 0 10px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.meus-veiculos-cancel-delete {
+  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(26, 36, 56, 0.78);
+  color: #dce3ee;
+}
+
+.meus-veiculos-confirm-delete {
+  border-color: rgba(255, 116, 116, 0.34);
+  background: #a94444;
+  color: #fff;
+}
+
+.meus-veiculos-cancel-delete:hover,
+.meus-veiculos-cancel-delete:focus-visible {
+  border-color: rgba(255, 255, 255, 0.3);
+  outline: none;
+}
+
+.meus-veiculos-confirm-delete:hover,
+.meus-veiculos-confirm-delete:focus-visible {
+  background: #bf5151;
+  outline: 3px solid rgba(255, 116, 116, 0.2);
+  outline-offset: 2px;
+}
+
+.meus-veiculos-confirm-actions button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+@media (min-width: 600px) {
+  .meus-veiculos-page {
+    padding-right: 28px;
+    padding-left: 28px;
+  }
+
+  .meus-veiculos-intro {
+    margin-top: 48px;
+  }
+
+  .meus-veiculos-card-select {
+    grid-template-columns: minmax(145px, 0.65fr) minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .meus-veiculos-card-header {
+    padding-right: 0;
+  }
+}

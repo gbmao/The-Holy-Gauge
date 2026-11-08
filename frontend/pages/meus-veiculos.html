@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#0a0f1d" />
+    <title>Meus Veículos | Controlador da Moto</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./meus-veiculos.css" />
+    <script type="module" src="./meus-veiculos-page.js" defer></script>
+  </head>
+
+  <body>
+    <main class="meus-veiculos-page" data-meus-veiculos-page>
+      <div class="meus-veiculos-shell">
+        <header class="meus-veiculos-header">
+          <a class="meus-veiculos-back" href="./index.html" aria-label="Voltar para a página inicial">
+            <span aria-hidden="true">‹</span>
+            <span>Início</span>
+          </a>
+          <button class="meus-veiculos-refresh" type="button" data-refresh aria-label="Atualizar veículos">
+            <span aria-hidden="true">↻</span>
+          </button>
+        </header>
+
+        <section class="meus-veiculos-intro" aria-labelledby="meus-veiculos-title">
+          <p class="meus-veiculos-eyebrow">SUA GARAGEM</p>
+          <h1 id="meus-veiculos-title">Meus Veículos</h1>
+          <p class="meus-veiculos-description">Veja os veículos cadastrados neste aparelho.</p>
+          <a class="meus-veiculos-add" href="./adicionar-veiculo.html">
+            <span aria-hidden="true">＋</span>
+            <span>Adicionar veículo</span>
+          </a>
+        </section>
+
+        <section class="meus-veiculos-list-section" aria-label="Veículos cadastrados">
+          <div class="meus-veiculos-list-heading">
+            <h2>Veículos cadastrados</h2>
+            <span data-vehicle-count aria-live="polite"></span>
+          </div>
+
+          <div class="meus-veiculos-loading" data-loading role="status" aria-live="polite">
+            <span class="meus-veiculos-spinner" aria-hidden="true"></span>
+            <span>Carregando veículos...</span>
+          </div>
+
+          <div class="meus-veiculos-list" data-vehicle-list role="list" hidden></div>
+
+          <section class="meus-veiculos-empty" data-empty role="status" hidden>
+            <span class="meus-veiculos-empty-icon" aria-hidden="true">⌁</span>
+            <h2>Nenhum veículo cadastrado</h2>
+            <p>Adicione um veículo para começar a montar sua garagem.</p>
+          </section>
+
+          <section class="meus-veiculos-error" data-error role="alert" hidden>
+            <h2>Não foi possível carregar os veículos.</h2>
+            <p>Confira o banco local do aparelho e tente novamente.</p>
+            <button class="meus-veiculos-retry" type="button" data-retry>Tentar novamente</button>
+          </section>
+
+          <p class="meus-veiculos-feedback" data-feedback role="status" aria-live="polite" hidden></p>
+        </section>
+      </div>
+
+      <dialog
+        class="meus-veiculos-confirm-dialog"
+        data-delete-dialog
+        aria-labelledby="meus-veiculos-confirm-title"
+        aria-describedby="meus-veiculos-confirm-description"
+      >
+        <div class="meus-veiculos-confirm-card">
+          <span class="meus-veiculos-confirm-icon" aria-hidden="true">!</span>
+          <h2 id="meus-veiculos-confirm-title">Excluir veículo?</h2>
+          <p class="meus-veiculos-confirm-description" id="meus-veiculos-confirm-description">
+            Tem certeza de que deseja excluir <strong data-delete-name></strong>? O veículo e seus registros
+            serão marcados como inativos, mas continuarão guardados no banco.
+          </p>
+          <p class="meus-veiculos-confirm-error" data-delete-error role="alert" hidden>
+            Não foi possível excluir o veículo. Tente novamente.
+          </p>
+          <div class="meus-veiculos-confirm-actions">
+            <button class="meus-veiculos-cancel-delete" data-cancel-delete type="button">Cancelar</button>
+            <button class="meus-veiculos-confirm-delete" data-confirm-delete type="button">
+              <span data-confirm-delete-label>Excluir veículo</span>
+            </button>
+          </div>
+        </div>
+      </dialog>
+    </main>
+  </body>
+</html>

@@ -1,5 +1,6 @@
 import { fuelingApi, isNativeApp, maintenanceApi } from './api.js';
 import { createBottomSheets } from './bottom-sheet.js';
+import { createNavigationSidebar } from './navigation-sidebar.js';
 import { createSidebar } from './sidebar.js';
 
 const appShell = document.querySelector('#appShell');
@@ -127,16 +128,19 @@ function updateOverlayState() {
   const isFuelingOpen = appShell.classList.contains('fueling-open');
   const isMaintenanceOpen = appShell.classList.contains('maintenance-open');
   const isComponentsOpen = appShell.classList.contains('components-open');
-  const hasOverlayOpen = isFuelingOpen || isMaintenanceOpen || isComponentsOpen;
+  const isNavigationOpen = appShell.classList.contains('navigation-open');
+  const hasOverlayOpen = isFuelingOpen || isMaintenanceOpen || isComponentsOpen || isNavigationOpen;
 
   backdrop.setAttribute('aria-hidden', String(!hasOverlayOpen));
   document.body.style.overflow = hasOverlayOpen ? 'hidden' : '';
 }
 
 let sidebar;
+let navigationSidebar;
 let bottomSheets;
 
 function closeAllOverlays() {
+  navigationSidebar?.closeAll();
   sidebar?.closeAll();
   bottomSheets?.closeAll();
 }
@@ -152,13 +156,27 @@ sidebar = createSidebar({
   componentsHandle: document.querySelector('#componentsHandle'),
   openFuelingButton: document.querySelector('#openFuelingButton'),
   openMaintenanceButton: document.querySelector('#openMaintenanceButton'),
+  closeNavigation: () => navigationSidebar?.closeAll(),
   onBackdrop: closeAllOverlays,
+  onStateChange: updateOverlayState,
+});
+
+navigationSidebar = createNavigationSidebar({
+  appShell,
+  panel: document.querySelector('#navigationPanel'),
+  handle: document.querySelector('#navigationHandle'),
+  closeButton: document.querySelector('#closeNavigationButton'),
+  closeComponents: () => sidebar.setComponentsState(false),
+  closeBottomSheets: () => bottomSheets?.closeAll(),
   onStateChange: updateOverlayState,
 });
 
 bottomSheets = createBottomSheets({
   appShell,
-  closeSidebar: () => sidebar.closeAll(),
+  closeSidebar: () => {
+    sidebar.closeAll();
+    navigationSidebar.closeAll();
+  },
   onStateChange: updateOverlayState,
   fueling: {
     sheet: document.querySelector('#fuelingSheet'),

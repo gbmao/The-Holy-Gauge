@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
+    <meta name="theme-color" content="#0a0f1d" />
+    <title>Adicionar veículo | Controlador da Moto</title>
+    <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./adicionar-veiculo.css" />
+    <script type="module" src="./adicionar-veiculo-page.js" defer></script>
+  </head>
+
+  <body>
+    <main class="adicionar-veiculo-page" data-adicionar-veiculo-page>
+      <div class="adicionar-veiculo-shell">
+        <header class="adicionar-veiculo-header">
+          <a class="adicionar-veiculo-back" href="./meus-veiculos.html" aria-label="Voltar para meus veículos">
+            <span aria-hidden="true">‹</span>
+            <span>Meus Veículos</span>
+          </a>
+        </header>
+
+        <section class="adicionar-veiculo-intro" aria-labelledby="adicionar-veiculo-title">
+          <p class="adicionar-veiculo-eyebrow">SUA GARAGEM</p>
+          <h1 id="adicionar-veiculo-title">Adicionar veículo</h1>
+          <p class="adicionar-veiculo-description">
+            Informe os dados da moto para cadastrá-la no aplicativo.
+          </p>
+        </section>
+
+        <form class="adicionar-veiculo-form" data-form>
+          <div class="adicionar-veiculo-field">
+            <label for="vehicleName">Nome do veículo <span aria-hidden="true">*</span></label>
+            <input
+              id="vehicleName"
+              name="name"
+              type="text"
+              autocomplete="off"
+              aria-describedby="vehicleNameHint"
+              placeholder="Ex.: Minha moto"
+              required
+            />
+            <span class="adicionar-veiculo-field-hint" id="vehicleNameHint">Use um nome para identificar esta moto.</span>
+          </div>
+
+          <div class="adicionar-veiculo-field">
+            <label for="vehicleBrand">Marca <span>(opcional)</span></label>
+            <input
+              id="vehicleBrand"
+              name="brand"
+              type="text"
+              autocomplete="off"
+              placeholder="Ex.: Honda"
+            />
+          </div>
+
+          <div class="adicionar-veiculo-field">
+            <label for="vehicleModel">Modelo <span>(opcional)</span></label>
+            <input
+              id="vehicleModel"
+              name="model"
+              type="text"
+              autocomplete="off"
+              placeholder="Ex.: XRE 300"
+            />
+          </div>
+
+          <div class="adicionar-veiculo-field">
+            <label for="vehicleYear">Ano <span>(opcional)</span></label>
+            <input
+              id="vehicleYear"
+              name="year"
+              type="number"
+              inputmode="numeric"
+              min="1"
+              max="9999"
+              step="1"
+              placeholder="Ex.: 2024"
+            />
+          </div>
+
+          <p class="adicionar-veiculo-feedback" data-feedback role="status" aria-live="polite" hidden></p>
+
+          <button class="adicionar-veiculo-submit" data-submit type="submit">
+            <span aria-hidden="true">＋</span>
+            <span data-submit-label>Salvar veículo</span>
+          </button>
+        </form>
+      </div>
+
+      <dialog
+        class="adicionar-veiculo-dialog"
+        data-success-dialog
+        aria-labelledby="adicionar-veiculo-dialog-title"
+        aria-describedby="adicionar-veiculo-dialog-description"
+      >
+        <div class="adicionar-veiculo-dialog-card">
+          <span class="adicionar-veiculo-dialog-icon" aria-hidden="true">✓</span>
+          <p class="adicionar-veiculo-dialog-eyebrow">CADASTRO CONCLUÍDO</p>
+          <h2 id="adicionar-veiculo-dialog-title">Veículo adicionado</h2>
+          <p class="adicionar-veiculo-dialog-description" id="adicionar-veiculo-dialog-description">
+            Confira os dados salvos no banco.
+          </p>
+
+          <dl class="adicionar-veiculo-dialog-details">
+            <div>
+              <dt>Nome</dt>
+              <dd data-vehicle-detail="name"></dd>
+            </div>
+            <div>
+              <dt>Marca</dt>
+              <dd data-vehicle-detail="brand"></dd>
+            </div>
+            <div>
+              <dt>Modelo</dt>
+              <dd data-vehicle-detail="model"></dd>
+            </div>
+            <div>
+              <dt>Ano</dt>
+              <dd data-vehicle-detail="year"></dd>
+            </div>
+            <div>
+              <dt>ID do cadastro</dt>
+              <dd data-vehicle-detail="id"></dd>
+            </div>
+          </dl>
+
+          <button class="adicionar-veiculo-dialog-ok" data-dialog-ok type="button">OK</button>
+        </div>
+      </dialog>
+    </main>
+  </body>
+</html>

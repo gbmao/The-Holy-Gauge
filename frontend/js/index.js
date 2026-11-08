@@ -1,6 +1,7 @@
 import './app.js';
 import './keyboard-viewport.js';
 import { fuelingApi } from './api.js';
+import { loadSelectedVehicleId } from './vehicle-selection.js';
 
 const averageConsumptionElement = document.querySelector('#kmPerLiter');
 const totalKmElement = document.querySelector('#totalKm');
@@ -59,3 +60,5 @@ window.addEventListener('fueling-record-added', loadTotalKm);
 
 loadAverageConsumption();
 window.addEventListener('fueling-record-added', loadAverageConsumption);
+
+loadSelectedVehicleId();
