@@ -87,6 +87,47 @@
           </button>
         </form>
       </div>
+
+      <dialog
+        class="adicionar-veiculo-dialog"
+        data-success-dialog
+        aria-labelledby="adicionar-veiculo-dialog-title"
+        aria-describedby="adicionar-veiculo-dialog-description"
+      >
+        <div class="adicionar-veiculo-dialog-card">
+          <span class="adicionar-veiculo-dialog-icon" aria-hidden="true">✓</span>
+          <p class="adicionar-veiculo-dialog-eyebrow">CADASTRO CONCLUÍDO</p>
+          <h2 id="adicionar-veiculo-dialog-title">Veículo adicionado</h2>
+          <p class="adicionar-veiculo-dialog-description" id="adicionar-veiculo-dialog-description">
+            Confira os dados salvos no banco.
+          </p>
+
+          <dl class="adicionar-veiculo-dialog-details">
+            <div>
+              <dt>Nome</dt>
+              <dd data-vehicle-detail="name"></dd>
+            </div>
+            <div>
+              <dt>Marca</dt>
+              <dd data-vehicle-detail="brand"></dd>
+            </div>
+            <div>
+              <dt>Modelo</dt>
+              <dd data-vehicle-detail="model"></dd>
+            </div>
+            <div>
+              <dt>Ano</dt>
+              <dd data-vehicle-detail="year"></dd>
+            </div>
+            <div>
+              <dt>ID do cadastro</dt>
+              <dd data-vehicle-detail="id"></dd>
+            </div>
+          </dl>
+
+          <button class="adicionar-veiculo-dialog-ok" data-dialog-ok type="button">OK</button>
+        </div>
+      </dialog>
     </main>
   </body>
 </html>

@@ -196,6 +196,122 @@
   line-height: 1;
 }
 
+.adicionar-veiculo-dialog {
+  width: min(440px, calc(100vw - 36px));
+  max-width: none;
+  max-height: calc(100dvh - 36px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 24px;
+  background: #151e32;
+  color: #f5f7fb;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+.adicionar-veiculo-dialog::backdrop {
+  background: rgba(4, 7, 15, 0.76);
+  backdrop-filter: blur(5px);
+}
+
+.adicionar-veiculo-dialog-card {
+  display: grid;
+  justify-items: center;
+  padding: 25px 20px 20px;
+  text-align: center;
+}
+
+.adicionar-veiculo-dialog-icon {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  margin-bottom: 14px;
+  border: 1px solid rgba(104, 211, 145, 0.3);
+  border-radius: 16px;
+  background: rgba(46, 125, 80, 0.16);
+  color: #9ce2b4;
+  font-size: 25px;
+  font-weight: 800;
+}
+
+.adicionar-veiculo-dialog-eyebrow {
+  margin: 0 0 7px;
+  color: #9ce2b4;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+}
+
+.adicionar-veiculo-dialog h2 {
+  margin: 0;
+  color: #f5f7fb;
+  font-size: 22px;
+  letter-spacing: -0.04em;
+}
+
+.adicionar-veiculo-dialog-description {
+  margin: 8px 0 18px;
+  color: #8b97ab;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.adicionar-veiculo-dialog-details {
+  display: grid;
+  width: 100%;
+  gap: 8px;
+  margin: 0 0 18px;
+  text-align: left;
+}
+
+.adicionar-veiculo-dialog-details div {
+  display: flex;
+  min-height: 42px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 11px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  background: rgba(10, 15, 29, 0.52);
+}
+
+.adicionar-veiculo-dialog-details dt {
+  flex: 0 0 auto;
+  color: #8b97ab;
+  font-size: 11px;
+}
+
+.adicionar-veiculo-dialog-details dd {
+  min-width: 0;
+  margin: 0;
+  color: #e8edf6;
+  font-size: 12px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.adicionar-veiculo-dialog-ok {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid rgba(255, 197, 108, 0.34);
+  border-radius: 14px;
+  background: linear-gradient(135deg, #ffb76e, #ff925d);
+  color: #24180f;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.adicionar-veiculo-dialog-ok:focus-visible {
+  outline: 3px solid rgba(255, 154, 90, 0.25);
+  outline-offset: 3px;
+}
+
 @media (min-width: 600px) {
   .adicionar-veiculo-page {
     padding-right: 28px;

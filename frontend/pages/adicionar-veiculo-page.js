@@ -8,8 +8,12 @@ export class AdicionarVeiculoPage {
     this.submitButton = root.querySelector('[data-submit]');
     this.submitLabel = root.querySelector('[data-submit-label]');
     this.feedback = root.querySelector('[data-feedback]');
+    this.successDialog = root.querySelector('[data-success-dialog]');
+    this.dialogOkButton = root.querySelector('[data-dialog-ok]');
 
     this.form.addEventListener('submit', (event) => this.handleSubmit(event));
+    this.dialogOkButton.addEventListener('click', () => this.closePage());
+    this.successDialog.addEventListener('cancel', (event) => event.preventDefault());
   }
 
   setSaving(isSaving) {
@@ -21,6 +25,28 @@ export class AdicionarVeiculoPage {
     this.feedback.textContent = message;
     this.feedback.dataset.state = state;
     this.feedback.hidden = false;
+  }
+
+  showSavedVehicle(vehicle) {
+    const details = {
+      name: vehicle.name,
+      brand: vehicle.brand || 'Não informada',
+      model: vehicle.model || 'Não informado',
+      year: vehicle.year ?? 'Não informado',
+      id: vehicle.id ? `#${vehicle.id}` : '—',
+    };
+
+    Object.entries(details).forEach(([key, value]) => {
+      const field = this.successDialog.querySelector(`[data-vehicle-detail="${key}"]`);
+      field.textContent = String(value);
+    });
+
+    this.successDialog.showModal();
+  }
+
+  closePage() {
+    this.successDialog.close();
+    window.location.replace('./index.html');
   }
 
   async handleSubmit(event) {
@@ -44,8 +70,7 @@ export class AdicionarVeiculoPage {
 
     try {
       const savedVehicle = await this.api.create(vehicle);
-      this.form.reset();
-      this.showFeedback(`${savedVehicle.name} foi adicionado à sua garagem.`, 'success');
+      this.showSavedVehicle(savedVehicle);
     } catch (error) {
       console.error('Não foi possível adicionar o veículo.', error);
       this.showFeedback('Não foi possível salvar o veículo. Confira os dados e tente novamente.', 'error');
