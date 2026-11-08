@@ -1,12 +1,13 @@
 import { Vehicle } from '../models/vehicle.js';
 
 export class VehicleService {
-  constructor(repository) {
+  constructor(repository, deleteVehiclePhotos = null) {
     if (!repository || typeof repository.create !== 'function') {
       throw new TypeError('O repositório de veículos precisa implementar create().');
     }
 
     this.repository = repository;
+    this.deleteVehiclePhotos = deleteVehiclePhotos;
   }
 
   async create(input) {
@@ -75,6 +76,9 @@ export class VehicleService {
       throw new TypeError('O repositório de veículos precisa implementar softDelete().');
     }
 
+    if (this.deleteVehiclePhotos) {
+      await this.deleteVehiclePhotos(vehicleId);
+    }
     return this.repository.softDelete(vehicleId);
   }
 }

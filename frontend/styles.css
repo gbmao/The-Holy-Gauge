@@ -239,7 +239,7 @@ h1 span {
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.08);
   border-radius: 25px;
-  background: #f3f3f1;
+  background: #11182a;
   box-shadow: 0 20px 45px rgba(0, 0, 0, 0.3);
 }
 
@@ -250,6 +250,15 @@ h1 span {
   border-radius: 50%;
   background: rgba(80, 126, 204, 0.24);
   filter: blur(38px);
+  display: none;
+}
+
+.motorcycle-stage[data-has-photo="true"] {
+  background: #f3f3f1;
+}
+
+.motorcycle-stage[data-has-photo="true"] .stage-glow {
+  display: block;
 }
 
 .motorcycle-image {
@@ -259,6 +268,17 @@ h1 span {
   height: 100%;
   object-fit: contain;
   object-position: center;
+}
+
+.vehicle-photo-home-empty {
+  position: relative;
+  z-index: 1;
+  max-width: 260px;
+  margin: 0;
+  padding: 20px;
+  color: #8b97ab;
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .backdrop {

@@ -18,11 +18,15 @@ function loadSavedImage() {
     if (savedImage) {
       motorcycleImage.src = savedImage;
       motorcycleImage.alt = savedImageName || 'Imagem da minha moto';
+      motorcycleImage.hidden = false;
       fileStatusTitle.textContent = 'Imagem salva';
       fileName.textContent = savedImageName || 'Imagem escolhida anteriormente';
+    } else {
+      fileStatusTitle.textContent = 'Nenhuma imagem salva';
+      fileName.textContent = 'Escolha uma imagem para continuar';
     }
   } catch {
-    // The default image remains available if browser storage is disabled.
+    // This legacy page may run where browser storage is disabled.
   }
 }
 
@@ -49,6 +53,7 @@ function showImage(file) {
   }
 
   currentObjectUrl = URL.createObjectURL(file);
+  motorcycleImage.hidden = false;
   motorcycleImage.src = currentObjectUrl;
   motorcycleImage.alt = file.name;
   fileStatusTitle.textContent = 'Imagem escolhida';
