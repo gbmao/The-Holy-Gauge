@@ -17,6 +17,26 @@ buildscript {
 
 apply from: "variables.gradle"
 
+// Build the web assets and sync Capacitor before any Android module starts
+// compiling. Capacitor sync refreshes the generated Cordova plugin module.
+def syncCapacitorWeb = tasks.register('syncCapacitorWeb', Exec) {
+    workingDir rootProject.projectDir.parentFile
+    commandLine 'npm', 'run', 'cap:sync'
+}
+
+subprojects { subproject ->
+    subproject.plugins.withId('com.android.application') {
+        subproject.tasks.named('preBuild').configure {
+            dependsOn syncCapacitorWeb
+        }
+    }
+    subproject.plugins.withId('com.android.library') {
+        subproject.tasks.named('preBuild').configure {
+            dependsOn syncCapacitorWeb
+        }
+    }
+}
+
 allprojects {
     repositories {
         google()
