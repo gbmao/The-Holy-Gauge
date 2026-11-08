@@ -201,6 +201,7 @@ export function createBottomSheet({
           form.reset();
         }
         renderHistory(history);
+        window.dispatchEvent(new Event('maintenance-record-added'));
       }
 
       feedback.textContent = successMessage;

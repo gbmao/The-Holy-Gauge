@@ -98,11 +98,20 @@ BEGIN
     DECLARE @InicioMes DATE = DATEFROMPARTS(@ANO, @MES, 1);
     DECLARE @InicioProximoMes DATE = DATEADD(MONTH, 1, @InicioMes);
 
-    SELECT COALESCE(SUM(Liters * Gas_price), 0) AS GASTO_MENSAL
-    FROM dbo.REFUELLING
-    WHERE Cd_status = 1
-      AND Dh_refuelling >= @InicioMes
-      AND Dh_refuelling < @InicioProximoMes;
+    SELECT
+        COALESCE((
+            SELECT SUM(Liters * Gas_price)
+            FROM dbo.REFUELLING
+            WHERE Cd_status = 1
+              AND Dh_refuelling >= @InicioMes
+              AND Dh_refuelling < @InicioProximoMes
+        ), 0)
+        + COALESCE((
+            SELECT SUM(COST)
+            FROM dbo.MAINTENANCE
+            WHERE MAINTENANCEDATE >= @InicioMes
+              AND MAINTENANCEDATE < @InicioProximoMes
+        ), 0) AS GASTO_MENSAL;
 END;
 GO
 
