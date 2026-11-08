@@ -1,4 +1,4 @@
-import { fuelingApi, maintenanceApi } from './api.js';
+import { fuelingApi, isNativeApp, maintenanceApi } from './api.js';
 import { createBottomSheets } from './bottom-sheet.js';
 import { createSidebar } from './sidebar.js';
 
@@ -213,6 +213,7 @@ bottomSheets = createBottomSheets({
     defaultAddLabel: 'Salvar manutenção',
     successMessage: 'Manutenção registrada.',
     errorMessage: 'Não foi possível registrar a manutenção.',
+    historyLimit: isNativeApp() ? 3 : Infinity,
     recordConfig: {
       cardClassName: 'fueling-card maintenance-card',
       titleField: 'service',

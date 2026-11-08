@@ -197,6 +197,17 @@ export const fuelingApi = {
 export const maintenanceApi = {
   async loadHistory() {
     if (isNativeApp()) {
+      const { repository } = await getNativeMaintenanceComponents();
+      const records = await repository.getRecentMaintenances();
+      return records.map(mapMaintenanceRecord);
+    }
+
+    const records = await requestApi('/api/maintenance');
+    return Array.isArray(records) ? records.map(mapMaintenanceRecord) : [];
+  },
+
+  async loadAllHistory() {
+    if (isNativeApp()) {
       const { service } = await getNativeMaintenanceComponents();
       const records = await service.getAllMaintenances();
       return records.map(mapMaintenanceRecord);

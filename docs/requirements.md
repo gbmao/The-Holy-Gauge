@@ -16,7 +16,7 @@ FR-02| Calcular o valor gasto e armazenar todos os dados do abastecimento
 FR-03| Exibir os três abastecimentos mais recentes no histórico rápido do Android
 FR-04| Exibir média de consumo do último abastecimento
 FR-05| O sistema deve permitir registrar uma manutenção.
-FR-06| O sistema deve exibir o histórico de manutenções.
+FR-06| Exibir as três manutenções mais recentes no histórico rápido do Android e todas na página Manutenção geral.
 FR-07| O sistema deve permitir informar a próxima manutenção por quilometragem ou data.
 
 

@@ -418,7 +418,8 @@ h1 span {
   transition: transform 280ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.fueling-sheet {
+.fueling-sheet,
+.maintenance-sheet {
   height: 86dvh;
   max-height: 86dvh;
 }
@@ -1014,7 +1015,8 @@ h1 span {
 }
 
 @media (max-height: 680px) {
-  .fueling-sheet {
+  .fueling-sheet,
+  .maintenance-sheet {
     height: 92dvh;
     max-height: 92dvh;
   }

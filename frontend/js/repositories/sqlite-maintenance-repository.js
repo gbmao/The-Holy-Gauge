@@ -73,6 +73,17 @@ export class SqliteMaintenanceRepository {
     return rows.map(mapMaintenanceRow);
   }
 
+  async getRecentMaintenances() {
+    const rows = await this.queryRows(`
+      SELECT ${SELECT_MAINTENANCE_COLUMNS}
+      FROM MAINTENANCE
+      ORDER BY MAINTENANCEDATE DESC, Maintenance_ID DESC
+      LIMIT 3
+    `);
+
+    return rows.map(mapMaintenanceRow);
+  }
+
   async getLatestRefuellingMileage() {
     const [row] = await this.queryRows(`
       SELECT Mileage AS mileage
