@@ -9,6 +9,7 @@
     "node": ">=18"
   },
   "scripts": {
+    "test:photos": "node --test frontend/tests/photos.test.mjs",
     "dev": "npm run dev --workspace frontend",
     "build": "npm run build --workspace frontend",
     "cap:sync": "npm run build && cap sync android",

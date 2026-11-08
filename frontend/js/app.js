@@ -5,10 +5,6 @@ import { createSidebar } from './sidebar.js';
 
 const appShell = document.querySelector('#appShell');
 const backdrop = document.querySelector('#backdrop');
-const homeMotorcycleImage = document.querySelector('#homeMotorcycleImage');
-
-const IMAGE_STORAGE_KEY = 'controlador-da-moto-image';
-const IMAGE_NAME_STORAGE_KEY = 'controlador-da-moto-image-name';
 
 const placeholderMetrics = {
   kmPerLiter: '12,5',
@@ -23,24 +19,6 @@ function renderMotoMetrics(metrics) {
       element.textContent = value;
     }
   });
-}
-
-function loadSavedMotorcycleImage() {
-  if (!homeMotorcycleImage) {
-    return;
-  }
-
-  try {
-    const savedImage = localStorage.getItem(IMAGE_STORAGE_KEY);
-    const savedImageName = localStorage.getItem(IMAGE_NAME_STORAGE_KEY);
-
-    if (savedImage) {
-      homeMotorcycleImage.src = savedImage;
-      homeMotorcycleImage.alt = savedImageName || 'Imagem da minha moto';
-    }
-  } catch {
-    // The default image remains available if browser storage is disabled.
-  }
 }
 
 function buildFuelingPayload() {
@@ -139,14 +117,16 @@ let sidebar;
 let navigationSidebar;
 let bottomSheets;
 
-function closeAllOverlays() {
+export function closeAllOverlays() {
+  const hadOverlay = ['navigation-open', 'components-open', 'fueling-open', 'maintenance-open']
+    .some((className) => appShell.classList.contains(className));
   navigationSidebar?.closeAll();
   sidebar?.closeAll();
   bottomSheets?.closeAll();
+  return hadOverlay;
 }
 
 renderMotoMetrics(placeholderMetrics);
-loadSavedMotorcycleImage();
 
 sidebar = createSidebar({
   appShell,

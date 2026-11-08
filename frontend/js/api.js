@@ -14,6 +14,7 @@ export const API_CONFIG = {
 let nativeFuelingComponentsPromise = null;
 let nativeMaintenanceComponentsPromise = null;
 let nativeVehicleComponentsPromise = null;
+let nativePhotoComponentsPromise = null;
 
 async function getNativeFuelingComponents() {
   if (!nativeFuelingComponentsPromise) {
@@ -63,7 +64,10 @@ async function getNativeVehicleComponents() {
     ])
       .then(([repositoryModule, serviceModule]) => {
         const repository = new repositoryModule.SqliteVehicleRepository();
-        const service = new serviceModule.VehicleService(repository);
+        const service = new serviceModule.VehicleService(repository, async (vehicleId) => {
+          const { service: photoService } = await getNativePhotoComponents();
+          await photoService.deleteAllForVehicle(vehicleId);
+        });
         return { repository, service };
       })
       .catch((error) => {
@@ -73,6 +77,31 @@ async function getNativeVehicleComponents() {
   }
 
   return nativeVehicleComponentsPromise;
+}
+
+async function getNativePhotoComponents() {
+  if (!nativePhotoComponentsPromise) {
+    nativePhotoComponentsPromise = Promise.all([
+      import('./repositories/sqlite-photo-repository.js'),
+      import('./services/photo-service.js'),
+      import('./photos/photo-storage.js'),
+      import('./photos/photo-camera.js'),
+    ])
+      .then(([repositoryModule, serviceModule, storageModule, cameraModule]) => {
+        const repository = new repositoryModule.SqlitePhotoRepository();
+        const service = new serviceModule.PhotoService(
+          repository,
+          new storageModule.PhotoStorage(),
+          new cameraModule.PhotoCamera(),
+        );
+        return { repository, service };
+      })
+      .catch((error) => {
+        nativePhotoComponentsPromise = null;
+        throw error;
+      });
+  }
+  return nativePhotoComponentsPromise;
 }
 
 export function isNativeApp() {
@@ -296,5 +325,39 @@ export const vehicleApi = {
 
     const { service } = await getNativeVehicleComponents();
     return service.create(input);
+  },
+};
+
+export const vehiclePhotoApi = {
+  async getCurrent(vehicleId) {
+    if (!isNativeApp() || vehicleId === null) {
+      return null;
+    }
+    const { service } = await getNativePhotoComponents();
+    return service.getCurrent(vehicleId);
+  },
+
+  async capture(vehicleId) {
+    if (!isNativeApp()) {
+      throw new Error('A câmera está disponível no app Android.');
+    }
+    const { service } = await getNativePhotoComponents();
+    return service.captureAndSave(vehicleId);
+  },
+
+  async delete(vehicleId) {
+    if (!isNativeApp()) {
+      throw new Error('As fotos estão disponíveis no app Android.');
+    }
+    const { service } = await getNativePhotoComponents();
+    return service.deleteCurrent(vehicleId);
+  },
+
+  async restoreCapture(event) {
+    if (!isNativeApp()) {
+      return null;
+    }
+    const { service } = await getNativePhotoComponents();
+    return service.restoreCapture(event);
   },
 };

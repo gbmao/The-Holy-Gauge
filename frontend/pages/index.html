@@ -6,12 +6,27 @@
     <meta name="theme-color" content="#0a0f1d" />
     <title>Controlador da Moto</title>
     <link rel="stylesheet" href="../styles.css" />
+    <link rel="stylesheet" href="./vehicle-photo-modal.css" />
     <script type="module" src="../js/index.js" defer></script>
   </head>
 
   <body>
     <main class="app-shell" id="appShell">
       <section class="hero" aria-label="Controle inteligente da moto">
+        <button
+          class="vehicle-photo-open"
+          type="button"
+          data-open-vehicle-photo
+          aria-haspopup="dialog"
+          aria-controls="vehiclePhotoDialog"
+          aria-expanded="false"
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M8 6l1.5-2h5L16 6h3a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2z" />
+            <circle cx="12" cy="13" r="4" />
+          </svg>
+          <span>Foto</span>
+        </button>
         <div class="metrics-panel" aria-label="Resumo da moto">
           <div class="metric">
             <span class="metric-label">CONSUMO</span>
@@ -28,15 +43,18 @@
           </div>
         </div>
 
-        <div class="motorcycle-stage" role="img" aria-label="Imagem da motocicleta">
+        <div class="motorcycle-stage" id="motorcycleStage" data-has-photo="false">
           <div class="stage-glow"></div>
 
           <img
             class="motorcycle-image"
             id="homeMotorcycleImage"
-            src="../honda-xre-300-2015-ganha-inedita-versao-rally.webp"
-            alt="Honda XRE 300 Rally"
+            alt="Foto do veículo selecionado"
+            hidden
           />
+          <p class="vehicle-photo-home-empty" data-home-vehicle-photo-empty>
+            Adicione uma foto pelo botão Foto.
+          </p>
         </div>
 
         <div class="quick-actions bottom-actions" aria-label="Ações rápidas">
@@ -69,6 +87,33 @@
           </button>
         </div>
       </section>
+
+      <dialog
+        class="vehicle-photo-dialog"
+        id="vehiclePhotoDialog"
+        data-vehicle-photo-dialog
+        aria-labelledby="vehiclePhotoTitle"
+        aria-describedby="vehiclePhotoContext"
+      >
+        <header class="vehicle-photo-header">
+          <div>
+            <h2 class="vehicle-photo-title" id="vehiclePhotoTitle">Foto do veículo</h2>
+            <p class="vehicle-photo-context" id="vehiclePhotoContext" data-vehicle-photo-context>Veículo selecionado</p>
+          </div>
+          <button class="vehicle-photo-close" type="button" data-close-vehicle-photo aria-label="Fechar foto">&times;</button>
+        </header>
+        <div class="vehicle-photo-preview">
+          <p class="vehicle-photo-loading" data-vehicle-photo-loading role="status" hidden>Carregando foto…</p>
+          <img class="vehicle-photo-image" data-vehicle-photo-image alt="Foto do veículo selecionado" hidden />
+          <p class="vehicle-photo-empty" data-vehicle-photo-empty>Este veículo ainda não tem foto.</p>
+        </div>
+        <div class="vehicle-photo-actions">
+          <button class="vehicle-photo-new" type="button" data-new-vehicle-photo disabled>Nova foto</button>
+          <button class="vehicle-photo-delete" type="button" data-delete-vehicle-photo disabled>Excluir foto</button>
+        </div>
+        <p class="vehicle-photo-feedback" data-vehicle-photo-feedback aria-live="polite" hidden></p>
+        <button class="vehicle-photo-retry" type="button" data-retry-vehicle-photo hidden>Tentar novamente</button>
+      </dialog>
 
       <div class="backdrop" id="backdrop" aria-hidden="true"></div>
 

@@ -1,7 +1,10 @@
-import './app.js';
+import { closeAllOverlays } from './app.js';
 import './keyboard-viewport.js';
 import { fuelingApi } from './api.js';
 import { loadSelectedVehicleId } from './vehicle-selection.js';
+import { VehiclePhotoModal } from '../pages/vehicle-photo-modal.js';
+
+new VehiclePhotoModal(document.querySelector('#appShell'), { closeOverlays: closeAllOverlays });
 
 const averageConsumptionElement = document.querySelector('#kmPerLiter');
 const totalKmElement = document.querySelector('#totalKm');
