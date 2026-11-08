@@ -118,6 +118,14 @@ BEGIN
   WHERE Maintenance_ID = NEW.Maintenance_ID;
 END;`;
 
+const CREATE_VEHICLE_TABLE = `CREATE TABLE IF NOT EXISTS VEHICLE (
+  VEHICLE_ID INTEGER PRIMARY KEY AUTOINCREMENT,
+  NAME TEXT NOT NULL,
+  BRAND TEXT NULL,
+  MODEL TEXT NULL,
+  YEAR INTEGER NULL
+);`;
+
 /**
  * Each entry describes the statements needed to move a database from the
  * previous version to `toVersion`. Add future ALTER/CREATE statements in a
@@ -144,6 +152,15 @@ export const DATABASE_MIGRATIONS = [
     toVersion: 3,
     statements: [
       'ALTER TABLE GAS_STATION RENAME COLUMN ADRESS TO ADDRESS;',
+    ],
+  },
+  {
+    toVersion: 4,
+    statements: [
+      CREATE_VEHICLE_TABLE,
+      'ALTER TABLE GAS_STATION ADD COLUMN VEHICLE_ID INTEGER NULL REFERENCES VEHICLE (VEHICLE_ID);',
+      'ALTER TABLE REFUELLING ADD COLUMN VEHICLE_ID INTEGER NULL REFERENCES VEHICLE (VEHICLE_ID);',
+      'ALTER TABLE MAINTENANCE ADD COLUMN VEHICLE_ID INTEGER NULL REFERENCES VEHICLE (VEHICLE_ID);',
     ],
   },
 ];
