@@ -18,6 +18,7 @@ export default defineConfig({
         index: resolve(pagesDirectory, 'index.html'),
         abastecimentos: resolve(pagesDirectory, 'abastecimentos.html'),
         manutencao: resolve(pagesDirectory, 'manutencao.html'),
+        adicionarVeiculo: resolve(pagesDirectory, 'adicionar-veiculo.html'),
         image: resolve(pagesDirectory, 'image.html'),
       },
     },
