@@ -164,7 +164,7 @@ export class SqliteRefuellingRepository {
       FROM REFUELLING
       WHERE Cd_status = 1
       ORDER BY Dh_refuelling DESC, Refuelling_id DESC
-      LIMIT 5
+      LIMIT 3
     `);
 
     return rows.map(mapRefuellingRow);
