@@ -158,13 +158,24 @@ export class SqliteRefuellingRepository {
     return mapRefuellingRow(row);
   }
 
-  async getAll() {
+  async getRecent() {
     const rows = await this.queryRows(`
       SELECT ${SELECT_REFUELLING_COLUMNS}
       FROM REFUELLING
       WHERE Cd_status = 1
       ORDER BY Dh_refuelling DESC, Refuelling_id DESC
       LIMIT 5
+    `);
+
+    return rows.map(mapRefuellingRow);
+  }
+
+  async getAll() {
+    const rows = await this.queryRows(`
+      SELECT ${SELECT_REFUELLING_COLUMNS}
+      FROM REFUELLING
+      WHERE Cd_status = 1
+      ORDER BY Dh_refuelling DESC, Refuelling_id DESC
     `);
 
     return rows.map(mapRefuellingRow);

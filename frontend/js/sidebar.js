@@ -1,4 +1,4 @@
-import { fuelingApi } from './api.js';
+import { fuelingApi, isNativeApp } from './api.js';
 
 function formatMonthlyExpense(expense) {
   const value = Number(expense);
@@ -33,6 +33,39 @@ function createMonthlyExpenseMonitor(componentsPanel) {
   componentsList.append(monitor);
 
   return valueElement;
+}
+
+function createComponentShortcut(componentsPanel, {
+  titleText,
+  descriptionText,
+  iconText,
+  onClick,
+}) {
+  const shortcut = document.createElement('button');
+  const icon = document.createElement('span');
+  const copy = document.createElement('span');
+  const title = document.createElement('strong');
+  const description = document.createElement('small');
+  const action = document.createElement('span');
+  const componentsList = componentsPanel.querySelector('.components-list');
+
+  shortcut.className = 'component-item component-shortcut';
+  shortcut.type = 'button';
+  shortcut.setAttribute('role', 'listitem');
+  shortcut.setAttribute('aria-label', `${titleText}. ${descriptionText}`);
+  icon.className = 'component-icon';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.textContent = iconText;
+  copy.className = 'component-copy';
+  title.textContent = titleText;
+  description.textContent = descriptionText;
+  action.className = 'component-status';
+  action.setAttribute('aria-hidden', 'true');
+  action.textContent = 'ABRIR';
+  copy.append(title, description);
+  shortcut.append(icon, copy, action);
+  shortcut.addEventListener('click', onClick);
+  componentsList.append(shortcut);
 }
 
 async function loadMonthlyExpense(valueElement) {
@@ -82,6 +115,8 @@ export function createSidebar({
   componentsPanel,
   closeComponentsButton,
   componentsHandle,
+  openFuelingButton,
+  openMaintenanceButton,
   onBackdrop = () => {},
   onStateChange = () => {},
 }) {
@@ -89,6 +124,30 @@ export function createSidebar({
   let componentsHandleGesture = null;
   let suppressHandleClick = false;
   const monthlyExpenseValue = createMonthlyExpenseMonitor(componentsPanel);
+  createComponentShortcut(componentsPanel, {
+    titleText: 'Abastecimento',
+    descriptionText: 'Ver todos os abastecimentos',
+    iconText: 'A',
+    onClick: () => {
+      if (isNativeApp()) {
+        window.location.assign('./abastecimentos.html');
+      } else {
+        openFuelingButton?.click();
+      }
+    },
+  });
+  createComponentShortcut(componentsPanel, {
+    titleText: 'Manutenção geral',
+    descriptionText: 'Ver todas as manutenções',
+    iconText: 'M',
+    onClick: () => {
+      if (isNativeApp()) {
+        window.location.assign('./manutencao.html');
+      } else {
+        openMaintenanceButton?.click();
+      }
+    },
+  });
 
   loadMonthlyExpense(monthlyExpenseValue);
   window.addEventListener('fueling-record-added', () => loadMonthlyExpense(monthlyExpenseValue));

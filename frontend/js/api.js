@@ -54,7 +54,7 @@ async function getNativeMaintenanceComponents() {
   return nativeMaintenanceComponentsPromise;
 }
 
-function isNativeApp() {
+export function isNativeApp() {
   return Capacitor.isNativePlatform();
 }
 
@@ -136,11 +136,21 @@ export const fuelingApi = {
   async loadHistory() {
     if (isNativeApp()) {
       const { repository } = await getNativeFuelingComponents();
-      const records = await repository.getAll();
+      const records = await repository.getRecent();
       return records.map(mapNativeFuelingRecord);
     }
 
     return requestApi(API_CONFIG.endpoints.fuelingHistory);
+  },
+
+  async loadAllHistory() {
+    if (!isNativeApp()) {
+      throw new Error('O histórico completo está disponível no app Android.');
+    }
+
+    const { repository } = await getNativeFuelingComponents();
+    const records = await repository.getAll();
+    return records.map(mapNativeFuelingRecord);
   },
 
   async addRecord(payload) {
