@@ -211,13 +211,24 @@ export class SqliteRefuellingRepository {
 
     const { start, end } = getMonthRange(month, year);
     const [row] = await this.queryRows(`
-      SELECT COALESCE(SUM(Liters * Gas_price), 0) AS monthlyExpense
-      FROM REFUELLING
-      WHERE Cd_status = 1
-        AND VEHICLE_ID = ?
-        AND Dh_refuelling >= ?
-        AND Dh_refuelling < ?
-    `, [vehicleId, start, end]);
+      SELECT
+        COALESCE((
+          SELECT SUM(Liters * Gas_price)
+          FROM REFUELLING
+          WHERE Cd_status = 1
+            AND VEHICLE_ID = ?
+            AND Dh_refuelling >= ?
+            AND Dh_refuelling < ?
+        ), 0)
+        + COALESCE((
+          SELECT SUM(COST)
+          FROM MAINTENANCE
+          WHERE Cd_status = 1
+            AND VEHICLE_ID = ?
+            AND MAINTENANCEDATE >= ?
+            AND MAINTENANCEDATE < ?
+        ), 0) AS monthlyExpense
+    `, [vehicleId, start, end, vehicleId, start, end]);
 
     return Number(row?.monthlyExpense ?? 0);
   }
