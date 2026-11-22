@@ -246,32 +246,41 @@ export class SqliteRefuellingRepository {
   async getAverageConsumption() {
     const vehicleId = await getSelectedVehicleId();
     if (vehicleId === null) {
-      return 0;
+      return null;
     }
 
     const rows = await this.queryRows(`
-      SELECT Mileage AS mileage, Liters AS liters
+      SELECT Mileage AS mileage, Liters AS liters, Bl_full_tank AS blFullTank
       FROM REFUELLING
       WHERE Cd_status = 1
         AND VEHICLE_ID = ?
-        AND Bl_full_tank = 1
-        AND Mileage IS NOT NULL
-        AND Liters > 0
       ORDER BY Dh_refuelling DESC, Refuelling_id DESC
       LIMIT 2
     `, [vehicleId]);
 
     if (rows.length < 2) {
-      return 0;
+      return null;
     }
 
     const [latest, previous] = rows;
-    const distance = Number(latest.mileage) - Number(previous.mileage);
-    if (distance <= 0) {
-      return 0;
+    // Select consecutive records first: a partial or incomplete entry must
+    // interrupt the pair instead of being skipped in search of older full tanks.
+    if (Number(latest.blFullTank) !== 1 || Number(previous.blFullTank) !== 1
+      || latest.mileage === null || latest.mileage === undefined
+      || previous.mileage === null || previous.mileage === undefined) {
+      return null;
     }
 
-    return Math.round(((distance / Number(latest.liters)) + Number.EPSILON) * 100) / 100;
+    const latestMileage = Number(latest.mileage);
+    const previousMileage = Number(previous.mileage);
+    const liters = Number(latest.liters);
+    const distance = latestMileage - previousMileage;
+    if (!Number.isFinite(latestMileage) || !Number.isFinite(previousMileage)
+      || !Number.isFinite(liters) || liters <= 0 || distance <= 0) {
+      return null;
+    }
+
+    return Math.round(((distance / liters) + Number.EPSILON) * 100) / 100;
   }
 
   async getTotalKm() {

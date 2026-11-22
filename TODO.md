@@ -14,17 +14,21 @@ As tarefas abaixo refletem decisões confirmadas pelo responsável pelo projeto.
   - Implementação: ao tentar salvar sem seleção, a interface abre uma janela no estilo do app com “Cancelar” e “Meus Veículos”. Os dois repositórios conferem a seleção ativa e só inserem se ela continuar válida no momento da gravação. O schema e os registros antigos foram preservados.
   - Verificação: `npm run test:vehicle-selection` cobre ausência de cadastro/seleção, veículo inativo, mudança de estado antes do INSERT, vínculo correto, preservação de registros antigos e o bloqueio no envio dos formulários. Testes de banco usam SQLite em memória; falta validação manual no Android.
 
-- [ ] **T02 — Calcular consumo somente entre dois abastecimentos consecutivos de tanque cheio.**
+- [x] **T02 — Calcular consumo somente entre dois abastecimentos consecutivos de tanque cheio.**
   - Consultar os abastecimentos consecutivos do veículo antes de verificar se ambos são de tanque cheio. A consulta atual filtra os tanques cheios antes de escolher o par e pode pular abastecimentos parciais.
   - Usar a diferença entre as quilometragens dividida pelos litros do abastecimento atual, quando houver dados válidos.
   - Critério de aceite: um parcial entre dois tanques cheios impede calcular consumo usando esses dois tanques como par; dois registros consecutivos de tanque cheio e com dados válidos permitem o cálculo.
-  - Evidência: `frontend/js/repositories/sqlite-refuelling-repository.js:getAverageConsumption()` difere da verificação do par feita em `frontend/js/services/refuelling-service.js:create()`.
-  - Pendente: definir como o indicador deve aparecer quando não houver um par válido e se deve exibir algum consumo anterior.
+  - Diagnóstico original: `frontend/js/repositories/sqlite-refuelling-repository.js:getAverageConsumption()` filtrava tanques cheios antes de escolher o par e diferia da verificação feita em `frontend/js/services/refuelling-service.js:create()`.
+  - Implementação: a consulta escolhe os dois últimos abastecimentos ativos do veículo, ordenados por data e ID, sem pular parciais ou registros incompletos. O cálculo exige ambos com tanque cheio, quilometragens válidas, distância positiva e litros atuais maiores que zero. Sem par válido, retorna `null` e o indicador mostra “—”, sem reutilizar consumo anterior. Carregamento e falha de leitura também mostram “—”.
+  - Escopo aprovado: app Android/SQLite, na mesma branch do T01. A API/SQL Server mantém o comportamento anterior.
+  - Verificação: `node --test frontend/tests/refuelling-consumption.test.mjs` cobre pares consecutivos, interrupção por parcial/dados ausentes, seleção, isolamento por veículo, status, desempate por ID, arredondamento, consistência com o serviço e formatação. Testes de banco usam SQLite em memória; falta validação manual no Android desta alteração.
 
-- [ ] **T03 — Permitir editar veículos.**
+- [x] **T03 — Permitir editar veículos.**
   - Disponibilizar edição de nome, marca, modelo e ano dos veículos cadastrados.
   - Critério de aceite: os dados editados persistem ao reabrir o app, mantendo o mesmo veículo e seus históricos e fotos associados.
-  - Evidência: `frontend/pages/meus-veiculos-page.js`, `frontend/js/services/vehicle-service.js` e `frontend/js/repositories/sqlite-vehicle-repository.js` oferecem cadastro, seleção e exclusão, mas não edição.
+  - Diagnóstico original: `frontend/pages/meus-veiculos-page.js`, `frontend/js/services/vehicle-service.js` e `frontend/js/repositories/sqlite-vehicle-repository.js` ofereciam cadastro, seleção e exclusão, mas não edição.
+  - Implementação: “Editar veículo” no cartão abre a página de cadastro com os dados preenchidos. Salvar atualiza somente nome, marca, modelo e ano do mesmo registro ativo, mantendo ID, seleção, históricos e fotos. Uma confirmação mostra os dados salvos e retorna a Meus Veículos ao tocar em “OK”. Mantidas as regras atuais de cadastro e a branch do T01/T02, conforme as escolhas do responsável.
+  - Verificação: `node --test frontend/tests/vehicle-edit.test.mjs` cobre persistência após reabrir o banco, preservação de vínculos e seleção, limpeza de campos opcionais, validação, carregamento, falhas, confirmação e cadastro sem ID. Testes usam SQLite em memória e elementos simulados; falta validação manual no Android desta alteração.
 
 - [ ] **T04 — Permitir editar e excluir abastecimentos.**
   - Disponibilizar as ações no histórico e atualizar os indicadores afetados após a alteração.
@@ -56,11 +60,11 @@ As tarefas abaixo refletem decisões confirmadas pelo responsável pelo projeto.
 - **Gasto mensal e fuso horário:** a consulta compara timestamps UTC com limites de mês sem fuso. Em reprodução com as migrations e a consulta atuais, um abastecimento de R$ 60 às 22h de 30/11/2026 em São Paulo ficou fora do gasto de novembro. Referência: `frontend/js/repositories/sqlite-refuelling-repository.js:getMonthlyExpense()`. Definir qual fuso deve determinar o mês dos gastos.
 - **Significado de “Total km”:** o indicador consulta apenas a quilometragem do último abastecimento. Uma manutenção posterior com quilometragem maior não altera o valor. Definir se o indicador representa odômetro atual ou distância percorrida. Referências: `frontend/js/repositories/sqlite-refuelling-repository.js:getTotalKm()` e `frontend/pages/index.html`.
 - **Mensagens de validação do abastecimento:** erros específicos lançados pelo serviço, como quilometragem não crescente, viram uma mensagem genérica na interface. O tratamento detalhado existe apenas para manutenção. Referência: `frontend/js/bottom-sheet.js:handleAdd()`.
-- **Falhas de leitura dos indicadores:** falhas ao carregar consumo, quilometragem e gasto mensal aparecem como zero. Definir a apresentação para diferenciar erro, ausência de dados e valor efetivamente zero. Referências: `frontend/js/index.js` e `frontend/js/sidebar.js:loadMonthlyExpense()`.
+- **Falhas de leitura dos indicadores:** o consumo mostra “—” em caso de falha, conforme a decisão do T02; quilometragem e gasto mensal ainda aparecem como zero quando a leitura falha. A apresentação desses dois últimos indicadores continua pendente. Referências: `frontend/js/index.js` e `frontend/js/sidebar.js:loadMonthlyExpense()`.
 - **Registros antigos sem veículo:** a migration 4 preserva esses dados, mas as consultas atuais não os exibem no histórico de um veículo. Definir se haverá associação manual desses registros. Referências: `frontend/js/database/migrations.js` e filtros dos repositórios SQLite.
 - **Capacidade do tanque:** o serviço aceita esse limite, mas não há campo no veículo nem configuração passada ao serviço. A regra documentada não é aplicada no fluxo atual. Definir se permanece no escopo. Referências: `docs/requirements.md`, `frontend/js/models/vehicle.js`, `frontend/js/api.js` e `frontend/js/services/refuelling-service.js`.
 - **Consulta de gastos e históricos:** o gasto mensal mostra somente o mês atual; os históricos não oferecem filtros ou busca. Definir se consulta por período deve entrar no TODO. Referências: `frontend/js/sidebar.js` e páginas de históricos.
-- **Validação do uso Android:** os testes JavaScript existentes se concentram em fotos. Não há testes automatizados dos fluxos completos de primeiro uso, seleção, abastecimento e manutenção no SQLite nativo. Definir a cobertura junto às tarefas aprovadas; o build web não valida o comportamento no aparelho.
+- **Validação do uso Android:** há testes JavaScript de fotos, bloqueio sem veículo selecionado e consumo, incluindo consultas SQLite em memória. Ainda não há testes automatizados dos fluxos completos no SQLite nativo. Definir a cobertura junto às tarefas aprovadas; o build web não valida o comportamento no aparelho.
 
 ## Item anterior preservado
 

@@ -255,6 +255,29 @@
   opacity: 0.65;
 }
 
+.meus-veiculos-edit {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 15px 15px;
+  padding: 0 12px;
+  border: 1px solid rgba(255, 197, 108, 0.3);
+  border-radius: 11px;
+  background: rgba(26, 36, 56, 0.78);
+  color: #ffc56c;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.meus-veiculos-edit:hover,
+.meus-veiculos-edit:focus-visible {
+  border-color: #ffc56c;
+  outline: 2px solid rgba(255, 197, 108, 0.3);
+  outline-offset: 2px;
+}
+
 .meus-veiculos-card-fields {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

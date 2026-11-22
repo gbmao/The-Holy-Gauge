@@ -6,16 +6,20 @@ Aplicativo Android para acompanhar veículos, abastecimentos, manutenções, gas
 
 ## Funcionalidades
 
-- Cadastro de vários veículos, com nome, marca, modelo e ano.
+- Cadastro e edição de vários veículos, com nome, marca, modelo e ano.
 - Seleção do veículo em uso na página **Meus Veículos**.
 - Foto por veículo, com captura pela câmera e exclusão do arquivo pelo app.
 - Registro de abastecimentos e manutenções, com históricos completos.
 - Consulta de gasto mensal e consumo médio por veículo.
 - Exclusão de veículos mediante confirmação, inativando o histórico e removendo suas fotos.
 
-Para começar, cadastre e selecione um veículo em **Meus Veículos**. Os históricos e indicadores exibem os dados dessa seleção; sem veículo selecionado, ficam vazios ou zerados.
+Para começar, cadastre e selecione um veículo em **Meus Veículos**. Os históricos e indicadores exibem os dados dessa seleção; sem veículo selecionado, os históricos ficam vazios, o consumo mostra **—** e os demais indicadores ficam zerados.
+
+Para corrigir os dados de um veículo, toque em **Editar veículo** no cartão em Meus Veículos. O formulário abre preenchido; após salvar, confira a confirmação e toque em **OK** para voltar à lista. A edição mantém o mesmo veículo, sua seleção, históricos e fotos.
 
 Ao tentar salvar um abastecimento ou uma manutenção sem veículo selecionado, o app mostra um aviso com as opções **Cancelar** e **Meus Veículos**. O lançamento só pode ser salvo depois de selecionar um veículo ativo.
+
+No Android, o consumo usa os dois últimos abastecimentos ativos do veículo, desde que sejam consecutivos e ambos de tanque cheio: a diferença de quilometragem dividida pelos litros do abastecimento atual. Se houver um parcial no par, faltarem quilometragens ou os valores não permitirem o cálculo, o indicador mostra **—**, sem reutilizar consumo anterior. Durante o carregamento ou em caso de falha de leitura, também mostra **—**.
 
 Os dados permanecem no aparelho. Ainda não há backup ou sincronização entre dispositivos. Ao excluir um veículo, seu histórico fica inativo no banco e suas fotos são apagadas definitivamente.
 

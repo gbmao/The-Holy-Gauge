@@ -21,7 +21,7 @@ function showVehicleRequiredNotice() {
 }
 
 const placeholderMetrics = {
-  kmPerLiter: '12,5',
+  kmPerLiter: '—',
   totalKm: '8.420',
 };
 

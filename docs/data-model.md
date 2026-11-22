@@ -32,6 +32,8 @@ Ao excluir um veículo, `CD_STATUS` também passa a `0` nos registros associados
 
 `IS_SELECTED` representa um booleano: SQLite armazena `true` como `1` e `false` como `0`. Veículos existentes e novos começam com `0` até serem selecionados.
 
+A edição de veículos atualiza somente `NAME`, `BRAND`, `MODEL` e `YEAR`, usando o `VEHICLE_ID` existente e exigindo `CD_STATUS = 1`. O ID e a seleção são preservados, assim como os registros e arquivos associados. Marca, modelo e ano continuam opcionais e podem ser removidos na edição; nome permanece obrigatório.
+
 As consultas de abastecimento, manutenção e métricas usam o `VEHICLE_ID` do veículo ativo com `IS_SELECTED = 1`. Novos abastecimentos e manutenções recebem esse mesmo ID. Se nenhum veículo estiver selecionado, as listas retornam vazias e os indicadores numéricos retornam zero. Registros antigos sem `VEHICLE_ID` continuam armazenados, mas não aparecem no histórico de um veículo específico.
 
 ## Foto (SQLite Android)
