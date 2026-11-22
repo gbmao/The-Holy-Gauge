@@ -10,6 +10,69 @@
   --line: rgba(255, 255, 255, 0.1);
 }
 
+.vehicle-required-dialog {
+  width: min(440px, calc(100vw - 36px));
+  max-height: calc(100dvh - 48px);
+  margin: auto;
+  padding: 24px 20px 20px;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);
+}
+
+.vehicle-required-dialog::backdrop {
+  background: rgba(2, 5, 12, 0.78);
+  backdrop-filter: blur(5px);
+}
+
+.vehicle-required-dialog h2 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.vehicle-required-dialog p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+.vehicle-required-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+  margin-top: 20px;
+}
+
+.vehicle-required-actions button,
+.vehicle-required-actions a {
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--surface-light);
+  color: var(--text);
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.vehicle-required-actions a {
+  background: var(--accent-light);
+  color: #24180f;
+}
+
+.vehicle-required-actions :focus-visible {
+  outline: 2px solid var(--accent-light);
+  outline-offset: 3px;
+}
+
 * {
   box-sizing: border-box;
 }

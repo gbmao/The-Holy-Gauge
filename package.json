@@ -9,6 +9,8 @@
     "node": ">=18"
   },
   "scripts": {
+    "test": "node --test frontend/tests/*.test.mjs",
+    "test:vehicle-selection": "node --test frontend/tests/vehicle-selection.test.mjs",
     "test:photos": "node --test frontend/tests/photos.test.mjs",
     "dev": "npm run dev --workspace frontend",
     "build": "npm run build --workspace frontend",

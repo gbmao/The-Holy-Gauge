@@ -9,6 +9,7 @@ function createVehicleCard(vehicle, isSelected, onDelete, onSelect) {
   const recordId = document.createElement('span');
   const title = document.createElement('h3');
   const deleteButton = document.createElement('button');
+  const editLink = document.createElement('a');
   const fields = document.createElement('dl');
 
   card.className = 'meus-veiculos-card';
@@ -59,7 +60,11 @@ function createVehicleCard(vehicle, isSelected, onDelete, onSelect) {
   });
 
   selectButton.append(header, fields);
-  card.append(selectButton, deleteButton);
+  editLink.className = 'meus-veiculos-edit';
+  editLink.href = `./adicionar-veiculo.html?id=${vehicle.id}`;
+  editLink.textContent = 'Editar veículo';
+  editLink.setAttribute('aria-label', `Editar veículo ${vehicle.name}`);
+  card.append(selectButton, editLink, deleteButton);
   return card;
 }
 

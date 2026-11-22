@@ -1,6 +1,8 @@
 import { openDatabase } from '../database/database.js';
 import { assertSqliteSucceeded, sqliteErrorMessage } from '../database/sqlite-utils.js';
 import { getSelectedVehicleId } from '../vehicle-selection.js';
+import { requireSelectedVehicle } from './selected-vehicle.js';
+import { VehicleRequiredError } from '../vehicle-required-error.js';
 
 const SELECT_REFUELLING_COLUMNS = `
   Refuelling_id AS id,
@@ -104,8 +106,8 @@ export class SqliteRefuellingRepository {
   }
 
   async create(record) {
-    const vehicleId = await getSelectedVehicleId();
     const connection = await this.databaseProvider();
+    const vehicleId = await requireSelectedVehicle(connection);
     const result = await connection.run(`
       INSERT INTO REFUELLING (
         Liters,
@@ -117,7 +119,11 @@ export class SqliteRefuellingRepository {
         Gas_price,
         GAS_STATION_ID,
         VEHICLE_ID
-      ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?)
+      ) SELECT ?, ?, ?, ?, ?, 1, ?, ?, ?
+      WHERE EXISTS (
+        SELECT 1 FROM VEHICLE
+        WHERE VEHICLE_ID = ? AND CD_STATUS = 1 AND IS_SELECTED = 1
+      )
     `, [
       record.liters,
       toSqliteBoolean(record.blAdditive, 'Bl_additive'),
@@ -127,8 +133,12 @@ export class SqliteRefuellingRepository {
       record.gasPrice ?? null,
       record.gasStationId ?? null,
       vehicleId,
+      vehicleId,
     ]);
     const changes = assertSqliteSucceeded(result, 'registrar o abastecimento');
+    if (changes.changes === 0) {
+      throw new VehicleRequiredError();
+    }
     const insertedId = Number(changes.lastId);
 
     if (!Number.isInteger(insertedId) || insertedId <= 0) {
@@ -236,32 +246,41 @@ export class SqliteRefuellingRepository {
   async getAverageConsumption() {
     const vehicleId = await getSelectedVehicleId();
     if (vehicleId === null) {
-      return 0;
+      return null;
     }
 
     const rows = await this.queryRows(`
-      SELECT Mileage AS mileage, Liters AS liters
+      SELECT Mileage AS mileage, Liters AS liters, Bl_full_tank AS blFullTank
       FROM REFUELLING
       WHERE Cd_status = 1
         AND VEHICLE_ID = ?
-        AND Bl_full_tank = 1
-        AND Mileage IS NOT NULL
-        AND Liters > 0
       ORDER BY Dh_refuelling DESC, Refuelling_id DESC
       LIMIT 2
     `, [vehicleId]);
 
     if (rows.length < 2) {
-      return 0;
+      return null;
     }
 
     const [latest, previous] = rows;
-    const distance = Number(latest.mileage) - Number(previous.mileage);
-    if (distance <= 0) {
-      return 0;
+    // Select consecutive records first: a partial or incomplete entry must
+    // interrupt the pair instead of being skipped in search of older full tanks.
+    if (Number(latest.blFullTank) !== 1 || Number(previous.blFullTank) !== 1
+      || latest.mileage === null || latest.mileage === undefined
+      || previous.mileage === null || previous.mileage === undefined) {
+      return null;
     }
 
-    return Math.round(((distance / Number(latest.liters)) + Number.EPSILON) * 100) / 100;
+    const latestMileage = Number(latest.mileage);
+    const previousMileage = Number(previous.mileage);
+    const liters = Number(latest.liters);
+    const distance = latestMileage - previousMileage;
+    if (!Number.isFinite(latestMileage) || !Number.isFinite(previousMileage)
+      || !Number.isFinite(liters) || liters <= 0 || distance <= 0) {
+      return null;
+    }
+
+    return Math.round(((distance / liters) + Number.EPSILON) * 100) / 100;
   }
 
   async getTotalKm() {

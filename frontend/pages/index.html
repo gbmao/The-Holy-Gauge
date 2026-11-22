@@ -30,7 +30,7 @@
         <div class="metrics-panel" aria-label="Resumo da moto">
           <div class="metric">
             <span class="metric-label">CONSUMO</span>
-            <strong class="metric-value" id="kmPerLiter" data-metric-key="kmPerLiter">--</strong>
+            <strong class="metric-value" id="kmPerLiter" data-metric-key="kmPerLiter">—</strong>
             <span class="metric-unit">km/L</span>
           </div>
 
@@ -451,6 +451,21 @@
           <p class="sheet-feedback" id="maintenanceFeedback" aria-live="polite"></p>
         </footer>
       </aside>
+      <dialog
+        class="vehicle-required-dialog"
+        id="vehicleRequiredDialog"
+        aria-labelledby="vehicleRequiredTitle"
+        aria-describedby="vehicleRequiredDescription"
+      >
+        <h2 id="vehicleRequiredTitle">Selecione um veículo</h2>
+        <p id="vehicleRequiredDescription">
+          Para registrar um abastecimento ou uma manutenção, cadastre e selecione um veículo em Meus Veículos.
+        </p>
+        <form method="dialog" class="vehicle-required-actions">
+          <button type="submit" autofocus>Cancelar</button>
+          <a href="./meus-veiculos.html">Meus Veículos</a>
+        </form>
+      </dialog>
     </main>
   </body>
 </html>

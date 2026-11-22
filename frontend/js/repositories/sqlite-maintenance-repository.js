@@ -1,6 +1,8 @@
 import { openDatabase } from '../database/database.js';
 import { assertSqliteSucceeded, sqliteErrorMessage } from '../database/sqlite-utils.js';
 import { getSelectedVehicleId } from '../vehicle-selection.js';
+import { requireSelectedVehicle } from './selected-vehicle.js';
+import { VehicleRequiredError } from '../vehicle-required-error.js';
 
 const SELECT_MAINTENANCE_COLUMNS = `
   Maintenance_ID AS id,
@@ -117,8 +119,8 @@ export class SqliteMaintenanceRepository {
   }
 
   async create(record) {
-    const vehicleId = await getSelectedVehicleId();
     const connection = await this.databaseProvider();
+    const vehicleId = await requireSelectedVehicle(connection);
     const result = await connection.run(`
       INSERT INTO MAINTENANCE (
         Description,
@@ -129,7 +131,11 @@ export class SqliteMaintenanceRepository {
         NEXTDATE,
         NOTES,
         VEHICLE_ID
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      ) SELECT ?, ?, ?, ?, ?, ?, ?, ?
+      WHERE EXISTS (
+        SELECT 1 FROM VEHICLE
+        WHERE VEHICLE_ID = ? AND CD_STATUS = 1 AND IS_SELECTED = 1
+      )
     `, [
       record.description,
       record.date ?? null,
@@ -139,8 +145,12 @@ export class SqliteMaintenanceRepository {
       record.nextDate ?? null,
       record.notes ?? null,
       vehicleId,
+      vehicleId,
     ]);
     const changes = assertSqliteSucceeded(result, 'registrar a manutenção');
+    if (changes.changes === 0) {
+      throw new VehicleRequiredError();
+    }
     const insertedId = Number(changes.lastId);
 
     if (!Number.isInteger(insertedId) || insertedId <= 0) {

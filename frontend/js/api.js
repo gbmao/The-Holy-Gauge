@@ -282,6 +282,24 @@ export const maintenanceApi = {
 };
 
 export const vehicleApi = {
+  async getById(vehicleId) {
+    if (!isNativeApp()) {
+      throw new Error('A consulta de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.getById(vehicleId);
+  },
+
+  async update(vehicleId, input) {
+    if (!isNativeApp()) {
+      throw new Error('A edição de veículos está disponível no app Android.');
+    }
+
+    const { service } = await getNativeVehicleComponents();
+    return service.update(vehicleId, input);
+  },
+
   async loadAll() {
     if (!isNativeApp()) {
       throw new Error('A lista de veículos está disponível no app Android.');

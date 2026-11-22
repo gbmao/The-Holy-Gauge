@@ -3,6 +3,7 @@ import './keyboard-viewport.js';
 import { fuelingApi } from './api.js';
 import { loadSelectedVehicleId } from './vehicle-selection.js';
 import { VehiclePhotoModal } from '../pages/vehicle-photo-modal.js';
+import { formatAverageConsumption } from './formatters/consumption.js';
 
 new VehiclePhotoModal(document.querySelector('#appShell'), { closeOverlays: closeAllOverlays });
 
@@ -17,29 +18,18 @@ function formatTotalKm(value) {
     : '0';
 }
 
-function formatAverageConsumption(value) {
-  const consumption = Number(value);
-
-  return Number.isFinite(consumption)
-    ? consumption.toLocaleString('pt-BR', {
-        minimumFractionDigits: 1,
-        maximumFractionDigits: 1,
-      })
-    : '0,0';
-}
-
 async function loadAverageConsumption() {
   if (!averageConsumptionElement) {
     return;
   }
 
-  averageConsumptionElement.textContent = '0,0';
+  averageConsumptionElement.textContent = '—';
 
   try {
     const averageConsumption = await fuelingApi.getAverageConsumption();
     averageConsumptionElement.textContent = formatAverageConsumption(averageConsumption);
   } catch {
-    averageConsumptionElement.textContent = '0,0';
+    averageConsumptionElement.textContent = '—';
   }
 }
 

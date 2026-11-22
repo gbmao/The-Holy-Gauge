@@ -57,6 +57,37 @@ export class VehicleService {
     return selectedId;
   }
 
+  async getById(vehicleId) {
+    if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
+      throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
+    }
+    if (typeof this.repository.getById !== 'function') {
+      throw new TypeError('O repositório de veículos precisa implementar getById().');
+    }
+    const vehicle = await this.repository.getById(vehicleId);
+    return vehicle === null ? null : new Vehicle(vehicle);
+  }
+
+  async update(vehicleId, input) {
+    if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
+      throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
+    }
+    if (typeof this.repository.update !== 'function') {
+      throw new TypeError('O repositório de veículos precisa implementar update().');
+    }
+    const vehicle = new Vehicle({
+      name: input?.name,
+      brand: input?.brand,
+      model: input?.model,
+      year: input?.year,
+    });
+    const savedVehicle = await this.repository.update(vehicleId, vehicle);
+    if (!savedVehicle) {
+      throw new Error('O veículo não foi encontrado ou não está mais ativo.');
+    }
+    return new Vehicle(savedVehicle);
+  }
+
   async select(vehicleId) {
     if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
       throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');

@@ -22,8 +22,8 @@
 
         <section class="adicionar-veiculo-intro" aria-labelledby="adicionar-veiculo-title">
           <p class="adicionar-veiculo-eyebrow">SUA GARAGEM</p>
-          <h1 id="adicionar-veiculo-title">Adicionar veículo</h1>
-          <p class="adicionar-veiculo-description">
+          <h1 id="adicionar-veiculo-title" data-page-title>Adicionar veículo</h1>
+          <p class="adicionar-veiculo-description" data-page-description>
             Informe os dados da moto para cadastrá-la no aplicativo.
           </p>
         </section>
@@ -80,9 +80,10 @@
           </div>
 
           <p class="adicionar-veiculo-feedback" data-feedback role="status" aria-live="polite" hidden></p>
+          <button class="adicionar-veiculo-retry" data-retry-load type="button" hidden>Tentar novamente</button>
 
           <button class="adicionar-veiculo-submit" data-submit type="submit">
-            <span aria-hidden="true">＋</span>
+            <span aria-hidden="true" data-submit-icon>＋</span>
             <span data-submit-label>Salvar veículo</span>
           </button>
         </form>
@@ -96,8 +97,8 @@
       >
         <div class="adicionar-veiculo-dialog-card">
           <span class="adicionar-veiculo-dialog-icon" aria-hidden="true">✓</span>
-          <p class="adicionar-veiculo-dialog-eyebrow">CADASTRO CONCLUÍDO</p>
-          <h2 id="adicionar-veiculo-dialog-title">Veículo adicionado</h2>
+          <p class="adicionar-veiculo-dialog-eyebrow" data-success-eyebrow>CADASTRO CONCLUÍDO</p>
+          <h2 id="adicionar-veiculo-dialog-title" data-success-title>Veículo adicionado</h2>
           <p class="adicionar-veiculo-dialog-description" id="adicionar-veiculo-dialog-description">
             Confira os dados salvos no banco.
           </p>

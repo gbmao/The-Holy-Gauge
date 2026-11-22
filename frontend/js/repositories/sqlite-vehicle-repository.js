@@ -68,6 +68,53 @@ export class SqliteVehicleRepository {
     return row?.id === null || row?.id === undefined ? null : Number(row.id);
   }
 
+  async getById(vehicleId) {
+    if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
+      throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
+    }
+
+    const [row] = await this.queryRows(`
+      SELECT ${SELECT_VEHICLE_COLUMNS}
+      FROM VEHICLE
+      WHERE VEHICLE_ID = ? AND CD_STATUS = 1
+    `, [vehicleId]);
+    return mapVehicleRow(row);
+  }
+
+  async update(vehicleId, input) {
+    if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
+      throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
+    }
+
+    const vehicle = new Vehicle({
+      name: input?.name,
+      brand: input?.brand,
+      model: input?.model,
+      year: input?.year,
+    });
+    const connection = await this.databaseProvider();
+    const result = await connection.run(`
+      UPDATE VEHICLE
+      SET NAME = ?, BRAND = ?, MODEL = ?, YEAR = ?
+      WHERE VEHICLE_ID = ? AND CD_STATUS = 1
+    `, [vehicle.name, vehicle.brand, vehicle.model, vehicle.year, vehicleId]);
+    const changes = assertSqliteSucceeded(result, 'atualizar o veículo');
+    if (changes.changes === 0) {
+      return null;
+    }
+
+    const [row] = await this.queryRows(`
+      SELECT ${SELECT_VEHICLE_COLUMNS}
+      FROM VEHICLE
+      WHERE VEHICLE_ID = ? AND CD_STATUS = 1
+    `, [vehicleId], connection);
+    const savedVehicle = mapVehicleRow(row);
+    if (!savedVehicle) {
+      throw new Error('O veículo foi atualizado, mas não pôde ser lido novamente.');
+    }
+    return savedVehicle;
+  }
+
   async select(vehicleId) {
     if (!Number.isSafeInteger(vehicleId) || vehicleId <= 0) {
       throw new RangeError('O ID do veículo precisa ser um número inteiro positivo.');
