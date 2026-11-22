@@ -1,6 +1,8 @@
 import { openDatabase } from '../database/database.js';
 import { assertSqliteSucceeded, sqliteErrorMessage } from '../database/sqlite-utils.js';
 import { getSelectedVehicleId } from '../vehicle-selection.js';
+import { requireSelectedVehicle } from './selected-vehicle.js';
+import { VehicleRequiredError } from '../vehicle-required-error.js';
 
 const SELECT_REFUELLING_COLUMNS = `
   Refuelling_id AS id,
@@ -104,8 +106,8 @@ export class SqliteRefuellingRepository {
   }
 
   async create(record) {
-    const vehicleId = await getSelectedVehicleId();
     const connection = await this.databaseProvider();
+    const vehicleId = await requireSelectedVehicle(connection);
     const result = await connection.run(`
       INSERT INTO REFUELLING (
         Liters,
@@ -117,7 +119,11 @@ export class SqliteRefuellingRepository {
         Gas_price,
         GAS_STATION_ID,
         VEHICLE_ID
-      ) VALUES (?, ?, ?, ?, ?, 1, ?, ?, ?)
+      ) SELECT ?, ?, ?, ?, ?, 1, ?, ?, ?
+      WHERE EXISTS (
+        SELECT 1 FROM VEHICLE
+        WHERE VEHICLE_ID = ? AND CD_STATUS = 1 AND IS_SELECTED = 1
+      )
     `, [
       record.liters,
       toSqliteBoolean(record.blAdditive, 'Bl_additive'),
@@ -127,8 +133,12 @@ export class SqliteRefuellingRepository {
       record.gasPrice ?? null,
       record.gasStationId ?? null,
       vehicleId,
+      vehicleId,
     ]);
     const changes = assertSqliteSucceeded(result, 'registrar o abastecimento');
+    if (changes.changes === 0) {
+      throw new VehicleRequiredError();
+    }
     const insertedId = Number(changes.lastId);
 
     if (!Number.isInteger(insertedId) || insertedId <= 0) {

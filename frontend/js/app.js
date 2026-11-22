@@ -1,10 +1,24 @@
-import { fuelingApi, isNativeApp, maintenanceApi } from './api.js';
+import { fuelingApi, isNativeApp, maintenanceApi, vehicleApi } from './api.js';
+import { VehicleRequiredError } from './vehicle-required-error.js';
 import { createBottomSheets } from './bottom-sheet.js';
 import { createNavigationSidebar } from './navigation-sidebar.js';
 import { createSidebar } from './sidebar.js';
 
 const appShell = document.querySelector('#appShell');
 const backdrop = document.querySelector('#backdrop');
+const vehicleRequiredDialog = document.querySelector('#vehicleRequiredDialog');
+
+async function ensureSelectedVehicle() {
+  if (isNativeApp() && await vehicleApi.getSelectedId() === null) {
+    throw new VehicleRequiredError();
+  }
+}
+
+function showVehicleRequiredNotice() {
+  if (!vehicleRequiredDialog.open) {
+    vehicleRequiredDialog.showModal();
+  }
+}
 
 const placeholderMetrics = {
   kmPerLiter: '12,5',
@@ -118,6 +132,10 @@ let navigationSidebar;
 let bottomSheets;
 
 export function closeAllOverlays() {
+  if (vehicleRequiredDialog.open) {
+    vehicleRequiredDialog.close();
+    return true;
+  }
   const hadOverlay = ['navigation-open', 'components-open', 'fueling-open', 'maintenance-open']
     .some((className) => appShell.classList.contains(className));
   navigationSidebar?.closeAll();
@@ -173,6 +191,8 @@ bottomSheets = createBottomSheets({
     api: fuelingApi,
     form: document.querySelector('#fuelingForm'),
     buildPayload: buildFuelingPayload,
+    beforeAdd: ensureSelectedVehicle,
+    onVehicleRequired: showVehicleRequiredNotice,
     openClass: 'fueling-open',
     recordType: 'fueling',
     defaultAddLabel: 'Abastecer',
@@ -206,6 +226,8 @@ bottomSheets = createBottomSheets({
     api: maintenanceApi,
     form: document.querySelector('#maintenanceForm'),
     buildPayload: buildMaintenancePayload,
+    beforeAdd: ensureSelectedVehicle,
+    onVehicleRequired: showVehicleRequiredNotice,
     openClass: 'maintenance-open',
     recordType: 'maintenance',
     defaultAddLabel: 'Salvar manutenção',
@@ -228,7 +250,7 @@ bottomSheets = createBottomSheets({
 });
 
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') {
+  if (event.key === 'Escape' && !vehicleRequiredDialog.open) {
     closeAllOverlays();
   }
 });

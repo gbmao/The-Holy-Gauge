@@ -1,3 +1,5 @@
+import { VehicleRequiredError } from './vehicle-required-error.js';
+
 function makeHistoryStat(label, value) {
   const stat = document.createElement('span');
   stat.className = 'fueling-stat';
@@ -83,6 +85,8 @@ export function createBottomSheet({
   recordConfig,
   historyLimit = Infinity,
   buildPayload = () => ({ motorcycleId: 'current-motorcycle' }),
+  beforeAdd = async () => {},
+  onVehicleRequired = () => {},
   onOpen = () => {},
   onStateChange = () => {},
 }) {
@@ -166,16 +170,6 @@ export function createBottomSheet({
       return;
     }
 
-    let payload;
-
-    try {
-      payload = buildPayload();
-    } catch (error) {
-      feedback.textContent = error.message;
-      feedback.classList.add('error');
-      return;
-    }
-
     isAdding = true;
     addButton.disabled = true;
     addLabel.textContent = 'Salvando...';
@@ -183,6 +177,16 @@ export function createBottomSheet({
     feedback.classList.remove('error');
 
     try {
+      await beforeAdd();
+      let payload;
+      try {
+        payload = buildPayload();
+      } catch (error) {
+        feedback.textContent = error.message;
+        feedback.classList.add('error');
+        return;
+      }
+
       const newRecord = await api.addRecord(payload);
 
       if (recordType === 'fueling') {
@@ -207,6 +211,12 @@ export function createBottomSheet({
       feedback.textContent = successMessage;
       feedback.classList.remove('error');
     } catch (error) {
+      if (error instanceof VehicleRequiredError) {
+        feedback.textContent = error.message;
+        feedback.classList.add('error');
+        onVehicleRequired();
+        return;
+      }
       console.error('Unable to add ' + recordType + ' record', error);
       const isMaintenanceValidationError = recordType === 'maintenance'
         && (error instanceof TypeError || error instanceof RangeError);

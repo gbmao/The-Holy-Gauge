@@ -15,6 +15,8 @@ Aplicativo Android para acompanhar veículos, abastecimentos, manutenções, gas
 
 Para começar, cadastre e selecione um veículo em **Meus Veículos**. Os históricos e indicadores exibem os dados dessa seleção; sem veículo selecionado, ficam vazios ou zerados.
 
+Ao tentar salvar um abastecimento ou uma manutenção sem veículo selecionado, o app mostra um aviso com as opções **Cancelar** e **Meus Veículos**. O lançamento só pode ser salvo depois de selecionar um veículo ativo.
+
 Os dados permanecem no aparelho. Ainda não há backup ou sincronização entre dispositivos. Ao excluir um veículo, seu histórico fica inativo no banco e suas fotos são apagadas definitivamente.
 
 ## Compilar e instalar no Android
