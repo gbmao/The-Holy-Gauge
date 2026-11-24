@@ -58,6 +58,6 @@ O código da interface fica em `frontend/` e o projeto nativo em `android/`. Use
 
 ## Releases
 
-A primeira release Android está em preparação. Os APKs e as notas de cada versão serão disponibilizados em [Releases](https://github.com/gbmao/The-Holy-Gauge/releases).
+Os APKs assinados e as notas de cada versão Android estão em [Releases](https://github.com/gbmao/The-Holy-Gauge/releases). A versão 0.2.0 é uma pré-release para testes.
 
-Os comandos acima geram um **APK de depuração**. Antes de publicar o APK de distribuição, é necessário configurar a assinatura de release e definir `versionCode` e `versionName` em `android/app/build.gradle`.
+Os comandos acima geram um **APK de depuração**. A publicação de uma tag `v*` aciona o workflow Release Android, que compila, assina e publica o APK usando os secrets configurados no GitHub. Antes de cada versão, incremente `versionCode` e ajuste `versionName` em `android/app/build.gradle`; o nome da tag deve corresponder à versão.
