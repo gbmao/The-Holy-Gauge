@@ -118,6 +118,8 @@ for (const invalidMileage of [1000, 900]) {
     const { db, add, repository } = fixture(t);
     add({ mileage: 1000 });
     add({ mileage: 1200 });
+    // Simulate legacy/corrupted data: normal edits now reject this sequence.
+    db.run('DROP TRIGGER TR_REFUELLING_UPDATE_MILEAGE');
     db.run('UPDATE REFUELLING SET Mileage = ? WHERE Refuelling_id = 2', [invalidMileage]);
     assert.equal(await repository.getAverageConsumption(), null);
   });

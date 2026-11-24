@@ -55,3 +55,10 @@ loadAverageConsumption();
 window.addEventListener('fueling-record-added', loadAverageConsumption);
 
 loadSelectedVehicleId();
+
+window.addEventListener('pageshow', (event) => {
+  if (event.persisted) {
+    loadAverageConsumption();
+    loadTotalKm();
+  }
+});

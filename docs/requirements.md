@@ -18,6 +18,8 @@ FR-04| Exibir média de consumo do último abastecimento
 FR-05| O sistema deve permitir registrar uma manutenção.
 FR-06| Exibir as três manutenções mais recentes no histórico rápido do Android e todas na página Manutenção geral.
 FR-07| O sistema deve permitir informar a próxima manutenção por quilometragem ou data.
+FR-08| Permitir editar data/hora, litros, preço, quilometragem e informações de tanque/combustível de abastecimentos no Android.
+FR-09| Excluir abastecimentos com confirmação e permitir recuperação pela lista de excluídos, atualizando histórico e indicadores.
 
 
 
@@ -47,4 +49,15 @@ FR-07| O sistema deve permitir informar a próxima manutenção por quilometrage
 - caso último abastecimento registrado, checar se foi tanque cheio
 - se o último abastecimento e o atual foram tanque cheio, calcular consumo
 - ( km atual - quilometragem do abastecimento anterior) / litros do abastecimento atual
+
+### Edição e recuperação de abastecimentos no Android
+
+- A edição preserva o ID, o veículo e o vínculo com o posto, alterando somente os campos do lançamento.
+- Edição, exclusão e recuperação se restringem ao veículo ativo selecionado.
+- Na edição e na recuperação, a quilometragem informada deve ficar estritamente entre as dos registros ativos vizinhos com odômetro, na ordem de data/hora e ID.
+- Quilometragem ausente continua permitida. Registros sem odômetro são ignorados somente para localizar os limites da validação; não são pulados ao escolher o par consecutivo do cálculo de consumo.
+- A exclusão inativa o registro (`Cd_status = 0`) sem apagar seus dados; a recuperação é recusada se houver conflito de quilometragem após outras edições.
+- As alterações persistem ao reabrir o banco. Gasto mensal, consumo e quilometragem usam os registros ativos restantes; o gasto continua atribuído ao período do lançamento.
+- A edição preserva os segundos/milissegundos originais quando a data/hora apresentada não for alterada.
+- O cadastro de novos eventos passados e as demais decisões de cronologia permanecem no T06.
 

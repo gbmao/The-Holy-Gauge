@@ -26,17 +26,35 @@ function roundTo(value, decimalPlaces) {
   return Math.round((value + Number.EPSILON) * factor) / factor;
 }
 
+function validateRefuellingId(id) {
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    throw new RangeError('O ID do abastecimento precisa ser um número inteiro positivo.');
+  }
+}
+
 function normalizeOccurredAt(value) {
+  if (typeof value === 'string') {
+    const parts = /^(\d{4})-(\d{2})-(\d{2})(?:T| |$)/.exec(value);
+    if (parts) {
+      const [year, month, day] = parts.slice(1).map(Number);
+      const calendarDate = new Date(0);
+      calendarDate.setUTCFullYear(year, month - 1, day);
+      if (calendarDate.getUTCFullYear() !== year || calendarDate.getUTCMonth() !== month - 1
+        || calendarDate.getUTCDate() !== day) {
+        throw new TypeError('A data do abastecimento é inválida.');
+      }
+    }
+  }
   const occurredAt = value instanceof Date ? value : new Date(value);
 
-  if (Number.isNaN(occurredAt.getTime())) {
+  if (Number.isNaN(occurredAt.getTime()) || occurredAt.getUTCFullYear() < 1 || occurredAt.getUTCFullYear() > 9999) {
     throw new TypeError('A data do abastecimento é inválida.');
   }
 
   return occurredAt.toISOString();
 }
 
-function validateAndNormalizeInput(input, tankCapacityLiters) {
+function validateAndNormalizeInput(input, tankCapacityLiters, { allowUnknownFullTank = false } = {}) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
     throw new TypeError('Os dados do abastecimento são obrigatórios.');
   }
@@ -45,6 +63,9 @@ function validateAndNormalizeInput(input, tankCapacityLiters) {
   if (liters <= 0) {
     throw new RangeError('A quantidade de litros precisa ser maior que zero.');
   }
+  if (liters > 999.99) {
+    throw new RangeError('A quantidade de litros não pode ultrapassar 999,99 L.');
+  }
   if (tankCapacityLiters !== null && liters > tankCapacityLiters) {
     throw new RangeError(`A quantidade de litros não pode exceder a capacidade do tanque (${tankCapacityLiters} L).`);
   }
@@ -52,11 +73,11 @@ function validateAndNormalizeInput(input, tankCapacityLiters) {
   const mileage = input.mileage === undefined || input.mileage === null || input.mileage === ''
     ? null
     : requireFiniteNumber(input.mileage, 'Quilometragem');
-  if (mileage !== null && (!Number.isInteger(mileage) || mileage < 0)) {
+  if (mileage !== null && (!Number.isSafeInteger(mileage) || mileage < 0)) {
     throw new RangeError('A quilometragem precisa ser um número inteiro maior ou igual a zero.');
   }
 
-  if (typeof input.blFullTank !== 'boolean') {
+  if (typeof input.blFullTank !== 'boolean' && !(allowUnknownFullTank && input.blFullTank === null)) {
     throw new TypeError('Informe se o tanque foi completado.');
   }
 
@@ -64,10 +85,15 @@ function validateAndNormalizeInput(input, tankCapacityLiters) {
     throw new TypeError('A informação sobre gasolina aditivada precisa ser verdadeira ou falsa.');
   }
 
+  const gasPrice = normalizeOptionalNonNegativeNumber(input.gasPrice, 'O preço por litro');
+  if (gasPrice !== null && gasPrice > 999.999) {
+    throw new RangeError('O preço por litro não pode ultrapassar R$ 999,999.');
+  }
+
   return {
     liters,
     mileage,
-    gasPrice: normalizeOptionalNonNegativeNumber(input.gasPrice, 'O preço por litro'),
+    gasPrice,
     blAdditive: input.blAdditive ?? null,
     blFullTank: input.blFullTank,
     occurredAt: normalizeOccurredAt(input.occurredAt ?? DEFAULT_TIMESTAMP()),
@@ -80,6 +106,9 @@ function validateAndNormalizeInput(input, tankCapacityLiters) {
  * The injected repository must implement:
  * - getLatest(): returns the latest record or null
  * - create(record): persists the record and may return it or its id
+ * - getById(), getDeletedById(), getDeleted(): active/deleted records for the selected vehicle
+ * - getMileageNeighbors(id, occurredAt): nearest known odometers in chronological order
+ * - update(), softDelete(), restore(): persist corrections and status changes
  *
  * Tank capacity is optional and only validated when the motorcycle's capacity
  * is configured. The service remains independent from SQLite.
@@ -98,6 +127,62 @@ export class RefuellingService {
 
     this.repository = repository;
     this.tankCapacityLiters = tankCapacityLiters ?? null;
+  }
+
+  async getById(id) {
+    validateRefuellingId(id);
+    return this.repository.getById(id);
+  }
+
+  async getDeleted() {
+    return this.repository.getDeleted();
+  }
+
+  async validateChronology(id, record) {
+    if (record.mileage === null) return;
+    const { previousMileage, nextMileage } = await this.repository.getMileageNeighbors(id, record.occurredAt);
+    if (previousMileage !== null && record.mileage <= previousMileage) {
+      throw new RangeError(`A quilometragem precisa ser maior que a do abastecimento anterior (${previousMileage.toLocaleString('pt-BR')} km).`);
+    }
+    if (nextMileage !== null && record.mileage >= nextMileage) {
+      throw new RangeError(`A quilometragem precisa ser menor que a do abastecimento posterior (${nextMileage.toLocaleString('pt-BR')} km).`);
+    }
+  }
+
+  async update(id, input) {
+    validateRefuellingId(id);
+    const current = await this.repository.getById(id);
+    if (!current) throw new Error('O abastecimento não foi encontrado ou não está mais ativo neste veículo.');
+    const record = validateAndNormalizeInput({ ...input, occurredAt: input?.occurredAt ?? current.occurredAt },
+      this.tankCapacityLiters, { allowUnknownFullTank: true });
+    await this.validateChronology(id, record);
+    const saved = await this.repository.update(id, record);
+    if (!saved) throw new Error('O abastecimento não foi encontrado ou não está mais ativo neste veículo.');
+    return saved;
+  }
+
+  async restore(id) {
+    validateRefuellingId(id);
+    const record = await this.repository.getDeletedById(id);
+    if (!record) throw new Error('O abastecimento excluído não foi encontrado neste veículo.');
+    try {
+      await this.validateChronology(id, record);
+    } catch (error) {
+      if (error instanceof RangeError) {
+        throw new RangeError(`Não foi possível recuperar: ${error.message} Confira os registros ativos antes de tentar novamente.`);
+      }
+      throw error;
+    }
+    if (!await this.repository.restore(id)) throw new Error('O abastecimento excluído não foi encontrado neste veículo.');
+    return true;
+  }
+
+  async delete(id) {
+    validateRefuellingId(id);
+    if (!await this.repository.softDelete(id)) {
+      throw new Error('O abastecimento não foi encontrado ou não está mais ativo neste veículo.');
+    }
+    return true;
   }
 
   async create(input) {

@@ -21,6 +21,17 @@ const SELECT_REFUELLING_COLUMNS = `
   END AS total
 `;
 
+function validateRefuellingId(id) {
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    throw new RangeError('O ID do abastecimento precisa ser um número inteiro positivo.');
+  }
+}
+
+const SELECTED_VEHICLE_EXISTS = `EXISTS (
+  SELECT 1 FROM VEHICLE
+  WHERE VEHICLE_ID = REFUELLING.VEHICLE_ID AND CD_STATUS = 1 AND IS_SELECTED = 1
+)`;
+
 function toSqliteBoolean(value, fieldName) {
   if (value === undefined || value === null) {
     return null;
@@ -172,7 +183,7 @@ export class SqliteRefuellingRepository {
       SELECT ${SELECT_REFUELLING_COLUMNS}
       FROM REFUELLING
       WHERE Cd_status = 1 AND VEHICLE_ID = ?
-      ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+      ORDER BY julianday(Dh_refuelling) DESC, Refuelling_id DESC
       LIMIT 1
     `, [vehicleId]);
 
@@ -189,7 +200,7 @@ export class SqliteRefuellingRepository {
       SELECT ${SELECT_REFUELLING_COLUMNS}
       FROM REFUELLING
       WHERE Cd_status = 1 AND VEHICLE_ID = ?
-      ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+      ORDER BY julianday(Dh_refuelling) DESC, Refuelling_id DESC
       LIMIT 3
     `, [vehicleId]);
 
@@ -206,10 +217,82 @@ export class SqliteRefuellingRepository {
       SELECT ${SELECT_REFUELLING_COLUMNS}
       FROM REFUELLING
       WHERE Cd_status = 1 AND VEHICLE_ID = ?
-      ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+      ORDER BY julianday(Dh_refuelling) DESC, Refuelling_id DESC
     `, [vehicleId]);
 
     return rows.map(mapRefuellingRow);
+  }
+
+  async getById(id) {
+    validateRefuellingId(id);
+    const [row] = await this.queryRows(`
+      SELECT ${SELECT_REFUELLING_COLUMNS} FROM REFUELLING
+      WHERE Refuelling_id = ? AND Cd_status = 1 AND ${SELECTED_VEHICLE_EXISTS}
+    `, [id]);
+    return mapRefuellingRow(row);
+  }
+
+  async getDeleted() {
+    const rows = await this.queryRows(`
+      SELECT ${SELECT_REFUELLING_COLUMNS} FROM REFUELLING
+      WHERE Cd_status = 0 AND ${SELECTED_VEHICLE_EXISTS}
+      ORDER BY julianday(Dh_refuelling) DESC, Refuelling_id DESC
+    `);
+    return rows.map(mapRefuellingRow);
+  }
+
+  async getDeletedById(id) {
+    validateRefuellingId(id);
+    const [row] = await this.queryRows(`
+      SELECT ${SELECT_REFUELLING_COLUMNS} FROM REFUELLING
+      WHERE Refuelling_id = ? AND Cd_status = 0 AND ${SELECTED_VEHICLE_EXISTS}
+    `, [id]);
+    return mapRefuellingRow(row);
+  }
+
+  async getMileageNeighbors(id, occurredAt) {
+    validateRefuellingId(id);
+    const connection = await this.databaseProvider();
+    const vehicleId = await requireSelectedVehicle(connection);
+    const result = {};
+    for (const [key, comparison, order] of [
+      ['previousMileage', '<', 'DESC'], ['nextMileage', '>', 'ASC'],
+    ]) {
+      const [row] = await this.queryRows(`
+        SELECT Mileage AS mileage FROM REFUELLING
+        WHERE VEHICLE_ID = ? AND Cd_status = 1 AND Mileage IS NOT NULL
+          AND Refuelling_id <> ?
+          AND (julianday(Dh_refuelling) ${comparison} julianday(?)
+            OR (julianday(Dh_refuelling) = julianday(?) AND Refuelling_id ${comparison} ?))
+        ORDER BY julianday(Dh_refuelling) ${order}, Refuelling_id ${order}
+        LIMIT 1
+      `, [vehicleId, id, occurredAt, occurredAt, id], connection);
+      result[key] = row ? Number(row.mileage) : null;
+    }
+    return result;
+  }
+
+  async update(id, record) {
+    validateRefuellingId(id);
+    const connection = await this.databaseProvider();
+    const vehicleId = await requireSelectedVehicle(connection);
+    const result = await connection.run(`
+      UPDATE REFUELLING
+      SET Liters = ?, Bl_additive = ?, Mileage = ?, Bl_full_tank = ?,
+          Dh_refuelling = ?, Gas_price = ?
+      WHERE Refuelling_id = ? AND VEHICLE_ID = ? AND Cd_status = 1
+        AND ${SELECTED_VEHICLE_EXISTS}
+    `, [record.liters, toSqliteBoolean(record.blAdditive, 'Bl_additive'),
+      record.mileage ?? null, toSqliteBoolean(record.blFullTank, 'Bl_full_tank'),
+      record.occurredAt, record.gasPrice ?? null, id, vehicleId]);
+    if (assertSqliteSucceeded(result, 'atualizar o abastecimento').changes === 0) return null;
+
+    const [row] = await this.queryRows(`
+      SELECT ${SELECT_REFUELLING_COLUMNS} FROM REFUELLING
+      WHERE Refuelling_id = ? AND VEHICLE_ID = ? AND Cd_status = 1
+    `, [id, vehicleId], connection);
+    if (!row) throw new Error('O abastecimento foi atualizado, mas não pôde ser lido novamente.');
+    return mapRefuellingRow(row);
   }
 
   async getMonthlyExpense(month, year) {
@@ -254,7 +337,7 @@ export class SqliteRefuellingRepository {
       FROM REFUELLING
       WHERE Cd_status = 1
         AND VEHICLE_ID = ?
-      ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+      ORDER BY julianday(Dh_refuelling) DESC, Refuelling_id DESC
       LIMIT 2
     `, [vehicleId]);
 
@@ -295,7 +378,7 @@ export class SqliteRefuellingRepository {
         WHERE Cd_status = 1
           AND VEHICLE_ID = ?
           AND Mileage IS NOT NULL
-        ORDER BY Dh_refuelling DESC, Refuelling_id DESC
+        ORDER BY julianday(Dh_refuelling) DESC, Refuelling_id DESC
         LIMIT 1
       `, [vehicleId]);
 
@@ -303,18 +386,24 @@ export class SqliteRefuellingRepository {
   }
 
   async softDelete(id) {
-    const vehicleId = await getSelectedVehicleId();
-    if (vehicleId === null) {
-      return false;
-    }
+    return this.setStatus(id, 0);
+  }
 
+  async restore(id) {
+    return this.setStatus(id, 1);
+  }
+
+  async setStatus(id, status) {
+    validateRefuellingId(id);
     const connection = await this.databaseProvider();
+    const vehicleId = await requireSelectedVehicle(connection);
     const result = await connection.run(`
       UPDATE REFUELLING
-      SET Cd_status = 0
-      WHERE Refuelling_id = ? AND VEHICLE_ID = ? AND Cd_status = 1
-    `, [id, vehicleId]);
-    const changes = assertSqliteSucceeded(result, 'inativar o abastecimento');
+      SET Cd_status = ?
+      WHERE Refuelling_id = ? AND VEHICLE_ID = ? AND Cd_status = ?
+        AND ${SELECTED_VEHICLE_EXISTS}
+    `, [status, id, vehicleId, status === 0 ? 1 : 0]);
+    const changes = assertSqliteSucceeded(result, status === 0 ? 'excluir o abastecimento' : 'recuperar o abastecimento');
 
     return changes.changes > 0;
   }

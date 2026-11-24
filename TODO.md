@@ -30,11 +30,13 @@ As tarefas abaixo refletem decisões confirmadas pelo responsável pelo projeto.
   - Implementação: “Editar veículo” no cartão abre a página de cadastro com os dados preenchidos. Salvar atualiza somente nome, marca, modelo e ano do mesmo registro ativo, mantendo ID, seleção, históricos e fotos. Uma confirmação mostra os dados salvos e retorna a Meus Veículos ao tocar em “OK”. Mantidas as regras atuais de cadastro e a branch do T01/T02, conforme as escolhas do responsável.
   - Verificação: `node --test frontend/tests/vehicle-edit.test.mjs` cobre persistência após reabrir o banco, preservação de vínculos e seleção, limpeza de campos opcionais, validação, carregamento, falhas, confirmação e cadastro sem ID. Testes usam SQLite em memória e elementos simulados; falta validação manual no Android desta alteração.
 
-- [ ] **T04 — Permitir editar e excluir abastecimentos.**
+- [x] **T04 — Permitir editar e excluir abastecimentos.**
   - Disponibilizar as ações no histórico e atualizar os indicadores afetados após a alteração.
   - Critério de aceite: corrigir um lançamento atualiza seu histórico, gasto e consumo conforme as regras aprovadas; excluir um lançamento retira sua contribuição dos indicadores.
-  - Evidência: `frontend/pages/abastecimentos-page.js` apenas lista registros. Existe `softDelete()` no repositório SQLite, mas não há ação correspondente na interface nem edição.
-  - Pendente: definir validação de alterações na quilometragem/data de registros antigos, confirmação de exclusão e possibilidade de recuperação.
+  - Diagnóstico original: `frontend/pages/abastecimentos-page.js` apenas listava registros. O repositório SQLite oferecia `softDelete()`, sem ação na interface nem edição.
+  - Decisões aprovadas: permitir corrigir data/hora e quilometragem validando os vizinhos com odômetro na ordem cronológica, sem valores iguais; registros sem odômetro são permitidos e empates de data/hora usam o ID. Excluir mediante confirmação e recuperar pela lista de excluídos; recusar recuperação que conflite com as quilometragens após outras edições.
+  - Implementação: ações “Editar” e “Excluir” no histórico ativo e filtro “Excluídos” com ação “Recuperar”. Formulário preenchido com dados persistidos; atualização mantém ID, veículo e vínculo com o posto. Serviço valida os vizinhos e a migration 9 protege alterações/restaurações também no SQLite, preservando os dados existentes. Históricos e indicadores são relidos após alterações e ao retornar à tela inicial pelo cache de navegação. Escopo Android/SQLite; cadastro de eventos passados continua no T06.
+  - Verificação: `node --test frontend/tests/refuelling-edit.test.mjs` cobre persistência após reabrir SQLite, custo/mês, consumo, quilometragem, cronologia, empates por ID, registros sem odômetro, recuperação com conflito, isolamento por veículo, migration, falhas, cancelamento e envios duplicados. Fluxos verificados no Chrome com largura de celular, usando a versão compilada e uma ponte de teste para o serviço/repositório reais com SQLite em memória. Falta validação manual em aparelho Android.
 
 - [x] **T05 — Permitir editar e excluir manutenções.**
   - Disponibilizar as ações no histórico e atualizar os valores e informações de próxima revisão afetados.
