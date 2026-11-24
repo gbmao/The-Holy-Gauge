@@ -1,3 +1,5 @@
+import { CHRONOLOGY_STATEMENTS } from './chronology-statements.js';
+
 // Migration 1 is kept as originally applied; migration 3 renames ADRESS safely.
 const CREATE_GAS_STATION_TABLE = `CREATE TABLE IF NOT EXISTS GAS_STATION (
   GAS_STATION_ID INTEGER NOT NULL PRIMARY KEY,
@@ -333,6 +335,7 @@ export const DATABASE_MIGRATIONS = [
       CREATE_REFUELLING_UPDATE_MILEAGE_TRIGGER,
     ],
   },
+  { toVersion: 10, statements: CHRONOLOGY_STATEMENTS },
 ];
 
 export const DATABASE_VERSION = DATABASE_MIGRATIONS[DATABASE_MIGRATIONS.length - 1]?.toVersion ?? 0;

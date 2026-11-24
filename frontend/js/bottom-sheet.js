@@ -218,9 +218,9 @@ export function createBottomSheet({
         return;
       }
       console.error('Unable to add ' + recordType + ' record', error);
-      const isMaintenanceValidationError = recordType === 'maintenance'
-        && (error instanceof TypeError || error instanceof RangeError);
-      feedback.textContent = isMaintenanceValidationError ? error.message : errorMessage;
+      const isValidationError = error instanceof TypeError || error instanceof RangeError
+        || /A quilometragem conflita|A próxima revisão/.test(error.message);
+      feedback.textContent = isValidationError ? error.message : errorMessage;
       feedback.classList.add('error');
     } finally {
       isAdding = false;

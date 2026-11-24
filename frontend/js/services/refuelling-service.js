@@ -187,15 +187,13 @@ export class RefuellingService {
 
   async create(input) {
     const refuelling = validateAndNormalizeInput(input, this.tankCapacityLiters);
-    const previous = await this.repository.getLatest();
+    await this.validateChronology(null, refuelling);
+    const previous = await this.repository.getLatest(refuelling.occurredAt);
     let previousMileage = null;
 
     if (refuelling.mileage !== null && previous?.mileage !== undefined && previous?.mileage !== null) {
       previousMileage = requireFiniteNumber(previous.mileage, 'Quilometragem do abastecimento anterior');
 
-      if (refuelling.mileage <= previousMileage) {
-        throw new RangeError('A quilometragem precisa ser maior que a do abastecimento anterior.');
-      }
     }
 
     const total = refuelling.gasPrice === null

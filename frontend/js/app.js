@@ -41,6 +41,11 @@ function buildFuelingPayload() {
   const gasPriceInput = document.querySelector('#fuelingGasPriceInput');
   const additiveInput = document.querySelector('#fuelingAdditiveInput');
   const fullTankInput = document.querySelector('#fuelingFullTankInput');
+  const dateValue = document.querySelector('#fuelingDateInput').value;
+  const occurredAt = dateValue ? new Date(dateValue) : null;
+  if (occurredAt && Number.isNaN(occurredAt.getTime())) {
+    throw new TypeError('Informe uma data e hora válidas para o abastecimento.');
+  }
 
   const litersValue = litersInput.value.trim();
   const mileageValue = mileageInput.value.trim();
@@ -62,6 +67,7 @@ function buildFuelingPayload() {
   }
 
   return {
+    ...(occurredAt ? { occurredAt: occurredAt.toISOString() } : {}),
     liters,
     mileage,
     gasPrice,
@@ -256,3 +262,7 @@ document.addEventListener('keydown', (event) => {
 });
 
 updateOverlayState();
+
+window.addEventListener('fueling-record-added', () => {
+  document.querySelector('#fuelingDateInput').value = '';
+});

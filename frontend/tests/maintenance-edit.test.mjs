@@ -129,12 +129,22 @@ for (const [name, changes] of [
   });
 }
 
-test('manutenção: editar histórico não afrouxa a validação de novos cadastros', async (t) => {
+test('manutenção: cadastro e edição antigos usam sua posição no histórico', async (t) => {
   const { service, db } = fixture(t);
   const record = await service.create(input);
   db.run('INSERT INTO REFUELLING (Liters, Mileage, VEHICLE_ID) VALUES (5, 5000, 1)');
   await service.update(record.id, { ...input, kilometers: 800 });
-  await assert.rejects(service.create(input), /último abastecimento/);
+  assert.equal((await service.create(input)).kilometers, 1000);
+  await assert.rejects(service.create({ ...input, date: '2099-01-01', nextDate: null }), /anterior/);
+});
+
+test('manutenção: não preenche odômetro ausente nem usa odômetro atual para limitar próxima revisão antiga', async (t) => {
+  const { service, db } = fixture(t);
+  db.run("INSERT INTO REFUELLING (Liters, Mileage, VEHICLE_ID, Dh_refuelling) VALUES (5, 5000, 1, '2026-11-24')");
+  const record = await service.create({ description: 'Revisão antiga', date: '2026-10-10', nextKilometers: 2000 });
+  assert.equal(record.kilometers, null);
+  assert.equal(record.nextKilometers, 2000);
+  assert.equal(record.date.slice(0, 10), '2026-10-10');
 });
 
 for (const id of [0, -1, 1.5, '1', null, 99]) {
