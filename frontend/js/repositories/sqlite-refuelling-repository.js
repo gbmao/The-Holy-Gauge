@@ -173,7 +173,7 @@ export class SqliteRefuellingRepository {
     };
   }
 
-  async getLatest() {
+  async getLatest(before = null) {
     const vehicleId = await getSelectedVehicleId();
     if (vehicleId === null) {
       return null;
@@ -183,9 +183,10 @@ export class SqliteRefuellingRepository {
       SELECT ${SELECT_REFUELLING_COLUMNS}
       FROM REFUELLING
       WHERE Cd_status = 1 AND VEHICLE_ID = ?
+        AND (? IS NULL OR julianday(Dh_refuelling) <= julianday(?))
       ORDER BY julianday(Dh_refuelling) DESC, Refuelling_id DESC
       LIMIT 1
-    `, [vehicleId]);
+    `, [vehicleId, before, before]);
 
     return mapRefuellingRow(row);
   }
@@ -251,7 +252,9 @@ export class SqliteRefuellingRepository {
   }
 
   async getMileageNeighbors(id, occurredAt) {
-    validateRefuellingId(id);
+    if (id !== null) validateRefuellingId(id);
+    // An inserted record follows existing IDs when its timestamp ties.
+    const positionId = id ?? Number.MAX_SAFE_INTEGER;
     const connection = await this.databaseProvider();
     const vehicleId = await requireSelectedVehicle(connection);
     const result = {};
@@ -266,7 +269,7 @@ export class SqliteRefuellingRepository {
             OR (julianday(Dh_refuelling) = julianday(?) AND Refuelling_id ${comparison} ?))
         ORDER BY julianday(Dh_refuelling) ${order}, Refuelling_id ${order}
         LIMIT 1
-      `, [vehicleId, id, occurredAt, occurredAt, id], connection);
+      `, [vehicleId, positionId, occurredAt, occurredAt, positionId], connection);
       result[key] = row ? Number(row.mileage) : null;
     }
     return result;

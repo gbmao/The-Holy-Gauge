@@ -6,6 +6,8 @@ import { vehicleApi } from '../js/api.js';
 import { DATABASE_MIGRATIONS } from '../js/database/migrations.js';
 import { SqliteRefuellingRepository } from '../js/repositories/sqlite-refuelling-repository.js';
 import { RefuellingService } from '../js/services/refuelling-service.js';
+import { SqliteMaintenanceRepository } from '../js/repositories/sqlite-maintenance-repository.js';
+import { MaintenanceService } from '../js/services/maintenance-service.js';
 
 const SQL = await initSqlJs();
 const input = {
@@ -403,6 +405,65 @@ test('migration 9: preserva dados existentes, protege edição e não impede exc
   assert.throws(() => db.run('UPDATE REFUELLING SET Mileage = 800 WHERE Refuelling_id = 2'), /anterior/);
   db.run('UPDATE REFUELLING SET Cd_status = 0 WHERE Refuelling_id = 2');
   assert.equal(db.exec('SELECT Cd_status FROM REFUELLING WHERE Refuelling_id = 2')[0].values[0][0], 0);
+  const existing = db.exec('SELECT * FROM REFUELLING');
+  for (const statement of DATABASE_MIGRATIONS.find((item) => item.toVersion === 10).statements) db.run(statement);
+  assert.deepEqual(db.exec('SELECT * FROM REFUELLING'), existing);
+});
+
+test('evento passado: insere no meio do histórico e calcula consumo pelo antecessor da data informada', async (t) => {
+  const { repository, add } = fixture(t);
+  await add(1000, 1);
+  const last = await add(1400, 3);
+  const middle = await add(1200, 2);
+  await add(800, 1, { occurredAt: '2026-10-31T15:00:00.000Z' });
+  assert.equal(middle.consumptionKmPerLiter, 20);
+  assert.equal((await repository.getRecent())[0].id, last.id);
+  assert.equal(await repository.getAverageConsumption(), 20);
+  assert.equal(await repository.getMonthlyExpense(10, 2026), 60);
+  assert.equal(await repository.getMonthlyExpense(11, 2026), 180);
+  await assert.rejects(add(1500, 2), /posterior/);
+  await assert.rejects(add(900, 2), /anterior/);
+  await assert.rejects(add(1200, 2), /anterior/);
+});
+
+test('cronologia conjunta: cadastro, edição e recuperação cruzam os dois tipos entre dias diferentes', async (t) => {
+  const { connection, service, add } = fixture(t);
+  const maintenance = new MaintenanceService(new SqliteMaintenanceRepository(async () => connection));
+  const first = await add(1000, 1);
+  await add(1400, 3);
+  const record = await maintenance.create({ description: 'Revisão', date: '2026-11-02', kilometers: 1200 });
+  await assert.rejects(add(900, 4), /anterior/);
+  await assert.rejects(maintenance.create({ description: 'Revisão', date: '2026-11-02', kilometers: 1500 }), /posterior/);
+  await assert.rejects(service.update(first.id, { ...input, occurredAt: first.occurredAt, mileage: 1300 }), /posterior/);
+  await assert.rejects(maintenance.update(record.id, { description: 'Revisão', date: '2026-11-02', kilometers: 900 }), /anterior/);
+  await maintenance.delete(record.id);
+  await service.update(first.id, { ...input, occurredAt: first.occurredAt, mileage: 1300 });
+  await assert.rejects(maintenance.restore(record.id), /anterior/);
+});
+
+test('cronologia conjunta: aceita igualdade entre tipos, ignora odômetros ausentes e não ordena manutenção pela hora', async (t) => {
+  const { connection, add } = fixture(t);
+  const maintenance = new MaintenanceService(new SqliteMaintenanceRepository(async () => connection));
+  await add(1000, 1);
+  await maintenance.create({ description: 'Mesmo odômetro', date: '2026-11-02', kilometers: 1000 });
+  await add(null, 3);
+  await add(1001, 4);
+  const unknown = await maintenance.create({ description: 'Sem odômetro', date: '2026-11-03' });
+  assert.equal(unknown.kilometers, null);
+  await maintenance.create({ description: 'Mesmo dia sem hora', date: '2026-11-04', kilometers: 1500 });
+  await add(1100, 4, { occurredAt: '2026-11-04T18:00:00.000Z' });
+});
+
+test('SQLite: valida também inserções diretas de eventos passados', async (t) => {
+  const { db, connection } = fixture(t);
+  db.run("INSERT INTO REFUELLING (Liters, Mileage, VEHICLE_ID, Dh_refuelling) VALUES (5, 2000, 1, '2026-11-20')");
+  await assert.rejects(connection.run("INSERT INTO MAINTENANCE (Description, KILOMETERS, VEHICLE_ID, MAINTENANCEDATE) VALUES ('Revisão', 2500, 1, '2026-11-10')"), /posterior/);
+  await connection.run("INSERT INTO MAINTENANCE (Description, KILOMETERS, VEHICLE_ID, MAINTENANCEDATE) VALUES ('Revisão', 1500, 1, '2026-11-10')");
+  await assert.rejects(connection.run("INSERT INTO REFUELLING (Liters, Mileage, VEHICLE_ID, Dh_refuelling) VALUES (5, 1200, 1, '2026-11-15')"), /anterior/);
+  const before = db.exec('SELECT * FROM REFUELLING');
+  const reopened = new SQL.Database(db.export());
+  t.after(() => reopened.close());
+  assert.deepEqual(reopened.exec('SELECT * FROM REFUELLING'), before);
 });
 
 const originalDocument = globalThis.document;

@@ -59,5 +59,7 @@ FR-09| Excluir abastecimentos com confirmação e permitir recuperação pela li
 - A exclusão inativa o registro (`Cd_status = 0`) sem apagar seus dados; a recuperação é recusada se houver conflito de quilometragem após outras edições.
 - As alterações persistem ao reabrir o banco. Gasto mensal, consumo e quilometragem usam os registros ativos restantes; o gasto continua atribuído ao período do lançamento.
 - A edição preserva os segundos/milissegundos originais quando a data/hora apresentada não for alterada.
-- O cadastro de novos eventos passados e as demais decisões de cronologia permanecem no T06.
+- O cadastro de abastecimentos aceita data/hora local; se omitida, usa o momento atual. Manutenções preservam a data informada.
+- Cadastro, edição e recuperação cruzam os dois tipos de evento entre dias locais diferentes, permitindo odômetros iguais entre tipos. Eventos envolvendo manutenção no mesmo dia não impõem ordem, pois ela não informa hora. Entre abastecimentos, a ordem continua por instante e ID, com aumento estrito do odômetro.
+- Manutenção sem quilometragem permanece vazia, sem copiar o odômetro de outro evento. A próxima revisão é validada contra os dados informados na própria manutenção.
 

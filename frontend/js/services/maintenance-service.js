@@ -79,6 +79,10 @@ function normalizeAndValidateInput(input) {
   const kilometers = normalizeOptionalKilometers(input.kilometers, 'A quilometragem');
   const nextKilometers = normalizeOptionalKilometers(input.nextKilometers, 'A próxima quilometragem');
 
+  if (kilometers !== null && nextKilometers !== null && nextKilometers < kilometers) {
+    throw new RangeError('A próxima quilometragem não pode ser menor que a quilometragem da manutenção.');
+  }
+
   if (nextDate !== null && new Date(nextDate).getTime() < new Date(date).getTime()) {
     throw new RangeError('A próxima data não pode ser anterior à data da manutenção.');
   }
@@ -108,10 +112,9 @@ export class MaintenanceService {
   constructor(repository) {
     if (!repository
       || typeof repository.getAllMaintenances !== 'function'
-      || typeof repository.getLatestRefuellingMileage !== 'function'
       || typeof repository.create !== 'function') {
       throw new TypeError(
-        'O repositório precisa implementar getAllMaintenances(), getLatestRefuellingMileage() e create().',
+        'O repositório precisa implementar getAllMaintenances() e create().',
       );
     }
 
@@ -134,11 +137,6 @@ export class MaintenanceService {
   async update(id, input) {
     validateMaintenanceId(id);
     const maintenance = normalizeAndValidateInput(input);
-    // Historical corrections are relative to this maintenance, not today's odometer.
-    if (maintenance.kilometers !== null && maintenance.nextKilometers !== null
-      && maintenance.nextKilometers < maintenance.kilometers) {
-      throw new RangeError('A próxima quilometragem não pode ser menor que a quilometragem da manutenção.');
-    }
     const saved = await this.repository.update(id, maintenance);
     if (!saved) {
       throw new Error('A manutenção não foi encontrada ou não está mais ativa neste veículo.');
@@ -164,22 +162,6 @@ export class MaintenanceService {
 
   async create(input) {
     const maintenance = normalizeAndValidateInput(input);
-    const latestMileage = await this.repository.getLatestRefuellingMileage();
-
-    if (latestMileage !== null && latestMileage !== undefined) {
-      if (maintenance.kilometers !== null && maintenance.kilometers < latestMileage) {
-        throw new RangeError('A quilometragem não pode ser menor que a do último abastecimento.');
-      }
-
-      const effectiveMileage = maintenance.kilometers ?? latestMileage;
-      if (maintenance.nextKilometers !== null && maintenance.nextKilometers < effectiveMileage) {
-        throw new RangeError('A próxima quilometragem não pode ser menor que a quilometragem atual.');
-      }
-    } else if (maintenance.kilometers !== null
-      && maintenance.nextKilometers !== null
-      && maintenance.nextKilometers < maintenance.kilometers) {
-      throw new RangeError('A próxima quilometragem não pode ser menor que a quilometragem atual.');
-    }
 
     const savedRecord = await this.repository.create(maintenance);
     if (savedRecord && typeof savedRecord === 'object') {

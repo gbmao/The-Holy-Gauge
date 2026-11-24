@@ -172,25 +172,6 @@ export class SqliteMaintenanceRepository {
     return assertSqliteSucceeded(result, status === 0 ? 'excluir a manutenção' : 'recuperar a manutenção').changes > 0;
   }
 
-  async getLatestRefuellingMileage() {
-    const vehicleId = await getSelectedVehicleId();
-    if (vehicleId === null) {
-      return null;
-    }
-
-    const [row] = await this.queryRows(`
-      SELECT Mileage AS mileage
-      FROM REFUELLING
-      WHERE Cd_status = 1 AND VEHICLE_ID = ? AND Mileage IS NOT NULL
-      ORDER BY Dh_refuelling DESC, Refuelling_id DESC
-      LIMIT 1
-    `, [vehicleId]);
-
-    return row?.mileage === null || row?.mileage === undefined
-      ? null
-      : Number(row.mileage);
-  }
-
   async create(record) {
     const connection = await this.databaseProvider();
     const vehicleId = await requireSelectedVehicle(connection);
