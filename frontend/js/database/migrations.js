@@ -222,6 +222,37 @@ const CREATE_PHOTO_TABLE = `CREATE TABLE IF NOT EXISTS PHOTO (
     ON DELETE CASCADE
 );`;
 
+// Validate a correction/restoration at its chronological position. Unknown
+// odometers are skipped here, but remain consecutive entries for consumption.
+const CREATE_REFUELLING_UPDATE_MILEAGE_TRIGGER = `CREATE TRIGGER IF NOT EXISTS TR_REFUELLING_UPDATE_MILEAGE
+BEFORE UPDATE OF Mileage, Dh_refuelling, Cd_status ON REFUELLING
+WHEN NEW.Cd_status = 1 AND NEW.Mileage IS NOT NULL
+  AND (OLD.Cd_status <> 1 OR NEW.Mileage IS NOT OLD.Mileage
+    OR julianday(NEW.Dh_refuelling) IS NOT julianday(OLD.Dh_refuelling))
+BEGIN
+  SELECT RAISE(ABORT, 'A quilometragem precisa ser maior que a do abastecimento anterior.')
+  WHERE NEW.Mileage <= (
+    SELECT Mileage FROM REFUELLING
+    WHERE Cd_status = 1 AND VEHICLE_ID IS NEW.VEHICLE_ID
+      AND Mileage IS NOT NULL AND Refuelling_id <> NEW.Refuelling_id
+      AND (julianday(Dh_refuelling) < julianday(NEW.Dh_refuelling)
+        OR (julianday(Dh_refuelling) = julianday(NEW.Dh_refuelling) AND Refuelling_id < NEW.Refuelling_id))
+    ORDER BY julianday(Dh_refuelling) DESC, Refuelling_id DESC
+    LIMIT 1
+  );
+
+  SELECT RAISE(ABORT, 'A quilometragem precisa ser menor que a do abastecimento posterior.')
+  WHERE NEW.Mileage >= (
+    SELECT Mileage FROM REFUELLING
+    WHERE Cd_status = 1 AND VEHICLE_ID IS NEW.VEHICLE_ID
+      AND Mileage IS NOT NULL AND Refuelling_id <> NEW.Refuelling_id
+      AND (julianday(Dh_refuelling) > julianday(NEW.Dh_refuelling)
+        OR (julianday(Dh_refuelling) = julianday(NEW.Dh_refuelling) AND Refuelling_id > NEW.Refuelling_id))
+    ORDER BY julianday(Dh_refuelling) ASC, Refuelling_id ASC
+    LIMIT 1
+  );
+END;`;
+
 /**
  * Each entry describes the statements needed to move a database from the
  * previous version to `toVersion`. Add future ALTER/CREATE statements in a
@@ -289,6 +320,17 @@ export const DATABASE_MIGRATIONS = [
     statements: [
       CREATE_PHOTO_TABLE,
       'CREATE INDEX IF NOT EXISTS IX_PHOTO_VEHICLE_ID ON PHOTO (VEHICLE_ID);',
+    ],
+  },
+  {
+    toVersion: 9,
+    statements: [
+      'DROP TRIGGER IF EXISTS TR_REFUELLING_MILEAGE_INCREASES;',
+      CREATE_REFUELLING_MILEAGE_TRIGGER_BY_VEHICLE.replace(
+        'ORDER BY Dh_refuelling DESC, Refuelling_id DESC',
+        'ORDER BY julianday(Dh_refuelling) DESC, Refuelling_id DESC',
+      ),
+      CREATE_REFUELLING_UPDATE_MILEAGE_TRIGGER,
     ],
   },
 ];

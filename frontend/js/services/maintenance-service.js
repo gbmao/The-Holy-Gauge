@@ -94,9 +94,15 @@ function normalizeAndValidateInput(input) {
   };
 }
 
+function validateMaintenanceId(id) {
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    throw new RangeError('O ID da manutenção precisa ser um número inteiro positivo.');
+  }
+}
+
 /**
- * Business rules for maintenance records. The injected repository must
- * implement getAllMaintenances(), getLatestRefuellingMileage() and create().
+ * Business rules for maintenance records. The injected repository supplies
+ * history, create, lookup, update, soft delete and restore operations.
  */
 export class MaintenanceService {
   constructor(repository) {
@@ -114,6 +120,46 @@ export class MaintenanceService {
 
   async getAllMaintenances() {
     return this.repository.getAllMaintenances();
+  }
+
+  async getById(id) {
+    validateMaintenanceId(id);
+    return this.repository.getById(id);
+  }
+
+  async getDeletedMaintenances() {
+    return this.repository.getDeletedMaintenances();
+  }
+
+  async update(id, input) {
+    validateMaintenanceId(id);
+    const maintenance = normalizeAndValidateInput(input);
+    // Historical corrections are relative to this maintenance, not today's odometer.
+    if (maintenance.kilometers !== null && maintenance.nextKilometers !== null
+      && maintenance.nextKilometers < maintenance.kilometers) {
+      throw new RangeError('A próxima quilometragem não pode ser menor que a quilometragem da manutenção.');
+    }
+    const saved = await this.repository.update(id, maintenance);
+    if (!saved) {
+      throw new Error('A manutenção não foi encontrada ou não está mais ativa neste veículo.');
+    }
+    return saved;
+  }
+
+  async restore(id) {
+    validateMaintenanceId(id);
+    if (!await this.repository.restore(id)) {
+      throw new Error('A manutenção excluída não foi encontrada neste veículo.');
+    }
+    return true;
+  }
+
+  async delete(id) {
+    validateMaintenanceId(id);
+    if (!await this.repository.softDelete(id)) {
+      throw new Error('A manutenção não foi encontrada ou não está mais ativa neste veículo.');
+    }
+    return true;
   }
 
   async create(input) {

@@ -153,6 +153,9 @@ export function createSidebar({
   loadMonthlyExpense(monthlyExpenseValue);
   window.addEventListener('fueling-record-added', () => loadMonthlyExpense(monthlyExpenseValue));
   window.addEventListener('maintenance-record-added', () => loadMonthlyExpense(monthlyExpenseValue));
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) loadMonthlyExpense(monthlyExpenseValue);
+  });
 
   function notifyStateChange() {
     onStateChange();

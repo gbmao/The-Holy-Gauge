@@ -183,6 +183,46 @@ export async function requestApi(endpoint, options = {}) {
 }
 
 export const fuelingApi = {
+  async loadDeletedHistory() {
+    if (!isNativeApp()) {
+      throw new Error('A recuperação de abastecimentos está disponível no app Android.');
+    }
+    const { service } = await getNativeFuelingComponents();
+    return service.getDeleted();
+  },
+
+  async restore(id) {
+    if (!isNativeApp()) {
+      throw new Error('A recuperação de abastecimentos está disponível no app Android.');
+    }
+    const { service } = await getNativeFuelingComponents();
+    return service.restore(id);
+  },
+
+  async getById(id) {
+    if (!isNativeApp()) {
+      throw new Error('A edição de abastecimentos está disponível no app Android.');
+    }
+    const { service } = await getNativeFuelingComponents();
+    return service.getById(id);
+  },
+
+  async update(id, payload) {
+    if (!isNativeApp()) {
+      throw new Error('A edição de abastecimentos está disponível no app Android.');
+    }
+    const { service } = await getNativeFuelingComponents();
+    return service.update(id, payload);
+  },
+
+  async delete(id) {
+    if (!isNativeApp()) {
+      throw new Error('A exclusão de abastecimentos está disponível no app Android.');
+    }
+    const { service } = await getNativeFuelingComponents();
+    return service.delete(id);
+  },
+
   async loadHistory() {
     if (isNativeApp()) {
       const { repository } = await getNativeFuelingComponents();
@@ -245,6 +285,46 @@ export const fuelingApi = {
 };
 
 export const maintenanceApi = {
+  async loadDeletedHistory() {
+    if (!isNativeApp()) {
+      throw new Error('A recuperação de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.getDeletedMaintenances();
+  },
+
+  async restore(id) {
+    if (!isNativeApp()) {
+      throw new Error('A recuperação de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.restore(id);
+  },
+
+  async getById(id) {
+    if (!isNativeApp()) {
+      throw new Error('A edição de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.getById(id);
+  },
+
+  async update(id, payload) {
+    if (!isNativeApp()) {
+      throw new Error('A edição de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.update(id, payload);
+  },
+
+  async delete(id) {
+    if (!isNativeApp()) {
+      throw new Error('A exclusão de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.delete(id);
+  },
+
   async loadHistory() {
     if (isNativeApp()) {
       const { repository } = await getNativeMaintenanceComponents();

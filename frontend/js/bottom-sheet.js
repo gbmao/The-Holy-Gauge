@@ -260,6 +260,11 @@ export function createBottomSheet({
 
   closeButton.addEventListener('click', close);
   retryButton.addEventListener('click', loadHistory);
+  window.addEventListener('pageshow', (event) => {
+    if (!event.persisted) return;
+    history = null;
+    if (appShell.classList.contains(openClass)) loadHistory();
+  });
 
   if (form) {
     form.addEventListener('submit', handleAdd);

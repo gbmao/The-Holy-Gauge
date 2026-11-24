@@ -15,6 +15,17 @@ const SELECT_MAINTENANCE_COLUMNS = `
   NOTES AS notes
 `;
 
+function validateMaintenanceId(id) {
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    throw new RangeError('O ID da manutenção precisa ser um número inteiro positivo.');
+  }
+}
+
+const SELECTED_VEHICLE_EXISTS = `EXISTS (
+  SELECT 1 FROM VEHICLE
+  WHERE VEHICLE_ID = MAINTENANCE.VEHICLE_ID AND CD_STATUS = 1 AND IS_SELECTED = 1
+)`;
+
 function mapMaintenanceRow(row) {
   if (!row) {
     return null;
@@ -97,6 +108,68 @@ export class SqliteMaintenanceRepository {
     `, [vehicleId]);
 
     return rows.map(mapMaintenanceRow);
+  }
+
+  async getById(id) {
+    validateMaintenanceId(id);
+    const [row] = await this.queryRows(`
+      SELECT ${SELECT_MAINTENANCE_COLUMNS} FROM MAINTENANCE
+      WHERE Maintenance_ID = ? AND CD_STATUS = 1 AND ${SELECTED_VEHICLE_EXISTS}
+    `, [id]);
+    return mapMaintenanceRow(row);
+  }
+
+  async getDeletedMaintenances() {
+    const rows = await this.queryRows(`
+      SELECT ${SELECT_MAINTENANCE_COLUMNS} FROM MAINTENANCE
+      WHERE CD_STATUS = 0 AND ${SELECTED_VEHICLE_EXISTS}
+      ORDER BY MAINTENANCEDATE DESC, Maintenance_ID DESC
+    `);
+    return rows.map(mapMaintenanceRow);
+  }
+
+  async update(id, record) {
+    validateMaintenanceId(id);
+    const connection = await this.databaseProvider();
+    const vehicleId = await requireSelectedVehicle(connection);
+    const result = await connection.run(`
+      UPDATE MAINTENANCE
+      SET Description = ?, MAINTENANCEDATE = ?, COST = ?, KILOMETERS = ?,
+          NEXTKILOMETERS = ?, NEXTDATE = ?, NOTES = ?
+      WHERE Maintenance_ID = ? AND VEHICLE_ID = ? AND CD_STATUS = 1
+        AND ${SELECTED_VEHICLE_EXISTS}
+    `, [record.description, record.date ?? null, record.cost ?? null,
+      record.kilometers ?? null, record.nextKilometers ?? null, record.nextDate ?? null,
+      record.notes ?? null, id, vehicleId]);
+    const changes = assertSqliteSucceeded(result, 'atualizar a manutenção');
+    if (changes.changes === 0) return null;
+
+    const [row] = await this.queryRows(`
+      SELECT ${SELECT_MAINTENANCE_COLUMNS} FROM MAINTENANCE
+      WHERE Maintenance_ID = ? AND VEHICLE_ID = ? AND CD_STATUS = 1
+    `, [id, vehicleId], connection);
+    if (!row) throw new Error('A manutenção foi atualizada, mas não pôde ser lida novamente.');
+    return mapMaintenanceRow(row);
+  }
+
+  async softDelete(id) {
+    return this.setStatus(id, 0);
+  }
+
+  async restore(id) {
+    return this.setStatus(id, 1);
+  }
+
+  async setStatus(id, status) {
+    validateMaintenanceId(id);
+    const connection = await this.databaseProvider();
+    const vehicleId = await requireSelectedVehicle(connection);
+    const result = await connection.run(`
+      UPDATE MAINTENANCE SET CD_STATUS = ?
+      WHERE Maintenance_ID = ? AND VEHICLE_ID = ? AND CD_STATUS = ?
+        AND ${SELECTED_VEHICLE_EXISTS}
+    `, [status, id, vehicleId, status === 0 ? 1 : 0]);
+    return assertSqliteSucceeded(result, status === 0 ? 'excluir a manutenção' : 'recuperar a manutenção').changes > 0;
   }
 
   async getLatestRefuellingMileage() {

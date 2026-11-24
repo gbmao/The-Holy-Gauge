@@ -10,12 +10,21 @@ Aplicativo Android para acompanhar veículos, abastecimentos, manutenções, gas
 - Seleção do veículo em uso na página **Meus Veículos**.
 - Foto por veículo, com captura pela câmera e exclusão do arquivo pelo app.
 - Registro de abastecimentos e manutenções, com históricos completos.
+- Edição de abastecimentos e manutenções, exclusão com confirmação e recuperação pela lista de excluídos.
 - Consulta de gasto mensal e consumo médio por veículo.
 - Exclusão de veículos mediante confirmação, inativando o histórico e removendo suas fotos.
 
 Para começar, cadastre e selecione um veículo em **Meus Veículos**. Os históricos e indicadores exibem os dados dessa seleção; sem veículo selecionado, os históricos ficam vazios, o consumo mostra **—** e os demais indicadores ficam zerados.
 
 Para corrigir os dados de um veículo, toque em **Editar veículo** no cartão em Meus Veículos. O formulário abre preenchido; após salvar, confira a confirmação e toque em **OK** para voltar à lista. A edição mantém o mesmo veículo, sua seleção, históricos e fotos.
+
+Em **Abastecimentos**, use **Editar** para corrigir data/hora, litros, preço por litro, quilometragem, tanque cheio e gasolina aditivada. A data/hora é apresentada no horário local do aparelho. Se a quilometragem for informada, ela deve ser maior que a do abastecimento anterior e menor que a do posterior com odômetro informado, na nova posição cronológica; empates de data/hora usam o ID. Preço, quilometragem e informações de tanque/combustível podem ficar sem informação.
+
+Use **Excluir** e confirme para retirar um abastecimento do histórico ativo e dos indicadores de gasto, consumo e quilometragem. Em **Excluídos**, **Recuperar** reativa o registro se sua quilometragem continuar compatível com os registros ativos; em caso de conflito, o app explica a recusa e mantém o registro excluído. Ao retornar à tela inicial, os indicadores são relidos do banco. A regra do consumo continua usando os dois últimos abastecimentos ativos consecutivos, exigindo ambos de tanque cheio e dados válidos.
+
+Em **Manutenção geral**, use **Editar** para corrigir descrição, data, custo, quilometragem, próxima revisão e observações. A edição de registros antigos aceita quilometragem menor que a do último abastecimento; a próxima quilometragem e a próxima data não podem ser anteriores às da própria manutenção. Os campos opcionais podem ser apagados.
+
+Use **Excluir** e confirme para retirar uma manutenção do histórico ativo e do gasto mensal. Para recuperá-la, abra **Excluídas** e toque em **Recuperar**; o registro volta ao histórico ativo, incluindo seu custo no mês da manutenção e suas informações de próxima revisão. Essas alterações ficam salvas no aparelho e respeitam o veículo selecionado.
 
 Ao tentar salvar um abastecimento ou uma manutenção sem veículo selecionado, o app mostra um aviso com as opções **Cancelar** e **Meus Veículos**. O lançamento só pode ser salvo depois de selecionar um veículo ativo.
 
