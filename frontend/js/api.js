@@ -245,6 +245,46 @@ export const fuelingApi = {
 };
 
 export const maintenanceApi = {
+  async loadDeletedHistory() {
+    if (!isNativeApp()) {
+      throw new Error('A recuperação de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.getDeletedMaintenances();
+  },
+
+  async restore(id) {
+    if (!isNativeApp()) {
+      throw new Error('A recuperação de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.restore(id);
+  },
+
+  async getById(id) {
+    if (!isNativeApp()) {
+      throw new Error('A edição de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.getById(id);
+  },
+
+  async update(id, payload) {
+    if (!isNativeApp()) {
+      throw new Error('A edição de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.update(id, payload);
+  },
+
+  async delete(id) {
+    if (!isNativeApp()) {
+      throw new Error('A exclusão de manutenções está disponível no app Android.');
+    }
+    const { service } = await getNativeMaintenanceComponents();
+    return service.delete(id);
+  },
+
   async loadHistory() {
     if (isNativeApp()) {
       const { repository } = await getNativeMaintenanceComponents();

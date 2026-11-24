@@ -36,11 +36,13 @@ As tarefas abaixo refletem decisões confirmadas pelo responsável pelo projeto.
   - Evidência: `frontend/pages/abastecimentos-page.js` apenas lista registros. Existe `softDelete()` no repositório SQLite, mas não há ação correspondente na interface nem edição.
   - Pendente: definir validação de alterações na quilometragem/data de registros antigos, confirmação de exclusão e possibilidade de recuperação.
 
-- [ ] **T05 — Permitir editar e excluir manutenções.**
+- [x] **T05 — Permitir editar e excluir manutenções.**
   - Disponibilizar as ações no histórico e atualizar os valores e informações de próxima revisão afetados.
   - Critério de aceite: alterações persistem ao reabrir o app; registros excluídos deixam de compor o histórico ativo e o gasto mensal.
-  - Evidência: `frontend/pages/manutencao-geral-page.js`, `frontend/js/services/maintenance-service.js` e `frontend/js/repositories/sqlite-maintenance-repository.js` ainda não oferecem essas operações.
-  - Pendente: definir confirmação de exclusão e possibilidade de recuperação.
+  - Diagnóstico original: `frontend/pages/manutencao-geral-page.js`, `frontend/js/services/maintenance-service.js` e `frontend/js/repositories/sqlite-maintenance-repository.js` não ofereciam essas operações.
+  - Decisões aprovadas: confirmar a exclusão e permitir recuperação em uma lista de excluídas. Na edição, aceitar quilometragem inferior à do último abastecimento, validando a próxima revisão em relação à própria manutenção. O cadastro mantém sua regra atual; as demais regras de cronologia continuam no T06.
+  - Implementação: ações “Editar” e “Excluir” nos registros ativos de Manutenção geral, formulário preenchido com os dados persistidos, confirmação antes de inativar e filtro “Excluídas” com ação “Recuperar”. As operações mantêm ID e veículo e são restritas ao veículo ativo selecionado. Custos e próxima revisão são relidos após as alterações; ao voltar à tela inicial pelo cache de navegação, gasto mensal e histórico também são atualizados. Escopo Android/SQLite.
+  - Verificação: `node --test frontend/tests/maintenance-edit.test.mjs` cobre edição, exclusão, recuperação, persistência após reabrir SQLite, gasto por mês, próxima revisão, isolamento por veículo, validações, cancelamento, falhas e envios duplicados. Fluxos da interface verificados no Chrome com largura de celular e API simulada, usando a versão compilada; falta validação manual no Android.
 
 - [ ] **T06 — Permitir lançamentos de eventos passados e validar pela ordem cronológica.**
   - Permitir informar a data do abastecimento; manter a data informada na manutenção.

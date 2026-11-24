@@ -9,6 +9,8 @@ manutenções realizadas na moto.
 
 - Registrar manutenção
 - Consultar histórico
+- Editar manutenção
+- Excluir com confirmação e recuperar pela lista de excluídas
 - Registrar próxima manutenção
 - Identificar manutenção próxima ou vencida
 
@@ -32,6 +34,14 @@ Maintenance
 - Cost é opcional
 - NextMileage é opcional
 - NextDate é opcional
+- A edição preserva o ID e o veículo do registro e permite limpar os campos opcionais.
+- Na edição, Mileage pode ser menor que a do último abastecimento, para corrigir registros históricos.
+- NextMileage não pode ser menor que Mileage quando ambos forem informados.
+- NextDate não pode ser anterior a Date.
+- A exclusão inativa o registro (`CD_STATUS = 0`), preservando os dados para recuperação.
+- Registros inativos não compõem o histórico ativo, as próximas revisões exibidas nele ou o gasto mensal.
+- A recuperação reativa o registro e inclui o custo no mês da manutenção, mantendo as informações de próxima revisão.
+- Edição, exclusão e recuperação se restringem às manutenções do veículo ativo selecionado.
 
 ## Fluxo
 
