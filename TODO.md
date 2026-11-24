@@ -46,13 +46,15 @@ As tarefas abaixo refletem decisões confirmadas pelo responsável pelo projeto.
   - Implementação: ações “Editar” e “Excluir” nos registros ativos de Manutenção geral, formulário preenchido com os dados persistidos, confirmação antes de inativar e filtro “Excluídas” com ação “Recuperar”. As operações mantêm ID e veículo e são restritas ao veículo ativo selecionado. Custos e próxima revisão são relidos após as alterações; ao voltar à tela inicial pelo cache de navegação, gasto mensal e histórico também são atualizados. Escopo Android/SQLite.
   - Verificação: `node --test frontend/tests/maintenance-edit.test.mjs` cobre edição, exclusão, recuperação, persistência após reabrir SQLite, gasto por mês, próxima revisão, isolamento por veículo, validações, cancelamento, falhas e envios duplicados. Fluxos da interface verificados no Chrome com largura de celular e API simulada, usando a versão compilada; falta validação manual no Android.
 
-- [ ] **T06 — Permitir lançamentos de eventos passados e validar pela ordem cronológica.**
+- [x] **T06 — Permitir lançamentos de eventos passados e validar pela ordem cronológica.**
   - Permitir informar a data do abastecimento; manter a data informada na manutenção.
   - Validar a quilometragem considerando a posição do evento no histórico do veículo, inclusive ao editar um registro antigo, em vez de comparar sempre com o abastecimento mais recente.
   - Atualizar históricos, consumo e gastos do período afetado após incluir ou editar um lançamento passado.
   - Critério de aceite: uma manutenção anterior ao último abastecimento não é recusada apenas por ter quilometragem menor que ele; um abastecimento antigo pode ser registrado na data correta; alterações não introduzem inconsistências de quilometragem na sequência cronológica.
-  - Evidência: `frontend/js/app.js:buildFuelingPayload()` não envia data; `frontend/js/services/refuelling-service.js`, `frontend/js/services/maintenance-service.js` e os triggers em `frontend/js/database/migrations.js` consultam o abastecimento mais recente para validar quilometragem.
-  - Pendente: definir regras para eventos no mesmo dia, registros sem quilometragem e interação entre quilometragens de abastecimento e manutenção.
+  - Diagnóstico original: o formulário de abastecimento não enviava data e a validação de novos registros consultava o abastecimento mais recente.
+  - Decisões aprovadas: cruzar os dois tipos entre dias locais diferentes, permitindo igualdade; abastecimentos mantêm ordem por instante/ID e aumento estrito. Manutenção mantém apenas data, sem ordem imposta no mesmo dia. Odômetro ausente permanece vazio e não limita outros registros.
+  - Implementação: formulário aceita data/hora passada; serviço reaproveita a validação da T04 e usa o antecessor cronológico no consumo. Migration 10 valida cadastro, edição e recuperação dos dois tipos sem preencher odômetros ausentes. O critério mensal de fuso permanece pendente no achado específico abaixo.
+  - Verificação: 181 testes passaram, incluindo posição histórica, validação cruzada, preservação de dados e campos opcionais. Formulário verificado no Chrome ligado ao serviço/SQLite de teste; falta validação manual em aparelho Android.
 
 ## Funcionalidades adiadas por decisão do responsável
 
