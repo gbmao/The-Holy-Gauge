@@ -56,6 +56,12 @@ As tarefas abaixo refletem decisões confirmadas pelo responsável pelo projeto.
   - Implementação: formulário aceita data/hora passada; serviço reaproveita a validação da T04 e usa o antecessor cronológico no consumo. Migration 10 valida cadastro, edição e recuperação dos dois tipos sem preencher odômetros ausentes. O critério mensal de fuso permanece pendente no achado específico abaixo.
   - Verificação: 181 testes passaram, incluindo posição histórica, validação cruzada, preservação de dados e campos opcionais. Formulário verificado no Chrome ligado ao serviço/SQLite de teste; falta validação manual em aparelho Android.
 
+- [ ] **T07 — Criar um banco SQL online para persistir os dados do Android e compartilhar veículos entre pessoas.**
+  - Integrar o app Android ao backend para persistir os dados em um banco SQL online.
+  - Permitir que um mesmo veículo e seus históricos de abastecimentos e manutenções sejam compartilhados entre diferentes pessoas, com controle de acesso.
+  - Definir autenticação, permissões de compartilhamento e sincronização com o SQLite local, incluindo o tratamento de alterações feitas offline.
+  - Critério de aceite: os dados enviados pelo Android permanecem disponíveis no banco online; pessoas autorizadas conseguem acessar o mesmo veículo e seus históricos em seus aparelhos, e pessoas sem autorização não têm acesso.
+
 ## Funcionalidades adiadas por decisão do responsável
 
 - **Backup e restauração — deixar para depois.** Não há fluxo de exportação/importação de dados e fotos. O README documenta essa ausência. A opção `allowBackup` do Android está habilitada, mas não constitui uma funcionalidade de backup manual do app.

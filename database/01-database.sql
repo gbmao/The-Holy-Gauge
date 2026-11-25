@@ -1,5 +1,0 @@
-IF DB_ID(N'HolyGauge') IS NULL
-BEGIN
-    CREATE DATABASE [HolyGauge];
-END;
-GO
