@@ -56,16 +56,35 @@ As tarefas abaixo refletem decisões confirmadas pelo responsável pelo projeto.
   - Implementação: formulário aceita data/hora passada; serviço reaproveita a validação da T04 e usa o antecessor cronológico no consumo. Migration 10 valida cadastro, edição e recuperação dos dois tipos sem preencher odômetros ausentes. O critério mensal de fuso permanece pendente no achado específico abaixo.
   - Verificação: 181 testes passaram, incluindo posição histórica, validação cruzada, preservação de dados e campos opcionais. Formulário verificado no Chrome ligado ao serviço/SQLite de teste; falta validação manual em aparelho Android.
 
-- [ ] **T07 — Criar um banco SQL online para persistir os dados do Android e compartilhar veículos entre pessoas.**
-  - Integrar o app Android ao backend para persistir os dados em um banco SQL online.
-  - Permitir que um mesmo veículo e seus históricos de abastecimentos e manutenções sejam compartilhados entre diferentes pessoas, com controle de acesso.
-  - Definir autenticação, permissões de compartilhamento e sincronização com o SQLite local, incluindo o tratamento de alterações feitas offline.
-  - Critério de aceite: os dados enviados pelo Android permanecem disponíveis no banco online; pessoas autorizadas conseguem acessar o mesmo veículo e seus históricos em seus aparelhos, e pessoas sem autorização não têm acesso.
+- [ ] **T07 — Compartilhar dados de veículos entre mobiles por uma API na nuvem, mantendo o Android inteiramente offline.**
+  - Manter todas as funcionalidades locais do app disponíveis offline, com persistência no SQLite do aparelho, independentemente da API ou de conexão com a internet.
+  - Somente quando o usuário solicitar o compartilhamento de um veículo, iniciar o envio dos dados desse veículo e de seus históricos de abastecimentos e manutenções para uma API hospedada na nuvem, com persistência em um banco SQL online.
+  - Permitir que outros mobiles autorizados recebam os dados compartilhados e os persistam localmente para uso offline.
+  - Definir autenticação, permissões de compartilhamento e sincronização com o SQLite local, incluindo o tratamento de alterações feitas offline, conflitos e falhas de conexão sem perda de dados.
+  - Critério de aceite: o app permite cadastrar, consultar e alterar os dados locais sem internet; o envio à nuvem começa apenas após solicitação do usuário; os dados compartilhados ficam disponíveis aos mobiles autorizados e, após recebidos, podem ser usados offline; pessoas sem autorização não têm acesso.
+
+- [ ] **T08 — Exibir a última troca de óleo na lateral e alertar sobre próximas manutenções no Android.**
+  - Permitir marcar uma manutenção como troca de óleo e exibir a última troca, com data e quilometragem, na aba lateral do veículo selecionado.
+  - Usar esse registro e a previsão da próxima troca para acompanhar o prazo e enviar um alerta no Android quando estiver chegando perto.
+  - Permitir marcar outras manutenções para o mesmo acompanhamento, com exibição na lateral e alerta de proximidade da próxima execução.
+  - Definir a antecedência do alerta e como considerar data e/ou quilometragem para cada manutenção acompanhada.
+  - Critério de aceite: a lateral mostra a última troca de óleo e as outras manutenções marcadas do veículo selecionado; os alertas respeitam a previsão e a antecedência definidas, e o acompanhamento é atualizado ao registrar uma nova execução.
+
+- [ ] **T09 — Integrar notas fiscais a manutenções e abastecimentos no Android.**
+  - Permitir vincular e consultar a nota fiscal de uma manutenção ou de um abastecimento do veículo selecionado.
+  - Possibilidade a avaliar: integrar um leitor de QR Code pela câmera para consultar a nota e preencher automaticamente os dados disponíveis, como estabelecimento, data, itens, quantidades e valores.
+  - Permitir revisar e corrigir os dados importados antes de salvar o lançamento.
+  - Critério de aceite: a nota permanece vinculada ao lançamento e pode ser consultada depois; caso a importação por QR Code seja implementada, os dados obtidos preenchem o formulário para revisão antes da gravação.
+
+- [ ] **T10 — Exportar históricos de manutenções e abastecimentos em PDF e compartilhar por e-mail ou WhatsApp no Android.**
+  - Priorizar a exportação do histórico de manutenções e permitir também exportar o de abastecimentos do veículo selecionado.
+  - Gerar e salvar o PDF no aparelho a partir dos dados locais, com identificação do veículo e os dados dos lançamentos, funcionando offline.
+  - Disponibilizar compartilhamento direto do PDF por e-mail ou WhatsApp pelo fluxo de compartilhamento do Android.
+  - Critério de aceite: o usuário consegue gerar e salvar o PDF de cada histórico e abrir o e-mail ou WhatsApp com o arquivo anexado para concluir o envio; o relatório contém somente os dados do veículo selecionado.
 
 ## Funcionalidades adiadas por decisão do responsável
 
 - **Backup e restauração — deixar para depois.** Não há fluxo de exportação/importação de dados e fotos. O README documenta essa ausência. A opção `allowBackup` do Android está habilitada, mas não constitui uma funcionalidade de backup manual do app.
-- **Alertas e status de revisões — deixar para depois.** O app grava a próxima data/quilometragem, mas apenas exibe os valores; não calcula a situação da revisão nem envia notificações. Referências: `frontend/js/api.js:mapMaintenanceRecord()`, `frontend/pages/manutencao-geral-page.js:formatNextReview()` e `docs/maintenance.md`.
 
 ## Outros achados para avaliar antes de definir tarefas
 
